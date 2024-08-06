@@ -1,1 +1,1 @@
-# Micro WGPU Compute
+# Micro WebGPU Compute
