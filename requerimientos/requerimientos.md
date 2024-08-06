@@ -1,5 +1,10 @@
---- toc: no header-includes: yes geometry:
-"left=1.6cm,right=1.6cm,top=1.6cm,bottom=1.6cm" gradient: no underline: no ---
+---
+toc: yes
+header-includes: yes
+geometry: "left=1.6cm,right=1.6cm,top=1.6cm,bottom=1.6cm"
+gradient: no
+underline: no
+---
 
 # 1. Introducción
 
