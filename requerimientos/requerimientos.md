@@ -13,37 +13,41 @@ suite de microbenchmarks diseñada para medir características de rendimiento de
 diferentes GPUs a través de diferentes plataformas y APIs gráficos. El software
 constará de dos interfaces principales: una web, para ejecutar los
 microbenchmarks usando WebGPU desde un navegador, y una CLI, para ejecutar los
-microbenchmarks de forma nativa compilando a APIs gráficas como Metal, Vulkan y
-DX12 mediante el API gráfico _wgpu_. Este documento especifica los requisitos
-funcionales, las características del usuario, el alcance del producto, y las
-verificaciones.
+microbenchmarks de forma nativa sobre Vulkan. Este documento especifica los
+requisitos funcionales, las características del usuario, el alcance del
+producto, y las verificaciones.
 
 ## 1.1. Propósito
 
 El propósito principal del software es proporcionar una suite de
 microbenchmarks para medir características específicas del rendimiento de GPUs
-en plataformas que soportan WebGPU y otras APIs gráficas.
+en plataformas que soportan WebGPU y Vulkan.
 
 También facilita la ejecución de microbenchmarks propios de los usuarios.
 
 Este software aborda la necesidad de obtener datos de rendimiento detallados y
 comparativos a través de diferentes combinaciones de hardware y plataformas,
 permitiendo a desarrolladores e investigadores optimizar su software para
-diferentes y evaluar el desempeño general de las GPUs.
+diferentes escenarios y evaluar el desempeño general de las GPUs.
 
 ## 1.2. Alcance
 
-El alcance del software, denominado "µwgpu compute" abarca el diseño,
+El alcance del software, denominado "wgpu microbench" abarca el diseño,
 desarrollo e implementación de los microbenchmarks para evaluar características
 del hardware de GPUs y las interfaces para ejecutarlos y visualizar resultados.
 
-El software incluirá dos interfaces principales:
+El software tiene 2 objetivos principales:
+
+- Simplificar el proceso de escribir microbenchmarks para GPU.
+- Proveer un banco de microbenchmarks comparativos con operaciones comunes para entender las capacidades del hardware sobre el que se ejecutan.
+
+El software incluirá dos interfaces que dan acceso a estas capacidades:
 
 1. Interfaz web: Permite ejecutar microbenchmarks desde un navegador,
    recolectar datos, visualizar resultados, y proporcionar una opción para
    ejecutar microbenchmarks personalizados.
-2. Interfaz CLI: Permite ejecutar microbenchmarks nativamente, compilando para
-   APIs gráficas como Metal, Vulkan y DX12, y ofrece resultados en texto.
+2. Interfaz CLI: Permite ejecutar microbenchmarks nativamente, compilando a
+   Vulkan y ofrece resultados en texto.
 
  El producto es autónomo y no interactúa con sistemas externos, aunque opera
  dentro del contexto los APIs gráficos mencionados y las plataformas sobre las
@@ -54,8 +58,10 @@ El software incluirá dos interfaces principales:
 ### 1.3.1. Perspectiva del producto
 
 Los microbenchmarks se implementarán utilizando el API de gráficos _wgpu_ que
-se puede correr en browsers que tengan soporta para WebGPU o nativamente
-traduciendo a los APIs nativos Vulkan, Metal y DX12.
+se puede correr en browsers que tengan soporte para WebGPU o nativamente
+traduciendo a los APIs nativos Vulkan, Metal y DX12. Aunque solo se verificará
+la capacidad de correr los microbenchmarks sobre Vulkan, por las razones
+especificadas en la sección de limitaciones.
 
 La figura [TODO: poner # figúra] muestra las plataformas en las que los
 microbenchmarks pueden ser evaluados y las capas de APIs gráficos, plataformas
@@ -89,9 +95,15 @@ optimizar el rendimiento de software para GPUs.
 
 ### 1.3.4. Limitaciones
 
-No hay limitaciones significativas que afecten el desarrollo del producto. El
-software no enfrenta restricciones de hardware o software específicas, y el
-tiempo disponible para el proyecto se ha considerado al definir el alcance.
+El API de gráficos sobre el que se implementará el software, _wgpu_, permitiría
+compilar el software nativamente (interfaz CLI) para cualquier plataforma con
+los APIs gráficos Vulkan, Metal o DX12; lo cual incluye los sistemas operativos
+Windows, Mac y Linux. Sin embargo, el desarrollador se ve limitado en las
+plataformas a las que tiene acceso ya que no cuenta con hardware de Apple
+(necesario para utilizar la API gráfica Metal) ni licencia de Windows
+(necesario para utilizar la API gráfica DX12). Por lo tanto, solo se podrán
+verificar el funcionamiento del software para la plataforma Linux y
+consecuentemente el API de gráficos Vulkan.
 
 ## 1.4. Definiciones
 
@@ -105,6 +117,12 @@ tiempo disponible para el proyecto se ha considerado al definir el alcance.
 
 # 2. Referencias
 
+- [wgpu](https://github.com/gfx-rs/wgpu)
+- [Estándar WebGPU](https://gpuweb.github.io/gpuweb/)
+- [µVkCompute](https://github.com/google/uVkCompute)
+- [Dissecting GPU Memory Hierarchy through Microbenchmarking](https://arxiv.org/abs/1509.02308)
+- [Demystifying GPU Microarchitecture through Microbenchmarking](https://courses.cs.washington.edu/courses/cse470/24sp/readings/Demystifying_GPU_microarchitecture_through_microbenchmarking.pdf)
+- [Nvidia CUDA Programming Guide](https://developer.download.nvidia.com/compute/cuda/1.0/NVIDIA_CUDA_Programming_Guide_1.0.pdf)
 # 3. Requisitos
 
 ## 3.1. Funciones
