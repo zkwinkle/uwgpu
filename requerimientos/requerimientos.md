@@ -64,11 +64,11 @@ traduciendo a los APIs nativos Vulkan, Metal y DX12. Aunque solo se verificará
 la capacidad de correr los microbenchmarks sobre Vulkan, por las razones
 especificadas en la sección de limitaciones.
 
-La figura [TODO: poner # figúra] muestra las plataformas en las que los
+La figura 1 muestra las plataformas en las que los
 microbenchmarks pueden ser evaluados y las capas de APIs gráficos, plataformas
 y hardware.
 
-[TODO: Figura de capas y plataformas compatibles]
+![Herarquía de APIs gráficos, plataformas y hardware sobre los que se puede ejecutar el API gráfico wgpu](./diagramas/Diagrama Plataformas-Hardware.svg){height=10cm}
 
 No forma parte de un sistema mayor, el software es el producto entero que se
 ofrece. El desarrollo abarca todas las partes del producto, incluyendo la
@@ -85,8 +85,6 @@ Las principales funciones del software incluyen:
 - **Ejecución de microbenchmarks personalizados:** Facilita a los usuarios
   ejecutar y evaluar microbenchmarks personalizados a través de ambas
   interfaces.
-
-[TODO: Diagrama mostrando funciones dependiendo de interfaz?]
 
 ### 1.3.3. Características del usuario
 
@@ -528,7 +526,7 @@ Esta sección especifica el método de verificación para cada requerimiento.
 
 - **Soporte de _wgpu_**: La portabilidad de los microbenchmarks depende de que el API gráfico _wgpu_ mantenga el soporte para todas las plataformas objetivo.
 
-- **Compatibilidad de Navegadores:** La implementación de la interfaz web depende de que los navegadores en las plataformas objetivo mantengan el soporte para WebGPU.
+- **Compatibilidad de Navegadores:** La implementación de la interfaz web depende de que los navegadores en las plataformas objetivo mantengan el soporte para WebGPU y WASM.
 
 - **Compatibilidad del Hardware:** Se asume que los sistemas donde se ejecutará el software cuentan con hardware que es compatible con los drivers a través de los que trabaja _wgpu_ en el sistema operativo, particularmente Vulkan.
 
