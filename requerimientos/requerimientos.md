@@ -526,4 +526,14 @@ Esta sección especifica el método de verificación para cada requerimiento.
 
 ## 5.1. Supuestos y dependencias
 
+- **Soporte de _wgpu_**: La portabilidad de los microbenchmarks depende de que el API gráfico _wgpu_ mantenga el soporte para todas las plataformas objetivo.
+
+- **Compatibilidad de Navegadores:** La implementación de la interfaz web depende de que los navegadores en las plataformas objetivo mantengan el soporte para WebGPU.
+
+- **Compatibilidad del Hardware:** Se asume que los sistemas donde se ejecutará el software cuentan con hardware que es compatible con los drivers a través de los que trabaja _wgpu_ en el sistema operativo, particularmente Vulkan.
+
+- **Desempeño del Hardware del Desarrollador:** La especificación de tiempos de ejecución de los microbenchmarks [\[**20002**\]](#20002) depende del desempeño del hardware específico del desarrollador (una laptop con una GPU integrada de un procesador Intel(R) Core(TM) i7-1260P de 12ª generación). Cambios en el hardware o en las características de desempeño podrían requerir ajustes en los tiempos estimados en los requerimientos, por ejemplo si se obtuviera una tarjeta de gráficos discreta se requeriría un tiempo de ejecución menor.
+
 ## 5.2. Matriz de trazabilidad
+
+No aplica.
