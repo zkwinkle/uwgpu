@@ -203,7 +203,6 @@ discreto. En casos donde la ejecución exceda este límite en otros
 dispositivos, se espera que el tiempo adicional no impacte significativamente
 la usabilidad.
 
-- \[**20003**\]: La interfaz web deberá ser portable, funcionando de manera efectiva en todas las plataformas objetivo oficiales: Chromium y Firefox, en Linux y en Android; garantizando un rendimiento y usabilidad consistentes en estos entornos de manera individual (es decir, que el rendimiento no tiene que ser consistente entre plataformas diferentes).
 
 ## 3.3. Interfaces externas
 
@@ -248,9 +247,17 @@ No aplica.
 
 ## 3.6. Restricciones de diseño
 
+No aplica.
+
 ## 3.7. Atributos del sistema de software
 
+- \[**70001**\]: La interfaz web deberá ser portátil, funcionando de manera efectiva en todas las plataformas objetivo oficiales: Chromium y Firefox, en Linux y en Android.
+
+- \[**70002**\]: Los microbenchmarks deberán ser escritos utilizando el API gráfico _wgpu_, el cual permite portabilidad entre múltiples entornos web y nativos; garantizando un rendimiento y usabilidad consistentes en estos entornos de manera individual (es decir, que el rendimiento no tiene que ser consistente entre plataformas diferentes).
+
 ## 3.8. Información de soporte
+
+No aplica.
 
 # 4. Verificación
 
