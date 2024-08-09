@@ -9,8 +9,7 @@ colorlinks: yes
 
 # 1. Introducción
 
-Este Documento de Requisitos de Software (SRS) detalla el desarrollo de una
-suite de microbenchmarks diseñada para medir características de rendimiento de
+Este Documento de Requisitos de Software (SRS) detalla el desarrollo de un banco de microbenchmarks diseñado para medir características de rendimiento de
 diferentes GPUs a través de diferentes plataformas y APIs gráficos. El software
 constará de dos interfaces principales: una web, para ejecutar los
 microbenchmarks usando WebGPU desde un navegador, y una CLI, para ejecutar los
@@ -20,7 +19,7 @@ producto, y las verificaciones.
 
 ## 1.1. Propósito
 
-El propósito principal del software es proporcionar una suite de
+El propósito principal del software es proporcionar un banco de
 microbenchmarks para medir características específicas del rendimiento de GPUs
 en plataformas que soportan WebGPU y Vulkan.
 
