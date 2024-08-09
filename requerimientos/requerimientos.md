@@ -270,11 +270,20 @@ Esta sección especifica el método de verificación para cada requerimiento.
 - \[**11008**\]: Ejecutar un microbenchmark personalizado y verificar su ejecución correcta.
 - \[**11009**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que la página alerta de que no se pudo compilar el microbenchmark e informa el porqué.
 - \[**11010**\]: Ejecutar uno de los microbenchmark predeterminados pero ingresándolo como si fuera uno personalizado, verificar que la interfaz web reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se ejecuta como predeterminado.
-- \[**11011**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual mi GPU no tenga soporte, verificar que la página informa la falta de soporte.
+- \[**11011**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual el GPU del dispositivo no tenga soporte, verificar que la página informa la falta de soporte.
 - \[**11012**\], \[**11013**\]: Ejecutar varios microbenchmarks y luego verificar que se muestran los resultados recopilados de esas ejecuciones.
 - \[**11014**\]: Ejecutar los microbenchmarks en los navegadores con soporte oficial y conseguir ejecutarlos en un computador con hardware diferente, tomar nota de los resultados. Luego, verificar que las estadísticas retornadas con los filtros aplicados sean consistentes con los resultados obtenidos en cada plataforma y hardware diferente.
 - \[**11016**\]: Después de múltiples ejecuciones de los microbenchmarks en plataformas y hardware diferentes, verificar que puedo decargar el CSV con los datos de todas las ejecuciones realizadas.
-- \[**11015**\], \[**11017**\]: Poner mi dispositivo en modo avión y verificar que la interfaz informa del fallo al intentar descargar los datos.
+- \[**11015**\], \[**11017**\]: Poner el dispositivo en modo avión y verificar que la interfaz informa del fallo al intentar descargar los datos.
+- \[**12001**\]: Ejecutar el comando, verificar que se ejecutaron todos viendo los resultados.
+- \[**12002**\]: Ejecutar el comando utilizando la bander para ejecutar un solo microbenchmark, verificar que solo se ejecutó ese porque debería de durar considerablemente menos que ejecutarlos todos y solo se generaron resultados para ese microbenchmark.
+- \[**12003**\]: Ejecutar los microbenchmarks y verificar que se imprimen los resultados para cada uno.
+- \[**12004**\]: Ejecutar el comando con la bandera y un microbenchmark personalizado mínimo, verificar que no hay ningún error.
+- \[**12005**\]: Ejecutar el comando con la bandera y un microbenchmark personalizado mínimo, verificar que duró el tiempo esperado (mucho menos que con los microbenchmarks realeas) y que no se muestran resultados de ningún microbenchmark predeterminado.
+- \[**12006**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que el comando informa que no se pudo compilar el microbenchmark e informa el porqué.
+- \[**12007**\]: Ejecutar uno de los microbenchmark predeterminados pero ingresándolo como si fuera uno personalizado, verificar que la terminal reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se ejecuta como predeterminado.
+- \[**12008**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual la GPU del desarrollador no tenga soporte, verificar que la página informa la falta de soporte.
+
 # 5. Apéndices
 
 ## 5.1. Supuestos y dependencias
