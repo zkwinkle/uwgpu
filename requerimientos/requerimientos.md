@@ -36,7 +36,7 @@ El alcance del software, denominado "wgpu microbench" abarca el diseño,
 desarrollo e implementación de los microbenchmarks para evaluar características
 del hardware de GPUs y las interfaces para ejecutarlos y visualizar resultados.
 
-El software tiene 2 objetivos principales:
+El software tiene dos objetivos principales:
 
 - Simplificar el proceso de escribir microbenchmarks para GPU.
 - Proveer un banco de microbenchmarks comparativos con operaciones comunes para
@@ -51,8 +51,8 @@ El software incluirá dos interfaces que dan acceso a estas capacidades:
    Vulkan y ofrece resultados en texto.
 
  El producto es autónomo y no interactúa con sistemas externos, aunque opera
- dentro del contexto los APIs gráficos mencionados y las plataformas sobre las
- que se ejecutan.
+ dentro del contexto de los APIs gráficos mencionados y las plataformas sobre
+ las que se ejecutan.
 
 ## 1.3. Resumen del producto
 
@@ -68,7 +68,7 @@ La figura 1 muestra las plataformas en las que los
 microbenchmarks pueden ser evaluados y las capas de APIs gráficos, plataformas
 y hardware.
 
-![Herarquía de APIs gráficos, plataformas y hardware sobre los que se puede ejecutar el API gráfico wgpu](./diagramas/Diagrama Plataformas-Hardware.svg){height=10cm}
+![Jerarquía de APIs gráficos, plataformas y hardware sobre los que se puede ejecutar el API gráfico wgpu](./diagramas/Diagrama Plataformas-Hardware.svg){height=10cm}
 
 No forma parte de un sistema mayor, el software es el producto entero que se
 ofrece. El desarrollo abarca todas las partes del producto, incluyendo la
@@ -336,7 +336,7 @@ No aplica.
   los microbenchmarks, incluyendo métricas de rendimiento (por ejemplo, tiempo
   de ejecución o uso de memoria, variará dependiendo del microbenchmark),
   información de la plataforma (sistema operativo, navegador web, versión del
-  navegador) y detalles del hardware (módelo del GPU).
+  navegador) y detalles del hardware (modelo del GPU).
 
 ### 3.5.2. Frecuencia de Uso
 
@@ -349,7 +349,7 @@ No aplica.
   hardware y métricas de rendimiento específicas.
 
 - [\[**53002**\]]{#53002}: Si los usuarios solicitan descargar los datos, la
-  base de datos deberá proporcionar capacidades para generar y descargar
+  base de datos deberá proporcionar la capacidad de generar y descargar
   archivos CSV que contengan todo el cuerpo de datos.
 
 ### 3.5.4. Entidades de Datos y Sus Relaciones
