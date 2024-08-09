@@ -192,17 +192,14 @@ que ambas interfaces implementará.
 ## 3.2. Requisitos de usabilidad
 
 - \[**20001**\]: Cada microbenchmark individual deberá producir resultados consistentes con una variación de no más del 5% en múltiples ejecuciones en el mismo hardware y plataforma en un computador que no esté realizando otros procesamientos significativos.
-- \[**20002**\]: Cada microbenchmark individual deberá ejecutarse en menos de 5 minutos en la computadora del desarrollador, específicamente una laptop equipada con una GPU integrada de un procesador Intel(R) Core(TM) i7-1260P de 12ª generación.
-
-**Nota:** Este límite de tiempo ha sido seleccionado de manera arbitraria, pero
+- \[**20002**\]: Cada microbenchmark individual deberá ejecutarse en menos de 5 minutos ^[Este límite de tiempo ha sido seleccionado de manera arbitraria, pero
 razonable, basado en lo que se considera aceptable para la mayoría de los
 usuarios. Se anticipa que si un microbenchmark se completa dentro de este
 periodo en el hardware del desarrollador, probablemente se ejecutará más
 rápido en la mayoría de sistemas modernos en especial si cuentan con un GPU
 discreto. En casos donde la ejecución exceda este límite en otros
 dispositivos, se espera que el tiempo adicional no impacte significativamente
-la usabilidad.
-
+la usabilidad.] en la computadora del desarrollador, específicamente una laptop equipada con una GPU integrada de un procesador Intel(R) Core(TM) i7-1260P de 12ª generación.
 
 ## 3.3. Interfaces externas
 
