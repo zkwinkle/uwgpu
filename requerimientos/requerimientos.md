@@ -215,6 +215,35 @@ No aplica.
 
 ## 3.5. Requisitos de la base de datos lógica
 
+### 3.5.1. Tipos de Información Utilizada por Diversas Funciones
+
+- \[**51001**\]: La base de datos deberá almacenar los resultados de los microbenchmarks, incluyendo métricas de rendimiento (por ejemplo, tiempo de ejecución o uso de memoria, variará dependiendo del microbenchmark), información de la plataforma (sistema operativo, navegador web, versión del navegador) y detalles del hardware (módelo del GPU).
+
+### 3.5.2. Frecuencia de Uso
+
+No aplica.
+
+### 3.5.3. Capacidades de Acceso
+
+- \[**53001**\]: La base de datos deberá permitir filtrar los datos de microbenchmarks según diversos criterios como plataforma, configuración de hardware y métricas de rendimiento específicas.
+- \[**53002**\]: Si los usuarios solicitan descargar los datos, la base de datos deberá proporcionar capacidades para generar y descargar archivos CSV que contengan todo el cuerpo de datos.
+
+### 3.5.4. Entidades de Datos y Sus Relaciones
+
+- \[**54001**\]: La base de datos deberá incluir una entidad para cada categoría de microbenchmark (como convolución, reducción, otros) con los datos relevantes para esa categoría.
+- \[**54002**\]: La base de datos deberá tener la capacidad de incluir una entidad para microbenchmark específico si requiere datos adicionales específicos al microbenchmark.
+- \[**54003**\]: La base de datos deberá incluir una entidad para plataformas que incluya la información de sistema operativo, navegador web, versión de navegador y hardware.
+
+### 3.5.5. Restricciones de Integridad
+
+- \[**55001**\]: Siempre que se almacene un resultado de microbenchmark, la base de datos deberá imponer integridad referencial, asegurando que un resultado de microbenchmark no pueda existir sin datos válidos asociados de plataforma y hardware.
+
+### 3.5.6. Seguridad
+
+No aplica.
+
+### 3.5.7. Requerimientos de retención de datos
+
 No aplica.
 
 ## 3.6. Restricciones de diseño
