@@ -191,9 +191,27 @@ que ambas interfaces implementará.
 
 ## 3.2. Requisitos de usabilidad
 
+- \[**20001**\]: Cada microbenchmark individual deberá producir resultados consistentes con una variación de no más del 5% en múltiples ejecuciones en el mismo hardware y plataforma en un computador que no esté realizando otros procesamientos significativos.
+- \[**20002**\]: Cada microbenchmark individual deberá ejecutarse en menos de 5 minutos en la computadora del desarrollador, específicamente una laptop equipada con una GPU integrada de un procesador Intel(R) Core(TM) i7-1260P de 12ª generación.
+
+**Nota:** Este límite de tiempo ha sido seleccionado de manera arbitraria, pero
+razonable, basado en lo que se considera aceptable para la mayoría de los
+usuarios. Se anticipa que si un microbenchmark se completa dentro de este
+periodo en el hardware del desarrollador, probablemente se ejecutará más
+rápido en la mayoría de sistemas modernos en especial si cuentan con un GPU
+discreto. En casos donde la ejecución exceda este límite en otros
+dispositivos, se espera que el tiempo adicional no impacte significativamente
+la usabilidad.
+
+- \[**20003**\]: La interfaz web deberá ser portable, funcionando de manera efectiva en todas las plataformas objetivo oficiales: Chromium y Firefox, en Linux y en Android; garantizando un rendimiento y usabilidad consistentes en estos entornos de manera individual (es decir, que el rendimiento no tiene que ser consistente entre plataformas diferentes).
+
 ## 3.3. Interfaces externas
 
+No aplica.
+
 ## 3.4. Requisitos de rendimiento
+
+No aplica.
 
 ## 3.5. Requisitos de la base de datos lógica
 
