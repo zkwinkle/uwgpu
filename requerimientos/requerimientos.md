@@ -4,6 +4,7 @@ header-includes: yes
 geometry: "left=1.6cm,right=1.6cm,top=1.6cm,bottom=1.6cm"
 gradient: no
 underline: no
+colorlinks: yes
 ---
 
 # 1. Introducción
