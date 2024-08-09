@@ -69,7 +69,7 @@ La figura 1 muestra las plataformas en las que los
 microbenchmarks pueden ser evaluados y las capas de APIs gráficos, plataformas
 y hardware.
 
-![Jerarquía de APIs gráficos, plataformas y hardware sobre los que se puede ejecutar el API gráfico wgpu](./diagramas/Diagrama Plataformas-Hardware.svg){height=10cm}
+![Jerarquía de APIs gráficos, plataformas y hardware sobre los que se puede ejecutar el API gráfico wgpu](./figuras/Diagrama Plataformas-Hardware.svg){height=10cm}
 
 No forma parte de un sistema mayor, el software es el producto entero que se
 ofrece. El desarrollo abarca todas las partes del producto, incluyendo la
@@ -536,3 +536,9 @@ Esta sección especifica el método de verificación para cada requerimiento.
 ## 5.2. Matriz de trazabilidad
 
 No aplica.
+
+\clearpage
+
+## 5.3. Aprobación por parte del supervisor
+
+![Pantallazo de correo con aprobación del documento por parte del supervisor Ernesto Rivera.](./figuras/avalo.png){width=100%}
