@@ -172,7 +172,7 @@ que ambas interfaces implementará.
 - \[**12002**\]: Si el usuario indica que solo se ejecute uno de los microbenchmarks (puede ser a través de una bandera en el comando), cuando el usuario ejecute el comando, la interfaz CLI deberá ejecutar solo el microbenchmark predeterminado que fue indicado.
 - \[**12003**\]: Cuando se terminan de ejecutar el conjunto completo o solo uno de los microbenchmarks predeterminados, la interfaz CLI deberá mostrar dentro de la terminal las características de rendimiento obtenidas de los microbenchmarks.
 - \[**12004**\]: La interfaz CLI deberá proporcionar la opción (posiblemente a través de una bandera en el comando) de leer un archivo de texto donde el usuario haya escrito el código de su propio microbenchmark personalizado y que este sea ejecutado.
-- \[**12005**\]: Si el usuario la india al comando que lea un archivo de texto para ejecutar su propio microbenchmark personalizado, al ejecutar el comando la interfaz CLI no deberá ejecutar ninguno de los microbenchmarks predeterminados.
+- \[**12005**\]: Si el usuario le indica al comando que lea un archivo de texto para ejecutar su propio microbenchmark personalizado, al ejecutar el comando la interfaz CLI no deberá ejecutar ninguno de los microbenchmarks predeterminados.
 - \[**12006**\]: Si el código del microbenchmark personalizado no puede compilar o ejecutarse por algún otro motivo cuando el usuario intenta ejecutarlo, entonces la interfaz CLI deberá indicar el error al usuario con un mensaje de texto en la terminal.
 - \[**12007**\]: Cuando finalice la ejecución correcta del microbenchmark personalizado, la interfaz CLI deberá mostrar cuánto tiempo duró en ejecutarse.
 - \[**12008**\]: Si el hardware del usuario no tiene soporte para alguna operación que se utilice en alguno de los microbenchmarks predeterminados cuando el usuario intente ejecutarlo, la interfaz CLI deberá indicar esta falta de soporte de operación al usuario y no ejecutará el microbenchmark específico.
@@ -268,13 +268,13 @@ Esta sección especifica el método de verificación para cada requerimiento.
 - \[**11006**\]: Ejecutar microbenchmarks y verificar que la interfaz web muestra los datos solicitados.
 - \[**11007**\]: Entrar a la interfaz web y verificar que se cuenta con un espacio para escribir microbenchmarks personalizados.
 - \[**11008**\]: Ejecutar un microbenchmark personalizado y verificar su ejecución correcta.
-- \[**11009**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que la página me alerta de que no se pudo compilar el microbenchmark y me informa el porqué.
+- \[**11009**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que la página alerta de que no se pudo compilar el microbenchmark e informa el porqué.
 - \[**11010**\]: Ejecutar uno de los microbenchmark predeterminados pero ingresándolo como si fuera uno personalizado, verificar que la interfaz web reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se ejecuta como predeterminado.
-- \[**11011**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual mi GPU no tenga soporte, verificar que la página me informa de la falta de soporte.
+- \[**11011**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual mi GPU no tenga soporte, verificar que la página informa la falta de soporte.
 - \[**11012**\], \[**11013**\]: Ejecutar varios microbenchmarks y luego verificar que se muestran los resultados recopilados de esas ejecuciones.
 - \[**11014**\]: Ejecutar los microbenchmarks en los navegadores con soporte oficial y conseguir ejecutarlos en un computador con hardware diferente, tomar nota de los resultados. Luego, verificar que las estadísticas retornadas con los filtros aplicados sean consistentes con los resultados obtenidos en cada plataforma y hardware diferente.
 - \[**11016**\]: Después de múltiples ejecuciones de los microbenchmarks en plataformas y hardware diferentes, verificar que puedo decargar el CSV con los datos de todas las ejecuciones realizadas.
-- \[**11015**\], \[**11017**\]: Poner mi dispositivo en modo avión y verificar que la interfaz me informa del fallo al intentar descargar los datos.
+- \[**11015**\], \[**11017**\]: Poner mi dispositivo en modo avión y verificar que la interfaz informa del fallo al intentar descargar los datos.
 # 5. Apéndices
 
 ## 5.1. Supuestos y dependencias
