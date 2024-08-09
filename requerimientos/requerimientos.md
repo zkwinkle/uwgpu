@@ -283,6 +283,13 @@ Esta sección especifica el método de verificación para cada requerimiento.
 - \[**12006**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que el comando informa que no se pudo compilar el microbenchmark e informa el porqué.
 - \[**12007**\]: Ejecutar uno de los microbenchmark predeterminados pero ingresándolo como si fuera uno personalizado, verificar que la terminal reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se ejecuta como predeterminado.
 - \[**12008**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual la GPU del desarrollador no tenga soporte, verificar que la página informa la falta de soporte.
+- \[**51001**\], \[**53001**\], \[**54001**\], \[**54002**\], \[**54003**\]: Para todos los requerimientos relacionados a la existencia del esquema, de las entidades y la capacidad de accederlas y de poder filtrarlas se realizarán pruebas unitarias con una base de datos local de prueba que verifique la capacidad de insertar y recuperar datos de las maneras especificadas.
+- \[**53002**\]: Crear una prueba unitaria para verificar la capacidad de insertar ciertos datos en la base de datos de prueba y luego obtenerlos en formato CSV.
+- \[**55001**\]: Crear una prueba unitaria que demuestre que si se intenta guardar un dato que rompe con la integridad referencial la base de datos dé un error.
+
+- \[**70001**\]: Llevar a cabo la verificación de requisitos funcionales (los que empiezan con '1') en cada una de las 4 combinaciones de navegador web y sistema operativo que conforman las plataformas objetivo oficiales.
+
+- \[**70002**\]: En cada una de las 4 plataformas objetivo oficiales, verificar la ejecución correcta de todo el banco de microbenchmarks y verificar con un solo microbenchmark la consistencia de resultados.
 
 # 5. Apéndices
 
