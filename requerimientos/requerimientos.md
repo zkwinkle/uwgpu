@@ -108,6 +108,8 @@ plataformas a las que tiene acceso ya que no cuenta con hardware de Apple
 verificar el funcionamiento del software para la plataforma Linux y
 consecuentemente el API de gráficos Vulkan.
 
+De igual manera, la interfaz web solo se podrá verificar para los navegadores web disponibles en Linux (notablemente excluyendo a Safari que tiene soporte experimental de WebGPU) y en Android (notablemente excluyendo verificación en iOS).
+
 ## 1.4. Definiciones
 
 - **Microbenchmark:** Prueba que mide el rendimiento de alguna característica
