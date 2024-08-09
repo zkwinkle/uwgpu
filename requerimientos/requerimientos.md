@@ -39,7 +39,8 @@ del hardware de GPUs y las interfaces para ejecutarlos y visualizar resultados.
 El software tiene 2 objetivos principales:
 
 - Simplificar el proceso de escribir microbenchmarks para GPU.
-- Proveer un banco de microbenchmarks comparativos con operaciones comunes para entender las capacidades del hardware sobre el que se ejecutan.
+- Proveer un banco de microbenchmarks comparativos con operaciones comunes para
+  entender las capacidades del hardware sobre el que se ejecutan.
 
 El software incluirá dos interfaces que dan acceso a estas capacidades:
 
@@ -58,7 +59,7 @@ El software incluirá dos interfaces que dan acceso a estas capacidades:
 ### 1.3.1. Perspectiva del producto
 
 Los microbenchmarks se implementarán utilizando el API de gráficos _wgpu_ que
-se puede correr en browsers que tengan soporte para WebGPU o nativamente
+se puede correr en navegadores web que tengan soporte para WebGPU o nativamente
 traduciendo a los APIs nativos Vulkan, Metal y DX12. Aunque solo se verificará
 la capacidad de correr los microbenchmarks sobre Vulkan, por las razones
 especificadas en la sección de limitaciones.
@@ -85,6 +86,8 @@ Las principales funciones del software incluyen:
   ejecutar y evaluar microbenchmarks personalizados a través de ambas
   interfaces.
 
+[TODO: Diagrama mostrando funciones dependiendo de interfaz?]
+
 ### 1.3.3. Características del usuario
 
 Los usuarios esperados incluyen desarrolladores de software de gráficos por
@@ -107,22 +110,30 @@ consecuentemente el API de gráficos Vulkan.
 
 ## 1.4. Definiciones
 
-- **Microbenchmark:** Prueba que mide el rendimiento de alguna característica específica de bajo nivel. Se diferencia de un "benchmark" ya que ese es un concepto más general que aplica a cualquier tipo de prueba que podría incluir el rendimiento de sistemas enteros.
-- **GPU Compute:** Uso de la GPU para cálculos computacionales de manera general.
+- **Microbenchmark:** Prueba que mide el rendimiento de alguna característica
+  específica de bajo nivel. Se diferencia de un "benchmark" ya que ese es un
+  concepto más general que aplica a cualquier tipo de prueba que podría incluir
+  el rendimiento de sistemas enteros.
+- **GPU Compute:** Uso del GPU para cálculos computacionales de manera general.
 
 ## 1.5. Siglas y abreviaturas
 
-**GPU:** Unidad de procesamiento gráfico.
-**CLI:** Interfaz de línea de comandos.
+**GPU:** Unidad de procesamiento gráfico. **CLI:** Interfaz de línea de
+comandos.
 
 # 2. Referencias
 
-- [wgpu](https://github.com/gfx-rs/wgpu)
-- [Estándar WebGPU](https://gpuweb.github.io/gpuweb/)
-- [µVkCompute](https://github.com/google/uVkCompute)
-- [Dissecting GPU Memory Hierarchy through Microbenchmarking](https://arxiv.org/abs/1509.02308)
-- [Demystifying GPU Microarchitecture through Microbenchmarking](https://courses.cs.washington.edu/courses/cse470/24sp/readings/Demystifying_GPU_microarchitecture_through_microbenchmarking.pdf)
-- [Nvidia CUDA Programming Guide](https://developer.download.nvidia.com/compute/cuda/1.0/NVIDIA_CUDA_Programming_Guide_1.0.pdf)
+- [Proyecto wgpu](https://github.com/gfx-rs/wgpu)
+- [Estándar de WebGPU](https://gpuweb.github.io/gpuweb/)
+- [Proyecto µVkCompute](https://github.com/google/uVkCompute)
+- [Dissecting GPU Memory Hierarchy through
+  Microbenchmarking](https://arxiv.org/abs/1509.02308)
+- [Demystifying GPU Microarchitecture through
+  Microbenchmarking](https://courses.cs.washington.edu/courses/cse470/24sp/readings/Demystifying_GPU_microarchitecture_through_microbenchmarking.pdf)
+- [Nvidia CUDA Programming
+  Guide](https://developer.download.nvidia.com/compute/cuda/1.0/NVIDIA_CUDA_Programming_Guide_1.0.pdf)
+- [GPU Atomic Performance Modeling with Microbenchmarks](https://vulkan.org/user/pages/09.events/vulkanised-2024/vulkanised-2024-devon-mckee.pdf)
+
 # 3. Requisitos
 
 ## 3.1. Funciones
