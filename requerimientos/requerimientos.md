@@ -185,7 +185,9 @@ que ambas interfaces implementará.
 - \[**13004**\]: El banco de microbenchmarks deberá incluir al menos 2 microbenchmarks con métodos distintos de realizar la operación conocida como suma de prefijos o "scan".
 - \[**13005**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de accesos de memoria secuenciales del GPU.
 - \[**13006**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de accesos de memoria desordenados del GPU.
-- \[**13007**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de copiar memoria entre buffers, de buffer a texturas y entre texturas del GPU.
+- \[**13007**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de copiar memoria entre buffers del GPU.
+- \[**13008**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de copiar memoria de buffer a texturas del GPU.
+- \[**13000**\]: El banco de microbenchmarks deberá incluir al menos un microbenchmarks para medir el ancho de banda de copiar memoria entre texturas del GPU.
 
 ## 3.2. Requisitos de usabilidad
 
