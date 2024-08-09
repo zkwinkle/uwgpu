@@ -258,6 +258,23 @@ No aplica.
 
 # 4. Verificación
 
+Esta sección especifica el método de verificación para cada requerimiento.
+
+- \[**11001**\]: Ejecutar todos los microbenchmarks, verificar que se ejecutaron todos viendo los resultados.
+- \[**11002**\]: Ejecutar un solo microbenchmark, verificar que solo se ejecutó ese porque debería de durar considerablemente menos que ejecutarlos todos y solo se generaron resultados para ese microbenchmark.
+- \[**11003**\]: Abrir la interfaz web y verificar visualmente la existencia del selector y que se puede estripar con una confirmación visual de si está seleccionado o no.
+- \[**11004**\]: Ejecutar microbenchmarks y luego revisar manualmente en la base de datos que llegaron los resultados de la ejecución.
+- \[**11005**\]: Ejecutar microbenchmarks con la recolección de datos deshabilitada y verificar que no se guardan los datos en la base de datos y ver en el tab de "Network" del navegador que no se hizo ninguna solicitud para enviar los datos.
+- \[**11006**\]: Ejecutar microbenchmarks y verificar que la interfaz web muestra los datos solicitados.
+- \[**11007**\]: Entrar a la interfaz web y verificar que se cuenta con un espacio para escribir microbenchmarks personalizados.
+- \[**11008**\]: Ejecutar un microbenchmark personalizado y verificar su ejecución correcta.
+- \[**11009**\]: Ingresar diferentes códigos con errores de sintaxis y verificar que la página me alerta de que no se pudo compilar el microbenchmark y me informa el porqué.
+- \[**11010**\]: Ejecutar uno de los microbenchmark predeterminados pero ingresándolo como si fuera uno personalizado, verificar que la interfaz web reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se ejecuta como predeterminado.
+- \[**11011**\]: Temporalmente agregar un microbenchmark cuyo único requisito es usar alguna característica para la cual mi GPU no tenga soporte, verificar que la página me informa de la falta de soporte.
+- \[**11012**\], \[**11013**\]: Ejecutar varios microbenchmarks y luego verificar que se muestran los resultados recopilados de esas ejecuciones.
+- \[**11014**\]: Ejecutar los microbenchmarks en los navegadores con soporte oficial y conseguir ejecutarlos en un computador con hardware diferente, tomar nota de los resultados. Luego, verificar que las estadísticas retornadas con los filtros aplicados sean consistentes con los resultados obtenidos en cada plataforma y hardware diferente.
+- \[**11016**\]: Después de múltiples ejecuciones de los microbenchmarks en plataformas y hardware diferentes, verificar que puedo decargar el CSV con los datos de todas las ejecuciones realizadas.
+- \[**11015**\], \[**11017**\]: Poner mi dispositivo en modo avión y verificar que la interfaz me informa del fallo al intentar descargar los datos.
 # 5. Apéndices
 
 ## 5.1. Supuestos y dependencias
