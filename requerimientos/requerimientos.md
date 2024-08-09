@@ -148,183 +148,179 @@ que ambas interfaces implementará.
 
 ### 3.1.1. Interfaz web
 
-- <span id="11001">\[**11001**\]</span>: Cuando el usuario inicie la acción de
-  ejecutar microbenchmarks, la interfaz web deberá ejecutar el conjunto de
+- [\[**11001**\]]{#11001}: Cuando el usuario inicie la acción de ejecutar
+  microbenchmarks, la interfaz web deberá ejecutar el conjunto de
   microbenchmarks predeterminados.
 
-- <span id="11002">\[**11002**\]</span>: Si el usuario indica que solo se
-  ejecute uno de los microbenchmarks (puede ser a través de un selector),
-  cuando el usuario inicie la acción de ejecutar microbenchmarks, la interfaz
-  web deberá ejecutar solo el microbenchmark predeterminado que fue indicado.
+- [\[**11002**\]]{#11002}: Si el usuario indica que solo se ejecute uno de los
+  microbenchmarks (puede ser a través de un selector), cuando el usuario inicie
+  la acción de ejecutar microbenchmarks, la interfaz web deberá ejecutar solo
+  el microbenchmark predeterminado que fue indicado.
 
-- <span id="11003">\[**11003**\]</span>: La interfaz web deberá proporcionar un
-  botón de "desactivar recopilación de datos" para el usuario.
+- [\[**11003**\]]{#11003}: La interfaz web deberá proporcionar un botón de
+  "desactivar recopilación de datos" para el usuario.
 
-- <span id="11004">\[**11004**\]</span>: Si se ejecuta el conjunto completo o
-  solo uno de microbenchmarks predeterminados mientras el botón de "desactivar
-  recopilación de datos" está inactivo, la interfaz web deberá recopilar los
-  datos de rendimiento obtenidos de los microbenchmarks, el hardware y la
-  plataforma del usuario y guardar esos datos en una base de datos.
-
-- <span id="11005">\[**11005**\]</span>: Si se ejecuta el conjunto de
+- [\[**11004**\]]{#11004}: Si se ejecuta el conjunto completo o solo uno de
   microbenchmarks predeterminados mientras el botón de "desactivar recopilación
-  de datos" está activo, la interfaz web no deberá recopilar ningún dato.
+  de datos" está inactivo, la interfaz web deberá recopilar los datos de
+  rendimiento obtenidos de los microbenchmarks, el hardware y la plataforma del
+  usuario y guardar esos datos en una base de datos.
 
-- <span id="11006">\[**11006**\]</span>: Cuando se terminan de ejecutar el
-  conjunto completo o solo uno de los microbenchmarks predeterminados, la
-  interfaz web deberá mostrar en la interfaz la plataforma, navegador web y
-  hardware identificados para el usuario así como las características de
-  rendimiento obtenidas de los microbenchmarks.
+- [\[**11005**\]]{#11005}: Si se ejecuta el conjunto de microbenchmarks
+  predeterminados mientras el botón de "desactivar recopilación de datos" está
+  activo, la interfaz web no deberá recopilar ningún dato.
 
-- <span id="11007">\[**11007**\]</span>: La interfaz web deberá proporcionar
-  una caja de texto para que el usuario escriba el código de su propio
-  microbenchmark personalizado.
+- [\[**11006**\]]{#11006}: Cuando se terminan de ejecutar el conjunto completo
+  o solo uno de los microbenchmarks predeterminados, la interfaz web deberá
+  mostrar en la interfaz la plataforma, navegador web y hardware identificados
+  para el usuario así como las características de rendimiento obtenidas de los
+  microbenchmarks.
 
-- <span id="11008">\[**11008**\]</span>: Cuando el usuario lo indique, la
-  interfaz web deberá ejecutar el microbenchmark personalizado del usuario.
+- [\[**11007**\]]{#11007}: La interfaz web deberá proporcionar una caja de
+  texto para que el usuario escriba el código de su propio microbenchmark
+  personalizado.
 
-- <span id="11009">\[**11009**\]</span>: Si el código del microbenchmark
-  personalizado no puede compilar o ejecutarse por algún otro motivo cuando el
-  usuario intenta ejecutarlo, entonces la interfaz web deberá indicar el error
-  al usuario con una _alerta_.
+- [\[**11008**\]]{#11008}: Cuando el usuario lo indique, la interfaz web deberá
+  ejecutar el microbenchmark personalizado del usuario.
 
-- <span id="11010">\[**11010**\]</span>: Cuando finalice la ejecución correcta
-  del microbenchmark personalizado, la interfaz web deberá mostrar cuánto
-  tiempo duró en ejecutarse.
+- [\[**11009**\]]{#11009}: Si el código del microbenchmark personalizado no
+  puede compilar o ejecutarse por algún otro motivo cuando el usuario intenta
+  ejecutarlo, entonces la interfaz web deberá indicar el error al usuario con
+  una _alerta_.
 
-- <span id="11011">\[**11011**\]</span>: Si la plataforma o hardware del
-  usuario no tiene soporte para alguna operación que se utilice en alguno de
-  los microbenchmarks predeterminados cuando el usuario intente ejecutarlo, la
-  interfaz web deberá indicar esta falta de soporte de operación al usuario y
-  no ejecutará el microbenchmark específico.
+- [\[**11010**\]]{#11010}: Cuando finalice la ejecución correcta del
+  microbenchmark personalizado, la interfaz web deberá mostrar cuánto tiempo
+  duró en ejecutarse.
 
-- <span id="11012">\[**11012**\]</span>: La interfaz web deberá permitir a los
-  usuarios accesar y ver estadísticas de los datos recopilados.
+- [\[**11011**\]]{#11011}: Si la plataforma o hardware del usuario no tiene
+  soporte para alguna operación que se utilice en alguno de los microbenchmarks
+  predeterminados cuando el usuario intente ejecutarlo, la interfaz web deberá
+  indicar esta falta de soporte de operación al usuario y no ejecutará el
+  microbenchmark específico.
 
-- <span id="11013">\[**11013**\]</span>: Cuando el usuario acceda las
-  estadísticas, la interfaz web deberá obtener las estadísticas del servidor
-  encargado de la base de datos.
+- [\[**11012**\]]{#11012}: La interfaz web deberá permitir a los usuarios
+  accesar y ver estadísticas de los datos recopilados.
 
-- <span id="11014">\[**11014**\]</span>: Si el usuario aplica filtros
-  (posiblemente a través de selectores) cuando accede las estadísticas, la
-  interfaz web deberá obtener las estadísticas para un subconjunto de datos
-  filtrados a como lo indicó el usuario; los filtros disponibles son para un
-  hardware específico, un navegador web específico, una plataforma específica y
-  un microbenchmark específico.
+- [\[**11013**\]]{#11013}: Cuando el usuario acceda las estadísticas, la
+  interfaz web deberá obtener las estadísticas del servidor encargado de la
+  base de datos.
 
-- <span id="11015">\[**11015**\]</span>: Si la petición falla (por algún error
-  de conectividad o cualquier otra razón) cuando se intentan descargar las
+- [\[**11014**\]]{#11014}: Si el usuario aplica filtros (posiblemente a través
+  de selectores) cuando accede las estadísticas, la interfaz web deberá obtener
+  las estadísticas para un subconjunto de datos filtrados a como lo indicó el
+  usuario; los filtros disponibles son para un hardware específico, un
+  navegador web específico, una plataforma específica y un microbenchmark
+  específico.
+
+- [\[**11015**\]]{#11015}: Si la petición falla (por algún error de
+  conectividad o cualquier otra razón) cuando se intentan descargar las
   estadísticas para visualización, la interfaz web deberá abortar la operación
   de visualización e indicar el fallo al usuario por medio de una _alerta_,
   indicándole que vuelva a intentar más tarde.
 
-- <span id="11016">\[**11016**\]</span>: La interfaz web deberá proveer un
-  botón para descargar todos los datos recopilados de ejecuciones de
-  microbenchmarks en formato CSV.
+- [\[**11016**\]]{#11016}: La interfaz web deberá proveer un botón para
+  descargar todos los datos recopilados de ejecuciones de microbenchmarks en
+  formato CSV.
 
-- <span id="11017">\[**11017**\]</span>: Si la petición falla (por algún error
-  de conectividad o cualquier otra razón) cuando se intentan descargar el
-  archivo de formato CSV con todos los datos de microbenchmarks realizados, la
-  interfaz web deberá abortar la operación e indicar el fallo al usuario por
-  medio de una _alerta_, indicándole que vuelva a intentar más tarde.
+- [\[**11017**\]]{#11017}: Si la petición falla (por algún error de
+  conectividad o cualquier otra razón) cuando se intentan descargar el archivo
+  de formato CSV con todos los datos de microbenchmarks realizados, la interfaz
+  web deberá abortar la operación e indicar el fallo al usuario por medio de
+  una _alerta_, indicándole que vuelva a intentar más tarde.
 
 ### 3.1.2. Interfaz CLI
 
-- <span id="12001">\[**12001**\]</span>: Cuando el usuario ejecute el comando
-  de la interfaz CLI, esta deberá ejecutar el conjunto de microbenchmarks
-  predeterminados.
+- [\[**12001**\]]{#12001}: Cuando el usuario ejecute el comando de la interfaz
+  CLI, esta deberá ejecutar el conjunto de microbenchmarks predeterminados.
 
-- <span id="12002">\[**12002**\]</span>: Si el usuario indica que solo se
-  ejecute uno de los microbenchmarks (puede ser a través de una bandera en el
-  comando), cuando el usuario ejecute el comando, la interfaz CLI deberá
-  ejecutar solo el microbenchmark predeterminado que fue indicado.
+- [\[**12002**\]]{#12002}: Si el usuario indica que solo se ejecute uno de los
+  microbenchmarks (puede ser a través de una bandera en el comando), cuando el
+  usuario ejecute el comando, la interfaz CLI deberá ejecutar solo el
+  microbenchmark predeterminado que fue indicado.
 
-- <span id="12003">\[**12003**\]</span>: Cuando se terminan de ejecutar el
-  conjunto completo o solo uno de los microbenchmarks predeterminados, la
-  interfaz CLI deberá mostrar dentro de la terminal las características de
-  rendimiento obtenidas de los microbenchmarks.
+- [\[**12003**\]]{#12003}: Cuando se terminan de ejecutar el conjunto completo
+  o solo uno de los microbenchmarks predeterminados, la interfaz CLI deberá
+  mostrar dentro de la terminal las características de rendimiento obtenidas de
+  los microbenchmarks.
 
-- <span id="12004">\[**12004**\]</span>: La interfaz CLI deberá proporcionar la
-  opción (posiblemente a través de una bandera en el comando) de leer un
-  archivo de texto donde el usuario haya escrito el código de su propio
-  microbenchmark personalizado y que este sea ejecutado.
+- [\[**12004**\]]{#12004}: La interfaz CLI deberá proporcionar la opción
+  (posiblemente a través de una bandera en el comando) de leer un archivo de
+  texto donde el usuario haya escrito el código de su propio microbenchmark
+  personalizado y que este sea ejecutado.
 
-- <span id="12005">\[**12005**\]</span>: Si el usuario le indica al comando que
-  lea un archivo de texto para ejecutar su propio microbenchmark personalizado,
-  al ejecutar el comando la interfaz CLI no deberá ejecutar ninguno de los
+- [\[**12005**\]]{#12005}: Si el usuario le indica al comando que lea un
+  archivo de texto para ejecutar su propio microbenchmark personalizado, al
+  ejecutar el comando la interfaz CLI no deberá ejecutar ninguno de los
   microbenchmarks predeterminados.
 
-- <span id="12006">\[**12006**\]</span>: Si el código del microbenchmark
-  personalizado no puede compilar o ejecutarse por algún otro motivo cuando el
-  usuario intenta ejecutarlo, entonces la interfaz CLI deberá indicar el error
-  al usuario con un mensaje de texto en la terminal.
+- [\[**12006**\]]{#12006}: Si el código del microbenchmark personalizado no
+  puede compilar o ejecutarse por algún otro motivo cuando el usuario intenta
+  ejecutarlo, entonces la interfaz CLI deberá indicar el error al usuario con
+  un mensaje de texto en la terminal.
 
-- <span id="12007">\[**12007**\]</span>: Cuando finalice la ejecución correcta
-  del microbenchmark personalizado, la interfaz CLI deberá mostrar cuánto
-  tiempo duró en ejecutarse.
+- [\[**12007**\]]{#12007}: Cuando finalice la ejecución correcta del
+  microbenchmark personalizado, la interfaz CLI deberá mostrar cuánto tiempo
+  duró en ejecutarse.
 
-- <span id="12008">\[**12008**\]</span>: Si el hardware del usuario no tiene
-  soporte para alguna operación que se utilice en alguno de los microbenchmarks
+- [\[**12008**\]]{#12008}: Si el hardware del usuario no tiene soporte para
+  alguna operación que se utilice en alguno de los microbenchmarks
   predeterminados cuando el usuario intente ejecutarlo, la interfaz CLI deberá
   indicar esta falta de soporte de operación al usuario y no ejecutará el
   microbenchmark específico.
 
 ### 3.1.3. Microbenchmarks
 
-- <span id="13001">\[**13001**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos 2 microbenchmarks con métodos distintos de realizar
-  convoluciones.
+- [\[**13001**\]]{#13001}: El banco de microbenchmarks deberá incluir al menos
+  2 microbenchmarks con métodos distintos de realizar convoluciones.
 
-- <span id="13002">\[**13002**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos 2 microbenchmarks con métodos distintos de realizar
-  multiplicación matricial.
+- [\[**13002**\]]{#13002}: El banco de microbenchmarks deberá incluir al menos
+  2 microbenchmarks con métodos distintos de realizar multiplicación matricial.
 
-- <span id="13003">\[**13003**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos 2 microbenchmarks con métodos distintos de realizar
-  reducciones.
+- [\[**13003**\]]{#13003}: El banco de microbenchmarks deberá incluir al menos
+  2 microbenchmarks con métodos distintos de realizar reducciones.
 
-- <span id="13004">\[**13004**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos 2 microbenchmarks con métodos distintos de realizar la
-  operación conocida como suma de prefijos o "scan".
+- [\[**13004**\]]{#13004}: El banco de microbenchmarks deberá incluir al menos
+  2 microbenchmarks con métodos distintos de realizar la operación conocida
+  como suma de prefijos o "scan".
 
-- <span id="13005">\[**13005**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos un microbenchmarks para medir el ancho de banda de accesos
-  de memoria secuenciales del GPU.
+- [\[**13005**\]]{#13005}: El banco de microbenchmarks deberá incluir al menos
+  un microbenchmarks para medir el ancho de banda de accesos de memoria
+  secuenciales del GPU.
 
-- <span id="13006">\[**13006**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos un microbenchmarks para medir el ancho de banda de accesos
-  de memoria desordenados del GPU.
+- [\[**13006**\]]{#13006}: El banco de microbenchmarks deberá incluir al menos
+  un microbenchmarks para medir el ancho de banda de accesos de memoria
+  desordenados del GPU.
 
-- <span id="13007">\[**13007**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos un microbenchmarks para medir el ancho de banda de copiar
-  memoria entre buffers del GPU.
+- [\[**13007**\]]{#13007}: El banco de microbenchmarks deberá incluir al menos
+  un microbenchmarks para medir el ancho de banda de copiar memoria entre
+  buffers del GPU.
 
-- <span id="13008">\[**13008**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos un microbenchmarks para medir el ancho de banda de copiar
-  memoria de buffer a texturas del GPU.
+- [\[**13008**\]]{#13008}: El banco de microbenchmarks deberá incluir al menos
+  un microbenchmarks para medir el ancho de banda de copiar memoria de buffer a
+  texturas del GPU.
 
-- <span id="13000">\[**13000**\]</span>: El banco de microbenchmarks deberá
-  incluir al menos un microbenchmarks para medir el ancho de banda de copiar
-  memoria entre texturas del GPU.
+- [\[**13000**\]]{#13000}: El banco de microbenchmarks deberá incluir al menos
+  un microbenchmarks para medir el ancho de banda de copiar memoria entre
+  texturas del GPU.
 
 ## 3.2. Requisitos de usabilidad
 
-- <span id="20001">\[**20001**\]</span>: Cada microbenchmark individual deberá
-  producir resultados consistentes con una variación de no más del 5% en
-  múltiples ejecuciones en el mismo hardware y plataforma en un computador que
-  no esté realizando otros procesamientos significativos.
+- [\[**20001**\]]{#20001}: Cada microbenchmark individual deberá producir
+  resultados consistentes con una variación de no más del 5% en múltiples
+  ejecuciones en el mismo hardware y plataforma en un computador que no esté
+  realizando otros procesamientos significativos.
 
-- <span id="20002">\[**20002**\]</span>: Cada microbenchmark individual deberá
-  ejecutarse en menos de 5 minutos ^[Este límite de tiempo ha sido seleccionado
-  de manera arbitraria, pero razonable, basado en lo que se considera aceptable
-  para la mayoría de los usuarios. Se anticipa que si un microbenchmark se
-  completa dentro de este periodo en el hardware del desarrollador,
-  probablemente se ejecutará más rápido en la mayoría de sistemas modernos en
-  especial si cuentan con un GPU discreto. En casos donde la ejecución exceda
-  este límite en otros dispositivos, se espera que el tiempo adicional no
-  impacte significativamente la usabilidad.] en la computadora del
-  desarrollador, específicamente una laptop equipada con una GPU integrada de
-  un procesador Intel(R) Core(TM) i7-1260P de 12ª generación.
+- [\[**20002**\]]{#20002}: Cada microbenchmark individual deberá ejecutarse en
+  menos de 5 minutos ^[Este límite de tiempo ha sido seleccionado de manera
+  arbitraria, pero razonable, basado en lo que se considera aceptable para la
+  mayoría de los usuarios. Se anticipa que si un microbenchmark se completa
+  dentro de este periodo en el hardware del desarrollador, probablemente se
+  ejecutará más rápido en la mayoría de sistemas modernos en especial si
+  cuentan con un GPU discreto. En casos donde la ejecución exceda este límite
+  en otros dispositivos, se espera que el tiempo adicional no impacte
+  significativamente la usabilidad.] en la computadora del desarrollador,
+  específicamente una laptop equipada con una GPU integrada de un procesador
+  Intel(R) Core(TM) i7-1260P de 12ª generación.
 
 ## 3.3. Interfaces externas
 
@@ -338,11 +334,11 @@ No aplica.
 
 ### 3.5.1. Tipos de Información Utilizada por Diversas Funciones
 
-- <span id="51001">\[**51001**\]</span>: La base de datos deberá almacenar los
-  resultados de los microbenchmarks, incluyendo métricas de rendimiento (por
-  ejemplo, tiempo de ejecución o uso de memoria, variará dependiendo del
-  microbenchmark), información de la plataforma (sistema operativo, navegador
-  web, versión del navegador) y detalles del hardware (módelo del GPU).
+- [\[**51001**\]]{#51001}: La base de datos deberá almacenar los resultados de
+  los microbenchmarks, incluyendo métricas de rendimiento (por ejemplo, tiempo
+  de ejecución o uso de memoria, variará dependiendo del microbenchmark),
+  información de la plataforma (sistema operativo, navegador web, versión del
+  navegador) y detalles del hardware (módelo del GPU).
 
 ### 3.5.2. Frecuencia de Uso
 
@@ -350,32 +346,32 @@ No aplica.
 
 ### 3.5.3. Capacidades de Acceso
 
-- <span id="53001">\[**53001**\]</span>: La base de datos deberá permitir
-  filtrar los datos de microbenchmarks según diversos criterios como
-  plataforma, configuración de hardware y métricas de rendimiento específicas.
+- [\[**53001**\]]{#53001}: La base de datos deberá permitir filtrar los datos
+  de microbenchmarks según diversos criterios como plataforma, configuración de
+  hardware y métricas de rendimiento específicas.
 
-- <span id="53002">\[**53002**\]</span>: Si los usuarios solicitan descargar
-  los datos, la base de datos deberá proporcionar capacidades para generar y
-  descargar archivos CSV que contengan todo el cuerpo de datos.
+- [\[**53002**\]]{#53002}: Si los usuarios solicitan descargar los datos, la
+  base de datos deberá proporcionar capacidades para generar y descargar
+  archivos CSV que contengan todo el cuerpo de datos.
 
 ### 3.5.4. Entidades de Datos y Sus Relaciones
 
-- <span id="54001">\[**54001**\]</span>: La base de datos deberá incluir una
-  entidad para cada categoría de microbenchmark (como convolución, reducción,
-  otros) con los datos relevantes para esa categoría.
+- [\[**54001**\]]{#54001}: La base de datos deberá incluir una entidad para
+  cada categoría de microbenchmark (como convolución, reducción, otros) con los
+  datos relevantes para esa categoría.
 
-- <span id="54002">\[**54002**\]</span>: La base de datos deberá tener la
-  capacidad de incluir una entidad para microbenchmark específico si requiere
-  datos adicionales específicos al microbenchmark.
+- [\[**54002**\]]{#54002}: La base de datos deberá tener la capacidad de
+  incluir una entidad para microbenchmark específico si requiere datos
+  adicionales específicos al microbenchmark.
 
-- <span id="54003">\[**54003**\]</span>: La base de datos deberá incluir una
-  entidad para plataformas que incluya la información de sistema operativo,
-  navegador web, versión de navegador y hardware.
+- [\[**54003**\]]{#54003}: La base de datos deberá incluir una entidad para
+  plataformas que incluya la información de sistema operativo, navegador web,
+  versión de navegador y hardware.
 
 ### 3.5.5. Restricciones de Integridad
 
-- <span id="55001">\[**55001**\]</span>: Siempre que se almacene un resultado
-  de microbenchmark, la base de datos deberá imponer integridad referencial,
+- [\[**55001**\]]{#55001}: Siempre que se almacene un resultado de
+  microbenchmark, la base de datos deberá imponer integridad referencial,
   asegurando que un resultado de microbenchmark no pueda existir sin datos
   válidos asociados de plataforma y hardware.
 
@@ -393,15 +389,15 @@ No aplica.
 
 ## 3.7. Atributos del sistema de software
 
-- <span id="70001">\[**70001**\]</span>: La interfaz web deberá ser portátil,
-  funcionando de manera efectiva en todas las plataformas objetivo oficiales:
-  Chromium y Firefox, en Linux y en Android.
+- [\[**70001**\]]{#70001}: La interfaz web deberá ser portátil, funcionando de
+  manera efectiva en todas las plataformas objetivo oficiales: Chromium y
+  Firefox, en Linux y en Android.
 
-- <span id="70002">\[**70002**\]</span>: Los microbenchmarks deberán ser
-  escritos utilizando el API gráfico _wgpu_, el cual permite portabilidad entre
-  múltiples entornos web y nativos; garantizando un rendimiento y usabilidad
-  consistentes en estos entornos de manera individual (es decir, que el
-  rendimiento no tiene que ser consistente entre plataformas diferentes).
+- [\[**70002**\]]{#70002}: Los microbenchmarks deberán ser escritos utilizando
+  el API gráfico _wgpu_, el cual permite portabilidad entre múltiples entornos
+  web y nativos; garantizando un rendimiento y usabilidad consistentes en estos
+  entornos de manera individual (es decir, que el rendimiento no tiene que ser
+  consistente entre plataformas diferentes).
 
 ## 3.8. Información de soporte
 
