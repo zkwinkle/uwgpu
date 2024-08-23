@@ -45,8 +45,7 @@ El software tiene dos objetivos principales:
 El software incluirá dos interfaces que dan acceso a estas capacidades:
 
 1. Interfaz web: Permite ejecutar microbenchmarks desde un navegador,
-   recolectar datos, visualizar resultados, y proporcionar una opción para
-   ejecutar microbenchmarks personalizados.
+   recolectar datos y visualizar resultados.
 2. Interfaz CLI: Permite ejecutar microbenchmarks nativamente, compilando a
    Vulkan y ofrece resultados en texto.
 
@@ -82,9 +81,6 @@ Las principales funciones del software incluyen:
   específicas del rendimiento de GPUs.
 - **Recolección y visualización de datos:** En la interfaz web, se recolectan y
   visualizan resultados; en la interfaz CLI, se generan resultados en texto.
-- **Ejecución de microbenchmarks personalizados:** Facilita a los usuarios
-  ejecutar y evaluar microbenchmarks personalizados a través de ambas
-  interfaces.
 
 ### 1.3.3. Características del usuario
 
@@ -174,22 +170,6 @@ que ambas interfaces implementará.
   para el usuario así como las características de rendimiento obtenidas de los
   microbenchmarks.
 
-- [\[**11007**\]]{#11007}: La interfaz web deberá proporcionar una caja de
-  texto para que el usuario escriba el código de su propio microbenchmark
-  personalizado.
-
-- [\[**11008**\]]{#11008}: Cuando el usuario lo indique, la interfaz web deberá
-  ejecutar el microbenchmark personalizado del usuario.
-
-- [\[**11009**\]]{#11009}: Si el código del microbenchmark personalizado no
-  puede compilar o ejecutarse por algún otro motivo cuando el usuario intenta
-  ejecutarlo, entonces la interfaz web deberá indicar el error al usuario con
-  una _alerta_.
-
-- [\[**11010**\]]{#11010}: Cuando finalice la ejecución correcta del
-  microbenchmark personalizado, la interfaz web deberá mostrar cuánto tiempo
-  duró en ejecutarse.
-
 - [\[**11011**\]]{#11011}: Si la plataforma o hardware del usuario no tiene
   soporte para alguna operación que se utilice en alguno de los microbenchmarks
   predeterminados cuando el usuario intente ejecutarlo, la interfaz web deberá
@@ -241,25 +221,6 @@ que ambas interfaces implementará.
   mostrar dentro de la terminal las características de rendimiento obtenidas de
   los microbenchmarks.
 
-- [\[**12004**\]]{#12004}: La interfaz CLI deberá proporcionar la opción
-  (posiblemente a través de una bandera en el comando) de leer un archivo de
-  texto donde el usuario haya escrito el código de su propio microbenchmark
-  personalizado y que este sea ejecutado.
-
-- [\[**12005**\]]{#12005}: Si el usuario le indica al comando que lea un
-  archivo de texto para ejecutar su propio microbenchmark personalizado, al
-  ejecutar el comando la interfaz CLI no deberá ejecutar ninguno de los
-  microbenchmarks predeterminados.
-
-- [\[**12006**\]]{#12006}: Si el código del microbenchmark personalizado no
-  puede compilar o ejecutarse por algún otro motivo cuando el usuario intenta
-  ejecutarlo, entonces la interfaz CLI deberá indicar el error al usuario con
-  un mensaje de texto en la terminal.
-
-- [\[**12007**\]]{#12007}: Cuando finalice la ejecución correcta del
-  microbenchmark personalizado, la interfaz CLI deberá mostrar cuánto tiempo
-  duró en ejecutarse.
-
 - [\[**12008**\]]{#12008}: Si el hardware del usuario no tiene soporte para
   alguna operación que se utilice en alguno de los microbenchmarks
   predeterminados cuando el usuario intente ejecutarlo, la interfaz CLI deberá
@@ -269,17 +230,17 @@ que ambas interfaces implementará.
 ### 3.1.3. Microbenchmarks
 
 - [\[**13001**\]]{#13001}: El banco de microbenchmarks deberá incluir al menos
-  2 microbenchmarks con métodos distintos de realizar convoluciones.
+  un microbenchmark que realice la operación de convolución.
 
 - [\[**13002**\]]{#13002}: El banco de microbenchmarks deberá incluir al menos
-  2 microbenchmarks con métodos distintos de realizar multiplicación matricial.
+  un microbenchmark que realice la operación de multiplicación matricial.
 
 - [\[**13003**\]]{#13003}: El banco de microbenchmarks deberá incluir al menos
-  2 microbenchmarks con métodos distintos de realizar reducciones.
+  un microbenchmark que realice la operación de reducción.
 
 - [\[**13004**\]]{#13004}: El banco de microbenchmarks deberá incluir al menos
-  2 microbenchmarks con métodos distintos de realizar la operación conocida
-  como suma de prefijos o "scan".
+  un microbenchmark que realice la operación conocida como suma de prefijos o
+  "scan".
 
 - [\[**13005**\]]{#13005}: El banco de microbenchmarks deberá incluir al menos
   un microbenchmarks para medir el ancho de banda de accesos de memoria
@@ -427,21 +388,6 @@ Esta sección especifica el método de verificación para cada requerimiento.
 - [\[**11006**\]](#11006): Ejecutar microbenchmarks y verificar que la interfaz
   web muestra los datos solicitados.
 
-- [\[**11007**\]](#11007): Entrar a la interfaz web y verificar que se cuenta
-  con un espacio para escribir microbenchmarks personalizados.
-
-- [\[**11008**\]](#11008): Ejecutar un microbenchmark personalizado y verificar
-  su ejecución correcta.
-
-- [\[**11009**\]](#11009): Ingresar diferentes códigos con errores de sintaxis
-  y verificar que la página alerta de que no se pudo compilar el microbenchmark
-  e informa el porqué.
-
-- [\[**11010**\]](#11010): Ejecutar uno de los microbenchmark predeterminados
-  pero ingresándolo como si fuera uno personalizado, verificar que la interfaz
-  web reporta el tiempo de ejecución correcto y acorde a lo que se espera
-  cuando se ejecuta como predeterminado.
-
 - [\[**11011**\]](#11011): Temporalmente agregar un microbenchmark cuyo único
   requisito es usar alguna característica para la cual el GPU del dispositivo
   no tenga soporte, verificar que la página informa la falta de soporte.
@@ -474,23 +420,6 @@ Esta sección especifica el método de verificación para cada requerimiento.
 
 - [\[**12003**\]](#12003): Ejecutar los microbenchmarks y verificar que se
   imprimen los resultados para cada uno.
-
-- [\[**12004**\]](#12004): Ejecutar el comando con la bandera y un
-  microbenchmark personalizado mínimo, verificar que no hay ningún error.
-
-- [\[**12005**\]](#12005): Ejecutar el comando con la bandera y un
-  microbenchmark personalizado mínimo, verificar que duró el tiempo esperado
-  (mucho menos que con los microbenchmarks realeas) y que no se muestran
-  resultados de ningún microbenchmark predeterminado.
-
-- [\[**12006**\]](#12006): Ingresar diferentes códigos con errores de sintaxis
-  y verificar que el comando informa que no se pudo compilar el microbenchmark
-  e informa el porqué.
-
-- [\[**12007**\]](#12007): Ejecutar uno de los microbenchmark predeterminados
-  pero ingresándolo como si fuera uno personalizado, verificar que la terminal
-  reporta el tiempo de ejecución correcto y acorde a lo que se espera cuando se
-  ejecuta como predeterminado.
 
 - [\[**12008**\]](#12008): Temporalmente agregar un microbenchmark cuyo único
   requisito es usar alguna característica para la cual la GPU del desarrollador
