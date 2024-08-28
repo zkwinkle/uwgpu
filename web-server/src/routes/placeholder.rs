@@ -1,4 +1,4 @@
-use maud::{html, Markup};
+use maud::{html, Markup, PreEscaped};
 
 use super::extractors::Layout;
 
@@ -6,5 +6,20 @@ use super::extractors::Layout;
 pub async fn placeholder(layout: Layout) -> Markup {
     layout.render( html! {
         p { "TODO: Esta página es temporal mientras experimento con wgpu, eventualmente voy a hacer el UI real" }
+        div id="wasm-canvas" {
+            style {
+                "canvas { background-color: black }"
+            }
+            script type="module" {
+                (PreEscaped(r#"
+                  import init from "./public/pkg/uwgpu.js";
+                  init().then(() => {
+                      console.log("WASM Loaded");
+                  });
+                "#))
+                }
+        }
     })
 }
+
+// TODO: WASM Loaded no se imprime idk xq

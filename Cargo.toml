@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["uwgpu", "web-server"]
+
+[workspace.dependencies]
+wgpu = "22.1.0"
+log = "0.4.22"
+env_logger = "0.11.5"

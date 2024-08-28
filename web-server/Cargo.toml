@@ -5,10 +5,13 @@ edition = "2021"
 
 [features]
 default = [ "debug" ]
-debug = [ "axum/macros" ]
+debug = [ "axum/macros", "log", "tracing-subscriber" ]
 
 [dependencies]
 axum = "0.7"
 maud = { version = "0.26", features = ["axum"] }
 tokio = { version = "1.39", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.5.2", features = ["fs"] }
+
+log = { workspace = true, optional = true }
+tracing-subscriber = { version = "0.3.18", optional = true }

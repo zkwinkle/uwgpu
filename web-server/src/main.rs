@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use web_server::{create_app_config_from_env, create_router};
 
 #[tokio::main]
@@ -8,6 +10,21 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:31416")
         .await
         .unwrap();
+
+    #[cfg(feature = "debug")]
+    {
+        let sock_address: SocketAddr = listener.local_addr().unwrap();
+
+        tracing_subscriber::fmt()
+            .with_max_level(tracing_subscriber::filter::LevelFilter::TRACE)
+            .pretty()
+            .init();
+        log::info!("listening on http://{}", sock_address);
+
+        // TODO: Cambiar esta mierda para poder poner el layer en el router
+        // let router = router
+        //     .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
+    }
 
     axum::serve(listener, router).await.unwrap();
 }
