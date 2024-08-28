@@ -3,7 +3,7 @@ use axum::{
     extract::{FromRequestParts, OriginalUri},
     http::request::Parts,
 };
-use maud::{html, Markup,  DOCTYPE};
+use maud::{html, Markup, DOCTYPE};
 
 use crate::components::css::STYLESHEET;
 //use crate::components::{navbar::Navbar, theme_selector::ThemeSelector};
@@ -18,7 +18,10 @@ use crate::components::css::STYLESHEET;
 /// }
 /// ```
 pub struct Layout {
-    #[expect(unused, reason = "Will probably get used once I have a navbar or something")]
+    #[expect(
+        unused,
+        reason = "Will probably get used once I have a navbar or something"
+    )]
     uri: OriginalUri,
 }
 

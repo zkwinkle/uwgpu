@@ -30,4 +30,6 @@ fn read_env(var_name: &str, default_value_dev: &str) -> String {
 ///
 /// Panics when the "debug" feature is disabled and the environment variable is
 /// not found.
-fn read_env_public_dir() -> String { read_env("PUBLIC_DIR", "web-server/public") }
+fn read_env_public_dir() -> String {
+    read_env("PUBLIC_DIR", "web-server/public")
+}
