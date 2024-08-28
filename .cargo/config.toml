@@ -1,0 +1,2 @@
+[alias]
+w = ["watch", "-w", "web-server", "-x", "check -p web-server", "-x", "run -p web-server"]
