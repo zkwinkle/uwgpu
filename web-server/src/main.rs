@@ -12,7 +12,7 @@ async fn main() {
         .unwrap();
 
     #[cfg(feature = "debug")]
-    {
+    let router = {
         let sock_address: SocketAddr = listener.local_addr().unwrap();
 
         tracing_subscriber::fmt()
@@ -21,10 +21,8 @@ async fn main() {
             .init();
         log::info!("listening on http://{}", sock_address);
 
-        // TODO: Cambiar esta mierda para poder poner el layer en el router
-        // let router = router
-        //     .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
-    }
+        router.layer(tower_http::trace::TraceLayer::new_for_http())
+    };
 
     axum::serve(listener, router).await.unwrap();
 }
