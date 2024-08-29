@@ -1,3 +1,3 @@
 use uwgpu::run;
 
-fn main() { run(); }
+fn main() { pollster::block_on(run()); }

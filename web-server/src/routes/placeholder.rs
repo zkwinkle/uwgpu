@@ -13,8 +13,9 @@ pub async fn placeholder(layout: Layout) -> Markup {
             script type="module" {
                 (PreEscaped(r#"
                   import init from "./public/pkg/uwgpu.js";
+
                   init().then(() => {
-                      console.log("WASM Loaded");
+                      console.log("WASM Loaded and executing");
                   });
                 "#))
                 }
