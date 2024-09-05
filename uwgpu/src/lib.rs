@@ -5,10 +5,11 @@ use std::collections::HashMap;
 
 use wgpu::{
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CommandEncoder, CommandEncoderDescriptor, CompilationInfo,
+    CommandEncoderDescriptor, CompilationInfo, CompilationMessageType,
+    ComputePass, ComputePassDescriptor, ComputePassTimestampWrites,
     ComputePipelineDescriptor, Device, DeviceDescriptor, DeviceLostReason,
-    Features, Instance, InstanceDescriptor, Limits, MemoryHints,
-    PowerPreference, QuerySet, QueryType, Queue, RequestAdapterOptions,
+    Features, Instance, InstanceDescriptor, Limits, MapMode, MemoryHints,
+    PowerPreference, QueryType, Queue, RequestAdapterOptions,
     RequestDeviceError, ShaderModule, ShaderModuleDescriptor,
 };
 
@@ -114,6 +115,10 @@ pub struct PipelineParameters<'a> {
 
     /// GPU context that is to be used for creating this pipeline.
     pub gpu: &'a GPUContext,
+
+    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
+    /// z)` dimensions of the grid of workgroups.
+    pub workgroups: (u32, u32, u32),
 }
 
 /// Represents a compute pipeline that can be used to execute one benchmark by
@@ -122,8 +127,8 @@ pub struct ComputePipeline<'a> {
     gpu: &'a GPUContext,
     shader_module: ShaderModule,
     bind_group: BindGroup,
-    encoder: CommandEncoder,
-    query_set: QuerySet,
+    pipeline: wgpu::ComputePipeline,
+    workgroups: (u32, u32, u32),
 }
 
 impl<'a> ComputePipeline<'a> {
@@ -131,13 +136,21 @@ impl<'a> ComputePipeline<'a> {
     /// fail we still recommend checking
     /// [get_shader_compilation_info](Self::get_shader_compilation_info) for any
     /// warnings.
-    pub fn new(
+    pub async fn new(
         params: PipelineParameters<'a>,
     ) -> Result<Self, CreatePipelineError> {
         let shader_module =
             params.gpu.device.create_shader_module(params.shader);
 
-        // TODO: Inspect messages to find an Error
+        let compilation_info = shader_module.get_compilation_info().await;
+
+        if compilation_info
+            .messages
+            .iter()
+            .any(|msg| msg.message_type == CompilationMessageType::Error)
+        {
+            return Err(CreatePipelineError::ShaderError);
+        }
 
         let pipeline = params.gpu.device.create_compute_pipeline(
             &ComputePipelineDescriptor {
@@ -164,27 +177,12 @@ impl<'a> ComputePipeline<'a> {
                     .collect::<Vec<BindGroupEntry>>(),
             });
 
-        let encoder = params
-            .gpu
-            .device
-            .create_command_encoder(&CommandEncoderDescriptor { label: None });
-
-        let query_set =
-            params
-                .gpu
-                .device
-                .create_query_set(&wgpu::QuerySetDescriptor {
-                    label: Some("Timestamp Query Set"),
-                    count: 2,
-                    ty: QueryType::Timestamp,
-                });
-
         Ok(Self {
             gpu: params.gpu,
             shader_module,
             bind_group,
-            encoder,
-            query_set,
+            pipeline,
+            workgroups: params.workgroups,
         })
     }
 
@@ -213,7 +211,7 @@ pub struct Benchmark<'a> {
     /// A common usage of this callback is copying the output from the shader
     /// to a buffer that has the [MAP_READ](wgpu::BufferUsages::MAP_READ)
     /// usage flag set.
-    pub finalize_encoder_callback: Option<&'a dyn Fn(&CommandEncoder)>,
+    pub finalize_encoder_callback: Option<&'a dyn Fn(&mut ComputePass)>,
     // Porbably need a workgroups param?
 }
 
@@ -224,14 +222,15 @@ pub struct BenchmarkResults {
     /// Total iterations ran, this should be equal to the `count` field in the
     /// [Benchmark] that was ran, but its also provided here for
     /// convenience.
-    pub count: u64,
+    pub count: usize,
+
     /// Total time spent executing the
-    pub total_time_spent: u64,
+    pub total_time_spent: f64,
 
     /// An "overhead benchmark" is carried out by executing a compute pass with
     /// all the same commands except for running the shader. The time spent
     /// in a single execution of this is reported here as "overhead time".
-    pub overhead_time_spent: u64,
+    pub overhead_time_spent: f64,
 }
 // TODO: Impl functions to get total_time without overhead, time per iteration
 // without overhead
@@ -240,17 +239,131 @@ impl Benchmark<'_> {
     /// Runs the benchmark using the provided compute pipeline
     pub async fn run<'a>(
         &self,
-        _pipeline: ComputePipeline<'a>,
+        pipeline: ComputePipeline<'a>,
     ) -> BenchmarkResults {
-        // 1. Create command buffer and run and get times
-        //
-        // 2. I also need to have a query resolve buffer and a results buffer in
-        //    order to map the timestamp results back to CPU land
-        //
-        // 3. Can then run another pass that does the same thing but without
-        //    running the actual shader to substract the "overhead"
+        // Timestamp query set and buffers
+        // ----------------------------------
+        let query_set =
+            pipeline
+                .gpu
+                .device
+                .create_query_set(&wgpu::QuerySetDescriptor {
+                    label: Some("Timestamp Query Set"),
+                    count: 4,
+                    ty: QueryType::Timestamp,
+                });
 
-        todo!()
+        let query_buf =
+            pipeline.gpu.device.create_buffer(&wgpu::BufferDescriptor {
+                label: None,
+                size: 32, // count * 2
+                usage: wgpu::BufferUsages::COPY_SRC
+                    | wgpu::BufferUsages::QUERY_RESOLVE,
+                mapped_at_creation: false,
+            });
+        let query_staging_buf =
+            pipeline.gpu.device.create_buffer(&wgpu::BufferDescriptor {
+                label: None,
+                size: 32, // same as query_buf
+                usage: wgpu::BufferUsages::MAP_READ
+                    | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
+            });
+
+        // Benchmark compute pass
+        // ----------------------------------
+        let mut encoder = pipeline
+            .gpu
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
+        let mut bench_pass =
+            encoder.begin_compute_pass(&ComputePassDescriptor {
+                label: None,
+                timestamp_writes: Some(ComputePassTimestampWrites {
+                    query_set: &query_set,
+                    beginning_of_pass_write_index: Some(0),
+                    end_of_pass_write_index: Some(1),
+                }),
+            });
+
+        bench_pass.set_pipeline(&pipeline.pipeline);
+        bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+
+        for _ in 0..self.count {
+            bench_pass.dispatch_workgroups(
+                pipeline.workgroups.0,
+                pipeline.workgroups.1,
+                pipeline.workgroups.2,
+            )
+        }
+
+        if let Some(callback) = self.finalize_encoder_callback {
+            callback(&mut bench_pass)
+        }
+        encoder.resolve_query_set(&query_set, 0..2, &query_buf, 0);
+        encoder.copy_buffer_to_buffer(&query_buf, 0, &query_staging_buf, 0, 16);
+
+        let benchmark_command_buf = encoder.finish();
+
+        // Overhead benchmark compute pass
+        // ----------------------------------
+        let mut encoder = pipeline
+            .gpu
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
+        let mut overhead_pass =
+            encoder.begin_compute_pass(&ComputePassDescriptor {
+                label: None,
+                timestamp_writes: Some(ComputePassTimestampWrites {
+                    query_set: &query_set,
+                    beginning_of_pass_write_index: Some(2),
+                    end_of_pass_write_index: Some(3),
+                }),
+            });
+
+        overhead_pass.set_pipeline(&pipeline.pipeline);
+        overhead_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+
+        if let Some(callback) = self.finalize_encoder_callback {
+            callback(&mut overhead_pass)
+        }
+        encoder.resolve_query_set(&query_set, 2..4, &query_buf, 2);
+        encoder.copy_buffer_to_buffer(&query_buf, 2, &query_staging_buf, 2, 16);
+
+        let overhead_command_buf = encoder.finish();
+
+        // Submit command buffers and get results
+        // ----------------------------------
+        pipeline
+            .gpu
+            .queue
+            .submit([benchmark_command_buf, overhead_command_buf]);
+
+        let (sender, receiver) = std::sync::mpsc::channel();
+
+        let timestamp_query_slice = query_buf.slice(..);
+
+        timestamp_query_slice.map_async(MapMode::Read, move |result| {
+            sender.send(result).unwrap()
+        });
+
+        pipeline.gpu.device.poll(wgpu::Maintain::Wait); // Not sure about needing this line
+
+        receiver.recv().unwrap().unwrap();
+
+        let ts_period = pipeline.gpu.queue.get_timestamp_period();
+        let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
+        let ts_data: &[u64] = bytemuck::cast_slice(ts_data_raw);
+
+        BenchmarkResults {
+            count: self.count,
+            total_time_spent: (ts_data[1] - ts_data[0]) as f64
+                * ts_period as f64,
+            overhead_time_spent: (ts_data[3] - ts_data[2]) as f64
+                * ts_period as f64,
+        }
     }
 }
 

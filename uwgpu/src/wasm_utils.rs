@@ -1,5 +1,3 @@
-pub use wasm_bindgen::prelude::*;
-
 /// Shadow println! when compiling to WASM
 #[macro_export]
 macro_rules! println {

@@ -15,19 +15,11 @@ serde = ["wgpu/serde"]
 env_logger = { workspace = true }
 log = { workspace = true }
 wgpu = { workspace = true }
+bytemuck = "1.17.1"
 
+# TODO: this after moving WASM stuff to web crate
 cfg-if = "1"
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# Lightweight async runtime para probar el main
-pollster = "0.3.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"
-wasm-bindgen = "0.2"
-wasm-bindgen-futures = "0.4.30"
-web-sys = { version = "0.3", features = [
-    "Document",
-    "Window",
-    "Element",
-]}
+web-sys = "0.3"
