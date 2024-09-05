@@ -5,12 +5,13 @@ use std::collections::HashMap;
 
 use wgpu::{
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CommandEncoderDescriptor, CompilationInfo, CompilationMessageType,
-    ComputePass, ComputePassDescriptor, ComputePassTimestampWrites,
-    ComputePipelineDescriptor, Device, DeviceDescriptor, DeviceLostReason,
-    Features, Instance, InstanceDescriptor, Limits, MapMode, MemoryHints,
-    PowerPreference, QueryType, Queue, RequestAdapterOptions,
-    RequestDeviceError, ShaderModule, ShaderModuleDescriptor,
+    CommandBuffer, CommandEncoderDescriptor, CompilationInfo,
+    CompilationMessageType, ComputePass, ComputePassDescriptor,
+    ComputePassTimestampWrites, ComputePipelineDescriptor, Device,
+    DeviceDescriptor, DeviceLostReason, Features, Instance, InstanceDescriptor,
+    Limits, MapMode, MemoryHints, PowerPreference, QuerySet, QueryType, Queue,
+    RequestAdapterOptions, RequestDeviceError, ShaderModule,
+    ShaderModuleDescriptor,
 };
 
 #[cfg(target_arch = "wasm32")]
@@ -149,7 +150,7 @@ impl<'a> ComputePipeline<'a> {
             .iter()
             .any(|msg| msg.message_type == CompilationMessageType::Error)
         {
-            return Err(CreatePipelineError::ShaderError);
+            return Err(CreatePipelineError::ShaderCompilationError);
         }
 
         let pipeline = params.gpu.device.create_compute_pipeline(
@@ -193,6 +194,21 @@ impl<'a> ComputePipeline<'a> {
 }
 
 /// This type represents the parameters for running a benchmark.
+///
+/// The benchmark will run 3 compute passes in the following order:
+///
+/// 1. If `warmup_count` is >0, it will run a compute pass executing the shader
+///    `warmup_count` times.
+///
+/// 2. After that it'll run the actual benchmark compute pass which will be
+///    timed. The time taken will be returned in the [BenchmarkResults]
+///    `total_time_spent` field.
+///
+/// 3. Lastly it'll run an extra compute pass to calculate "overhead" time. To
+///    do this, it'll execute a pass that is the same as the previous one if
+///    `count` were equal to `0`. In order words it just doesn't execute the
+///    shader. The time taken will be returned in the [BenchmarkResults]
+///    `overhead_time_spent` field.
 #[derive(Clone)]
 pub struct Benchmark<'a> {
     /// The number of warm-up iterations to run before starting the actual
@@ -211,8 +227,10 @@ pub struct Benchmark<'a> {
     /// A common usage of this callback is copying the output from the shader
     /// to a buffer that has the [MAP_READ](wgpu::BufferUsages::MAP_READ)
     /// usage flag set.
+    ///
+    /// The callback will be called at the end of the 3 compute passes
+    /// described in the [Benchmark] docs.
     pub finalize_encoder_callback: Option<&'a dyn Fn(&mut ComputePass)>,
-    // Porbably need a workgroups param?
 }
 
 /// Results from executing a benchmark with [Benchmark::run].
@@ -264,14 +282,39 @@ impl Benchmark<'_> {
         let query_staging_buf =
             pipeline.gpu.device.create_buffer(&wgpu::BufferDescriptor {
                 label: None,
-                size: 32, // same as query_buf
-                usage: wgpu::BufferUsages::MAP_READ
-                    | wgpu::BufferUsages::COPY_DST,
-                mapped_at_creation: false,
+                timestamp_writes: None,
             });
 
-        // Benchmark compute pass
-        // ----------------------------------
+        bench_pass.set_pipeline(&pipeline.pipeline);
+        bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+
+        for _ in 0..self.warmup_count {
+            bench_pass.dispatch_workgroups(
+                pipeline.workgroups.0,
+                pipeline.workgroups.1,
+                pipeline.workgroups.2,
+            )
+        }
+
+        if let Some(callback) = self.finalize_encoder_callback {
+            callback(&mut bench_pass)
+        }
+
+        encoder.finish()
+    }
+
+    /// Benchmark compute pass
+    fn benchmark_pass(
+        &self,
+        pipeline: &ComputePipeline,
+        timestamp_query: &TimestampQuery,
+    ) -> CommandBuffer {
+        let TimestampQuery {
+            query_set,
+            query_buf,
+            query_staging_buf,
+        } = timestamp_query;
+
         let mut encoder = pipeline
             .gpu
             .device
@@ -304,10 +347,21 @@ impl Benchmark<'_> {
         encoder.resolve_query_set(&query_set, 0..2, &query_buf, 0);
         encoder.copy_buffer_to_buffer(&query_buf, 0, &query_staging_buf, 0, 16);
 
-        let benchmark_command_buf = encoder.finish();
+        encoder.finish()
+    }
 
-        // Overhead benchmark compute pass
-        // ----------------------------------
+    /// Overhead compute pass
+    fn overhead_pass(
+        &self,
+        pipeline: &ComputePipeline,
+        timestamp_query: &TimestampQuery,
+    ) -> CommandBuffer {
+        let TimestampQuery {
+            query_set,
+            query_buf,
+            query_staging_buf,
+        } = timestamp_query;
+
         let mut encoder = pipeline
             .gpu
             .device
@@ -332,37 +386,49 @@ impl Benchmark<'_> {
         encoder.resolve_query_set(&query_set, 2..4, &query_buf, 2);
         encoder.copy_buffer_to_buffer(&query_buf, 2, &query_staging_buf, 2, 16);
 
-        let overhead_command_buf = encoder.finish();
+        encoder.finish()
+    }
+}
 
-        // Submit command buffers and get results
-        // ----------------------------------
-        pipeline
-            .gpu
-            .queue
-            .submit([benchmark_command_buf, overhead_command_buf]);
+/// Utility struct for passing around the query set and buffers needed to add
+/// timestamp queries to the [Benchmark] compute passes.
+struct TimestampQuery {
+    /// The timestamp query set
+    query_set: QuerySet,
+    /// Buffer where the timestamp query gets resolved.
+    /// Flags: COPY_SRC | QUERY_RESOLVE,
+    query_buf: wgpu::Buffer,
+    /// Mappable buffer to read the query results.
+    /// Flags: COPY_SRC | QUERY_RESOLVE,
+    query_staging_buf: wgpu::Buffer,
+}
 
-        let (sender, receiver) = std::sync::mpsc::channel();
-
-        let timestamp_query_slice = query_buf.slice(..);
-
-        timestamp_query_slice.map_async(MapMode::Read, move |result| {
-            sender.send(result).unwrap()
+impl TimestampQuery {
+    fn new(device: &Device) -> Self {
+        let query_set = device.create_query_set(&wgpu::QuerySetDescriptor {
+            label: Some("Timestamp Query Set"),
+            count: 4,
+            ty: QueryType::Timestamp,
         });
 
-        pipeline.gpu.device.poll(wgpu::Maintain::Wait); // Not sure about needing this line
+        let query_buf = device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size: 32, // count * 2
+            usage: wgpu::BufferUsages::COPY_SRC
+                | wgpu::BufferUsages::QUERY_RESOLVE,
+            mapped_at_creation: false,
+        });
+        let query_staging_buf = device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size: 32, // same as query_buf
+            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
 
-        receiver.recv().unwrap().unwrap();
-
-        let ts_period = pipeline.gpu.queue.get_timestamp_period();
-        let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
-        let ts_data: &[u64] = bytemuck::cast_slice(ts_data_raw);
-
-        BenchmarkResults {
-            count: self.count,
-            total_time_spent: (ts_data[1] - ts_data[0]) as f64
-                * ts_period as f64,
-            overhead_time_spent: (ts_data[3] - ts_data[2]) as f64
-                * ts_period as f64,
+        Self {
+            query_set,
+            query_buf,
+            query_staging_buf,
         }
     }
 }
@@ -393,7 +459,7 @@ pub enum GetGPUContextError {
 /// Error creating a [ComputePipeline]
 pub enum CreatePipelineError {
     /// Error compiling the shader
-    ShaderError,
+    ShaderCompilationError,
     // TODO: Include the compilation info messages
     // TODO: We don't return this yet, need to check the compilation info
     // messages for any errors.
