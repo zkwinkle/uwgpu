@@ -1,338 +1,192 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 
-use state::State;
-use winit::{
-    event::*,
-    event_loop::{ControlFlow, EventLoop},
-    keyboard::{KeyCode, PhysicalKey},
-    window::{Window, WindowBuilder},
+use std::collections::HashMap;
+
+use wgpu::{
+    Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
+    CommandEncoder, CommandEncoderDescriptor, CompilationInfo,
+    ComputePipelineDescriptor, Device, DeviceLostReason, Features, Instance,
+    InstanceDescriptor, Limits, MemoryHints, PowerPreference, Queue,
+    RequestAdapterOptions, RequestDeviceError, ShaderModule,
+    ShaderModuleDescriptor,
 };
 
 #[cfg(target_arch = "wasm32")]
 mod wasm_utils;
-#[cfg(target_arch = "wasm32")]
-pub use wasm_utils::*;
 
-// Canvas size (300x400) -> Output bitmat (500x500) image changes?
-
-/// Experimenting with wgpu tutorial
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen(start))]
-pub async fn run() {
-    init_logger();
-
-    let event_loop = EventLoop::new().unwrap();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
-    #[cfg(target_arch = "wasm32")]
-    wasm_add_canvas_to_html(&window);
-
-    let mut state = State::new(&window).await;
-
-    event_loop
-        .run(move |event, control_flow| match event {
-            Event::WindowEvent {
-                ref event,
-                window_id,
-            } if window_id == state.window().id() => {
-                if !state.input(event) {
-                    match event {
-                        WindowEvent::Resized(physical_size) => {
-                            println!("Resize: {:?}", physical_size);
-                            state.resize(*physical_size);
-                        }
-                        WindowEvent::RedrawRequested => {
-                            state.update();
-                            match state.render() {
-                                Ok(_) => {}
-                                // Reconfigure the surface if lost
-                                Err(wgpu::SurfaceError::Lost) => {
-                                    state.resize(state.size)
-                                }
-                                // The system is out of memory, we should
-                                // probably quit
-                                Err(wgpu::SurfaceError::OutOfMemory) => {
-                                    eprintln!("System ran out of memory");
-                                    control_flow.exit()
-                                }
-                                // All other errors (Outdated, Timeout) should
-                                // be resolved by the next frame
-                                Err(e) => eprintln!("{:?}", e),
-                            }
-                        }
-                        WindowEvent::CloseRequested
-                        | WindowEvent::KeyboardInput {
-                            event:
-                                KeyEvent {
-                                    state: ElementState::Pressed,
-                                    physical_key:
-                                        PhysicalKey::Code(KeyCode::Escape),
-                                    ..
-                                },
-                            ..
-                        } => control_flow.exit(),
-                        _ => {}
-                    }
-                }
-            }
-            Event::AboutToWait => {
-                // RedrawRequested will only trigger once unless we manually
-                // request it.
-                state.window().request_redraw();
-            }
-
-            _ => {}
-        })
-        .unwrap();
-}
-
-/// We have to do a bit of setup to enable logging of panics.
+/// Parameters when instantiating a [`BenchmarkPipeline`].
 ///
-/// "When wgpu hits any error, it panics with a generic message, while logging
-/// the real error via the log crate. This means if you don't include
-/// env_logger::init(), wgpu will fail silently, leaving you very confused!"
-/// Reference: https://sotrh.github.io/learn-wgpu/beginner/tutorial1-window/#env-logger
-fn init_logger() {
-    cfg_if::cfg_if! {
-        if #[cfg(target_arch = "wasm32")] {
-                std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        } else {
-            env_logger::init();
-        }
-    }
+/// At a minimum, you must specify the compute shader to execute and its inputs
+#[derive(Clone)]
+pub struct BenchmarkDescriptor<'a> {
+    /// Compute shader to execute
+    pub shader: ShaderModuleDescriptor<'a>,
+
+    /// Entry point of the compute shader.
+    /// Must be the name of a shader function annotated with `@compute` and no
+    /// return value.
+    pub entry_point: &'a str,
+
+    /// This bind group must specify all the bindings used in the shader.
+    /// The key used in the HashMap is the `n` index value of the corresponding
+    /// `@binding(n)` attribute in the shader.
+    ///
+    /// This BindGroup will be assigned to `@group(0)` in the shader,
+    /// the shader should only use that group.
+    pub bind_group_0: HashMap<u32, BindingResource<'a>>,
+    /* /// Generate compute shader inputs
+     * generate_inputs: &'a dyn Fn() -> &'a [u8], */
+
+    // get_output: Fn(bindings) -> R
+
+    // assert_output: R
 }
 
-mod state {
-    use winit::{event::WindowEvent, window::Window};
+/// Represents a simple compute pipeline that can execute 1 shader in various
+/// ways, useful for benchmarking and testing compute shaders
+pub struct BenchmarkPipeline {
+    device: Device,
+    queue: Queue,
+    shader_module: ShaderModule,
+    bind_group: BindGroup,
+    encoder: CommandEncoder,
+}
 
-    pub struct State<'a> {
-        surface: wgpu::Surface<'a>,
-        device: wgpu::Device,
-        queue: wgpu::Queue,
-        surface_config: wgpu::SurfaceConfiguration,
-        pub size: winit::dpi::PhysicalSize<u32>,
-        // The window must be declared after the surface so
-        // it gets dropped after it as the surface contains
-        // unsafe references to the window's resources.
-        window: &'a Window,
-        render_pipeline: wgpu::RenderPipeline,
-    }
+impl BenchmarkPipeline {
+    /// Create a new [`BenchmarkPipeline`].
+    ///
+    /// The `shader` parameter must be the path to the file with the compute
+    /// shader
+    ///
+    /// If the shader compilation fails this function will error. If it doesn't
+    /// fail we still recommend checking `get_shader_compilation_info`
+    pub async fn new<'a>(
+        params: BenchmarkDescriptor<'a>,
+    ) -> Result<Self, CreatePipelineError> {
+        let (device, queue) = get_device()
+            .await
+            .map_err(|err| CreatePipelineError::GetDevice(err))?;
 
-    impl<'a> State<'a> {
-        // Creating some of the wgpu types requires async code
-        pub async fn new(window: &'a Window) -> State<'a> {
-            let size = window.inner_size();
+        let shader_module = device.create_shader_module(params.shader);
 
-            // The instance is a handle to our GPU
-            // Backends::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
-            let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-                backends: wgpu::Backends::PRIMARY,
-                ..Default::default()
+        // TODO: Inspect messages to find an Error
+
+        let pipeline =
+            device.create_compute_pipeline(&ComputePipelineDescriptor {
+                label: None,
+                layout: None,
+                module: &shader_module,
+                entry_point: params.entry_point,
+                compilation_options: Default::default(),
+                cache: None,
             });
 
-            let surface = instance.create_surface(window).unwrap();
-
-            let adapter = instance
-                .request_adapter(&wgpu::RequestAdapterOptions {
-                    power_preference: wgpu::PowerPreference::HighPerformance,
-                    compatible_surface: Some(&surface),
-                    force_fallback_adapter: false,
+        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+            label: None,
+            layout: &pipeline.get_bind_group_layout(0),
+            entries: &params
+                .bind_group_0
+                .into_iter()
+                .map(|(id, resource)| BindGroupEntry {
+                    binding: id,
+                    resource,
                 })
-                .await
-                .unwrap();
+                .collect::<Vec<BindGroupEntry>>(),
+        });
 
-            let (device, queue) = adapter
-                .request_device(
-                    &wgpu::DeviceDescriptor {
-                        label: None,
-                        required_features: wgpu::Features::empty(),
-                        required_limits: wgpu::Limits::default(),
-                        memory_hints: wgpu::MemoryHints::Performance,
-                    },
-                    None, // Trace path
-                )
-                .await
-                .unwrap();
+        let encoder = device
+            .create_command_encoder(&CommandEncoderDescriptor { label: None });
 
-            let surface_caps = surface.get_capabilities(&adapter);
-            // Shader code in this tutorial assumes an sRGB surface texture.
-            // Using a different one will result in all the colors
-            // coming out darker. If you want to support non
-            // sRGB surfaces, you'll need to account for that when drawing to
-            // the frame.
-            let surface_format = surface_caps
-                .formats
-                .iter()
-                .find(|f| f.is_srgb())
-                .copied()
-                .unwrap_or(surface_caps.formats[0]);
-            let surface_config = wgpu::SurfaceConfiguration {
-                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                format: surface_format,
-                width: size.width,
-                height: size.height,
-                present_mode: surface_caps.present_modes[0],
-                alpha_mode: surface_caps.alpha_modes[0],
-                view_formats: vec![],
-                desired_maximum_frame_latency: 2,
-            };
-
-            let shader =
-                device.create_shader_module(wgpu::include_wgsl!("shader.wgsl"));
-
-            let render_pipeline_layout = device.create_pipeline_layout(
-                &wgpu::PipelineLayoutDescriptor {
-                    label: Some("Render Pipeline Layout"),
-                    bind_group_layouts: &[],
-                    push_constant_ranges: &[],
-                },
-            );
-
-            let render_pipeline = device.create_render_pipeline(
-                &wgpu::RenderPipelineDescriptor {
-                    label: Some("Render Pipeline"),
-                    layout: Some(&render_pipeline_layout),
-                    vertex: wgpu::VertexState {
-                        module: &shader,
-                        entry_point: "vs_main",
-                        // Vertices declared inside shader, no buffers as of yet
-                        buffers: &[],
-                        // Advanced options, default is fine
-                        compilation_options:
-                            wgpu::PipelineCompilationOptions::default(),
-                    },
-                    fragment: Some(wgpu::FragmentState {
-                        module: &shader,
-                        entry_point: "fs_main",
-                        targets: &[Some(wgpu::ColorTargetState {
-                            // format same as surface for easy copying
-                            format: surface_config.format,
-                            // just replace old data with new data
-                            blend: Some(wgpu::BlendState::REPLACE),
-                            // Use all colors: R,G,B,A
-                            write_mask: wgpu::ColorWrites::ALL,
-                        })],
-                        compilation_options:
-                            wgpu::PipelineCompilationOptions::default(),
-                    }),
-                    // how to interpret vertices when turning them into tringles
-                    primitive: wgpu::PrimitiveState {
-                        // Every 3 vertices = 1 tringle
-                        topology: wgpu::PrimitiveTopology::TriangleList,
-                        // Applies to "LineStrip" and "TriangleStrip"
-                        // topologies, ignore
-                        strip_index_format: None,
-                        // Front face of tringle, clock-wise or
-                        // (current/default) counter-clockwise
-                        front_face: wgpu::FrontFace::Ccw,
-                        // Cull tringles facing back or facing front
-                        cull_mode: Some(wgpu::Face::Back),
-                        // Setting this to anything other than Fill requires
-                        // Features::NON_FILL_POLYGON_MODE
-                        polygon_mode: wgpu::PolygonMode::Fill,
-                        // Requires Features::DEPTH_CLIP_CONTROL
-                        unclipped_depth: false,
-                        // Requires Features::CONSERVATIVE_RASTERIZATION
-                        conservative: false,
-                    },
-                    // Doesn't apply because not using depth/stencil buffers yet
-                    depth_stencil: None,
-                    // Multisampling / Anti-aliasing
-                    multisample: wgpu::MultisampleState {
-                        // How many samples per pixel (1 = no multisampling)
-                        count: 1,
-                        // Bitmask restricting samples, (!0 = No restriction)
-                        mask: !0,
-                        // Anti-aliasing, not using this
-                        alpha_to_coverage_enabled: false,
-                    },
-                    // Only applies when rendering to array textures, we aren't
-                    multiview: None,
-                    // No pipeline cache
-                    cache: None,
-                },
-            );
-
-            Self {
-                window,
-                surface,
-                device,
-                queue,
-                surface_config,
-                size,
-                render_pipeline,
-            }
-        }
-
-        pub fn window(&self) -> &Window { &self.window }
-
-        pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
-            if new_size.width > 0 && new_size.height > 0 {
-                self.size = new_size;
-                self.surface_config.width = new_size.width;
-                self.surface_config.height = new_size.height;
-
-                #[cfg(target_arch = "wasm32")]
-                {
-                    self.surface_config.width = 500;
-                    self.surface_config.height = 500;
-                }
-                self.surface.configure(&self.device, &self.surface_config);
-            }
-        }
-
-        pub fn input(&mut self, event: &WindowEvent) -> bool { false }
-
-        pub fn update(&mut self) { //TODO
-        }
-
-        pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-            let output = self.surface.get_current_texture()?;
-            let view = output
-                .texture
-                .create_view(&wgpu::TextureViewDescriptor::default());
-
-            let mut encoder = self.device.create_command_encoder(
-                &wgpu::CommandEncoderDescriptor {
-                    label: Some("Render Encoder"),
-                },
-            );
-
-            let mut render_pass =
-                encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                    label: Some("Render Pass"),
-                    color_attachments: &[Some(
-                        wgpu::RenderPassColorAttachment {
-                            view: &view,
-                            resolve_target: None,
-                            ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(wgpu::Color {
-                                    r: 0.1,
-                                    g: 0.2,
-                                    b: 0.3,
-                                    a: 1.0,
-                                }),
-                                store: wgpu::StoreOp::Store,
-                            },
-                        },
-                    )],
-                    depth_stencil_attachment: None,
-                    occlusion_query_set: None,
-                    timestamp_writes: None,
-                });
-
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3, 0..1);
-
-            // must be dropped before calling encoder.finish()
-            // Reference: https://sotrh.github.io/learn-wgpu/beginner/tutorial2-surface/#render
-            drop(render_pass);
-
-            // submit will accept anything that implements IntoIter
-            self.queue.submit(std::iter::once(encoder.finish()));
-            output.present();
-
-            Ok(())
-        }
+        Ok(Self {
+            device,
+            queue,
+            shader_module,
+            bind_group,
+            encoder,
+        })
     }
+
+    /// Set the [device lost
+    /// callback](https://developer.mozilla.org/en-US/docs/Web/API/GPUDevice/lost)
+    ///
+    /// If the callback gets triggered, then this [`BenchmarkPipeline`] will no
+    /// longer be valid, request a new one with [`BenchmarkPipeline::new()`]
+    pub fn set_device_lost_callback(
+        &self,
+        callback: impl Fn(DeviceLostReason, String) + Send + 'static,
+    ) {
+        self.device.set_device_lost_callback(callback)
+    }
+
+    /// Get the compilation messages from compiling the shader module
+    pub async fn get_shader_compilation_info(&self) -> CompilationInfo {
+        self.shader_module.get_compilation_info().await
+    }
+}
+
+/// Error creating a [`BenchmarkPipeline`]
+pub enum CreatePipelineError {
+    /// Error getting the GPU Device, see [`GetDeviceError`]
+    GetDevice(GetDeviceError),
+}
+
+async fn get_device() -> Result<(Device, Queue), GetDeviceError> {
+    let instance = Instance::new(InstanceDescriptor {
+        backends: Backends::PRIMARY,
+        ..Default::default()
+    });
+
+    let Some(adapter) = instance
+        .request_adapter(&RequestAdapterOptions {
+            power_preference: PowerPreference::HighPerformance,
+            compatible_surface: None,
+            force_fallback_adapter: false,
+        })
+        .await
+    else {
+        return Err(GetDeviceError::NoAdapter);
+    };
+
+    let features = adapter.features();
+
+    if !(features.intersects(Features::TIMESTAMP_QUERY)) {
+        return Err(GetDeviceError::DoesNotSupportTimestamps);
+    }
+
+    let (device, queue) = adapter
+        .request_device(
+            &wgpu::DeviceDescriptor {
+                label: None,
+                required_features: Features::empty(),
+                required_limits: Limits::default(),
+                memory_hints: MemoryHints::Performance,
+            },
+            Default::default(),
+        )
+        .await
+        .map_err(|err| GetDeviceError::RequestDevice(err))?;
+
+    // TODO: set_device_lost_callback() on device, or leave up to the user?
+
+    Ok((device, queue))
+}
+
+/// An error when trying to get the GPU device
+pub enum GetDeviceError {
+    /// Failed to get an adapter, a possible reason could be because no backend
+    /// was available.
+    ///
+    /// For example, if this is running in a browser that doesn't support
+    /// WebGPU.
+    NoAdapter,
+
+    /// Failed to request the device, see [`RequestDeviceError`]
+    RequestDevice(RequestDeviceError),
+
+    /// The adapter doesn't support timestamp queries.
+    ///
+    /// This feature is needed to time the microbenchmarks accurately,
+    /// therefore if the feature is not available we treat it as an error.
+    DoesNotSupportTimestamps,
 }

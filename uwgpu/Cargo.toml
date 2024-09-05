@@ -6,14 +6,17 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+spirv = ["wgpu/spirv"]
+naga-ir = ["wgpu/naga-ir"]
+serde = ["wgpu/serde"]
+
 [dependencies]
 env_logger = { workspace = true }
 log = { workspace = true }
 wgpu = { workspace = true }
 
 cfg-if = "1"
-
-winit = { version = "0.29", features = ["rwh_05"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # Lightweight async runtime para probar el main
