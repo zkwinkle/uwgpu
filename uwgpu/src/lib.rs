@@ -259,28 +259,53 @@ impl Benchmark<'_> {
         &self,
         pipeline: ComputePipeline<'a>,
     ) -> BenchmarkResults {
-        // Timestamp query set and buffers
-        // ----------------------------------
-        let query_set =
-            pipeline
-                .gpu
-                .device
-                .create_query_set(&wgpu::QuerySetDescriptor {
-                    label: Some("Timestamp Query Set"),
-                    count: 4,
-                    ty: QueryType::Timestamp,
-                });
+        let timestamp_query = TimestampQuery::new(&pipeline.gpu.device);
 
-        let query_buf =
-            pipeline.gpu.device.create_buffer(&wgpu::BufferDescriptor {
-                label: None,
-                size: 32, // count * 2
-                usage: wgpu::BufferUsages::COPY_SRC
-                    | wgpu::BufferUsages::QUERY_RESOLVE,
-                mapped_at_creation: false,
-            });
-        let query_staging_buf =
-            pipeline.gpu.device.create_buffer(&wgpu::BufferDescriptor {
+        let warmup_command_buf = self.warmup_pass(&pipeline);
+        let benchmark_command_buf =
+            self.benchmark_pass(&pipeline, &timestamp_query);
+        let overhead_command_buf =
+            self.overhead_pass(&pipeline, &timestamp_query);
+
+        pipeline.gpu.queue.submit([
+            warmup_command_buf,
+            benchmark_command_buf,
+            overhead_command_buf,
+        ]);
+
+        let timestamp_query_slice = timestamp_query.query_buf.slice(..);
+
+        let (sender, receiver) = std::sync::mpsc::channel();
+        timestamp_query_slice.map_async(MapMode::Read, move |result| {
+            sender.send(result).unwrap()
+        });
+
+        pipeline.gpu.device.poll(wgpu::Maintain::Wait); // Not sure about needing this line
+
+        receiver.recv().unwrap().unwrap();
+
+        let ts_period = pipeline.gpu.queue.get_timestamp_period();
+        let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
+        let ts_data: &[u64] = bytemuck::cast_slice(ts_data_raw);
+
+        BenchmarkResults {
+            count: self.count,
+            total_time_spent: (ts_data[1] - ts_data[0]) as f64
+                * ts_period as f64,
+            overhead_time_spent: (ts_data[3] - ts_data[2]) as f64
+                * ts_period as f64,
+        }
+    }
+
+    /// Warmup compute pass
+    fn warmup_pass(&self, pipeline: &ComputePipeline) -> CommandBuffer {
+        let mut encoder = pipeline
+            .gpu
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
+        let mut bench_pass =
+            encoder.begin_compute_pass(&ComputePassDescriptor {
                 label: None,
                 timestamp_writes: None,
             });
