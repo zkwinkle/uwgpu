@@ -896,6 +896,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "microbenchmarks"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "tokio",
+ "uwgpu",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1590,6 +1599,7 @@ dependencies = [
  "log",
  "web-sys",
  "wgpu",
+ "wgpu-async",
 ]
 
 [[package]]
@@ -1723,6 +1733,15 @@ dependencies = [
  "wgpu-core",
  "wgpu-hal",
  "wgpu-types",
+]
+
+[[package]]
+name = "wgpu-async"
+version = "22.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17b0fc1d9ad255f7867fa84f344bf74ff0b5ff7316c5d74b24bdbe1c2c8f4203"
+dependencies = [
+ "wgpu",
 ]
 
 [[package]]

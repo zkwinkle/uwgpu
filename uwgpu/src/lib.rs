@@ -1,26 +1,35 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 
-use std::collections::HashMap;
+// Re-export so that users of this library can use wgpu types.
+// Upgrading wgpu major version means a semver breaknig change for this library
+// as well. Could use my own type wrappers to avoid that. Idea to dwell on...
+pub use wgpu;
+pub use wgpu_async;
+
+use std::{collections::HashMap, mem::size_of, sync::Arc};
 
 use wgpu::{
+    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder},
     Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CommandBuffer, CommandEncoderDescriptor, CompilationInfo,
-    CompilationMessageType, ComputePass, ComputePassDescriptor,
-    ComputePassTimestampWrites, ComputePipelineDescriptor, Device,
-    DeviceDescriptor, DeviceLostReason, Features, Instance, InstanceDescriptor,
-    Limits, MapMode, MemoryHints, PowerPreference, QuerySet, QueryType, Queue,
-    RequestAdapterOptions, RequestDeviceError, ShaderModule,
-    ShaderModuleDescriptor,
+    BufferDescriptor, CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
+    CompilationInfo, CompilationMessage, CompilationMessageType,
+    ComputePassDescriptor, ComputePassTimestampWrites,
+    ComputePipelineDescriptor, DeviceDescriptor, DeviceLostReason, Features,
+    Instance, InstanceDescriptor, Limits, MapMode, MemoryHints,
+    PowerPreference, QuerySet, QueryType, RequestAdapterOptions,
+    RequestDeviceError, ShaderModule, ShaderModuleDescriptor, Texture,
+    TextureDescriptor,
 };
+use wgpu_async::{AsyncBuffer, AsyncDevice, AsyncQueue};
 
 #[cfg(target_arch = "wasm32")]
 mod wasm_utils;
 
 /// Represents a handle on a GPU device
 pub struct GPUContext {
-    device: Device,
-    queue: Queue,
+    device: AsyncDevice,
+    queue: AsyncQueue,
 }
 
 impl GPUContext {
@@ -72,6 +81,9 @@ impl GPUContext {
             .await
             .map_err(|err| GetGPUContextError::RequestDevice(err))?;
 
+        let (device, queue) =
+            wgpu_async::wrap(Arc::new(device), Arc::new(queue));
+
         Ok(GPUContext { device, queue })
     }
 
@@ -85,6 +97,38 @@ impl GPUContext {
         callback: impl Fn(DeviceLostReason, String) + Send + 'static,
     ) {
         self.device.set_device_lost_callback(callback)
+    }
+
+    /// Creates a [Buffer], this is just a wrapper for
+    /// [AsyncDevice::create_buffer]
+    pub fn create_buffer(&self, desc: &BufferDescriptor) -> AsyncBuffer {
+        self.device.create_buffer(desc)
+    }
+
+    /// Creates a [Buffer], this is just a wrapper for
+    /// [AsyncDevice::create_buffer_init]
+    pub fn create_buffer_init(
+        &self,
+        desc: &BufferInitDescriptor,
+    ) -> AsyncBuffer {
+        self.device.create_buffer_init(desc)
+    }
+
+    /// Creates a [Texture], this is just a wrapper for [Device::create_texture]
+    pub fn create_texture(&self, desc: &TextureDescriptor) -> Texture {
+        self.device.create_texture(desc)
+    }
+
+    /// Creates a [Texture], this is just a wrapper for
+    /// [DeviceExt::create_texture_with_data]
+    pub fn create_texture_with_data(
+        &self,
+        desc: &TextureDescriptor,
+        order: TextureDataOrder,
+        data: &[u8],
+    ) -> Texture {
+        self.device
+            .create_texture_with_data(&self.queue, desc, order, data)
     }
 }
 
@@ -124,7 +168,7 @@ pub struct PipelineParameters<'a> {
 
 /// Represents a compute pipeline that can be used to execute one benchmark by
 /// passing it to [Benchmark::run].
-pub struct ComputePipeline<'a> {
+pub struct BenchmarkComputePipeline<'a> {
     gpu: &'a GPUContext,
     shader_module: ShaderModule,
     bind_group: BindGroup,
@@ -132,7 +176,7 @@ pub struct ComputePipeline<'a> {
     workgroups: (u32, u32, u32),
 }
 
-impl<'a> ComputePipeline<'a> {
+impl<'a> BenchmarkComputePipeline<'a> {
     /// If the shader compilation fails this function will error. If it doesn't
     /// fail we still recommend checking
     /// [get_shader_compilation_info](Self::get_shader_compilation_info) for any
@@ -150,7 +194,9 @@ impl<'a> ComputePipeline<'a> {
             .iter()
             .any(|msg| msg.message_type == CompilationMessageType::Error)
         {
-            return Err(CreatePipelineError::ShaderCompilationError);
+            return Err(CreatePipelineError::ShaderCompilationError(
+                compilation_info.messages,
+            ));
         }
 
         let pipeline = params.gpu.device.create_compute_pipeline(
@@ -221,108 +267,93 @@ pub struct Benchmark<'a> {
     /// Optional callback to encode any last commands in the command buffer
     /// before execution.
     ///
-    /// This will get called after all the iterations of benchmark execution
-    /// have been.
-    ///
     /// A common usage of this callback is copying the output from the shader
     /// to a buffer that has the [MAP_READ](wgpu::BufferUsages::MAP_READ)
     /// usage flag set.
     ///
     /// The callback will be called at the end of the 3 compute passes
-    /// described in the [Benchmark] docs.
-    pub finalize_encoder_callback: Option<&'a dyn Fn(&mut ComputePass)>,
+    /// described in the [Benchmark] docs. Right before calling
+    /// `encoder.finish()`.
+    pub finalize_encoder_callback: Option<&'a dyn Fn(&mut CommandEncoder)>,
 }
 
 /// Results from executing a benchmark with [Benchmark::run].
 ///
 /// All timing quantities are given in nanoseconds
+#[derive(Debug)]
 pub struct BenchmarkResults {
     /// Total iterations ran, this should be equal to the `count` field in the
     /// [Benchmark] that was ran, but its also provided here for
     /// convenience.
     pub count: usize,
 
-    /// Total time spent executing the
+    /// Total time spent executing the benchmark.
     pub total_time_spent: f64,
-
-    /// An "overhead benchmark" is carried out by executing a compute pass with
-    /// all the same commands except for running the shader. The time spent
-    /// in a single execution of this is reported here as "overhead time".
-    pub overhead_time_spent: f64,
 }
-// TODO: Impl functions to get total_time without overhead, time per iteration
-// without overhead
 
 impl Benchmark<'_> {
     /// Runs the benchmark using the provided compute pipeline
+    ///
+    /// See [MapTimestampResultError] for the failure mode of this operation.
     pub async fn run<'a>(
         &self,
-        pipeline: ComputePipeline<'a>,
-    ) -> BenchmarkResults {
+        pipeline: BenchmarkComputePipeline<'a>,
+    ) -> Result<BenchmarkResults, MapTimestampResultError> {
         let timestamp_query = TimestampQuery::new(&pipeline.gpu.device);
 
         let warmup_command_buf = self.warmup_pass(&pipeline);
         let benchmark_command_buf =
             self.benchmark_pass(&pipeline, &timestamp_query);
-        let overhead_command_buf =
-            self.overhead_pass(&pipeline, &timestamp_query);
+        let resolve_timestamp_pass =
+            self.timestamp_pass(&pipeline, &timestamp_query);
 
         pipeline.gpu.queue.submit([
             warmup_command_buf,
             benchmark_command_buf,
-            overhead_command_buf,
+            resolve_timestamp_pass,
         ]);
 
-        let timestamp_query_slice = timestamp_query.query_buf.slice(..);
-
-        let (sender, receiver) = std::sync::mpsc::channel();
-        timestamp_query_slice.map_async(MapMode::Read, move |result| {
-            sender.send(result).unwrap()
-        });
-
-        pipeline.gpu.device.poll(wgpu::Maintain::Wait); // Not sure about needing this line
-
-        receiver.recv().unwrap().unwrap();
-
+        let ts_data = timestamp_query.get_timestamp_result().await?;
         let ts_period = pipeline.gpu.queue.get_timestamp_period();
-        let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
-        let ts_data: &[u64] = bytemuck::cast_slice(ts_data_raw);
 
-        BenchmarkResults {
+        Ok(BenchmarkResults {
             count: self.count,
-            total_time_spent: (ts_data[1] - ts_data[0]) as f64
-                * ts_period as f64,
-            overhead_time_spent: (ts_data[3] - ts_data[2]) as f64
-                * ts_period as f64,
-        }
+            total_time_spent: u64::wrapping_sub(ts_data[1], ts_data[0]) as f64
+                * (ts_period as f64),
+        })
     }
 
     /// Warmup compute pass
-    fn warmup_pass(&self, pipeline: &ComputePipeline) -> CommandBuffer {
+    fn warmup_pass(
+        &self,
+        pipeline: &BenchmarkComputePipeline,
+    ) -> CommandBuffer {
         let mut encoder = pipeline
             .gpu
             .device
             .create_command_encoder(&CommandEncoderDescriptor { label: None });
 
-        let mut bench_pass =
+        let mut warmup_pass =
             encoder.begin_compute_pass(&ComputePassDescriptor {
                 label: None,
                 timestamp_writes: None,
             });
 
-        bench_pass.set_pipeline(&pipeline.pipeline);
-        bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+        warmup_pass.set_pipeline(&pipeline.pipeline);
+        warmup_pass.set_bind_group(0, &pipeline.bind_group, &[]);
 
         for _ in 0..self.warmup_count {
-            bench_pass.dispatch_workgroups(
+            warmup_pass.dispatch_workgroups(
                 pipeline.workgroups.0,
                 pipeline.workgroups.1,
                 pipeline.workgroups.2,
             )
         }
 
+        drop(warmup_pass); // has to be dropped before encoding more commands
+
         if let Some(callback) = self.finalize_encoder_callback {
-            callback(&mut bench_pass)
+            callback(&mut encoder)
         }
 
         encoder.finish()
@@ -331,14 +362,10 @@ impl Benchmark<'_> {
     /// Benchmark compute pass
     fn benchmark_pass(
         &self,
-        pipeline: &ComputePipeline,
+        pipeline: &BenchmarkComputePipeline,
         timestamp_query: &TimestampQuery,
     ) -> CommandBuffer {
-        let TimestampQuery {
-            query_set,
-            query_buf,
-            query_staging_buf,
-        } = timestamp_query;
+        let query_set = &timestamp_query.query_set;
 
         let mut encoder = pipeline
             .gpu
@@ -366,19 +393,19 @@ impl Benchmark<'_> {
             )
         }
 
+        drop(bench_pass); // has to be dropped before encoding more commands
+
         if let Some(callback) = self.finalize_encoder_callback {
-            callback(&mut bench_pass)
+            callback(&mut encoder)
         }
-        encoder.resolve_query_set(&query_set, 0..2, &query_buf, 0);
-        encoder.copy_buffer_to_buffer(&query_buf, 0, &query_staging_buf, 0, 16);
 
         encoder.finish()
     }
 
-    /// Overhead compute pass
-    fn overhead_pass(
+    /// Pass for resolving the timestamp query compute pass
+    fn timestamp_pass(
         &self,
-        pipeline: &ComputePipeline,
+        pipeline: &BenchmarkComputePipeline,
         timestamp_query: &TimestampQuery,
     ) -> CommandBuffer {
         let TimestampQuery {
@@ -392,24 +419,19 @@ impl Benchmark<'_> {
             .device
             .create_command_encoder(&CommandEncoderDescriptor { label: None });
 
-        let mut overhead_pass =
-            encoder.begin_compute_pass(&ComputePassDescriptor {
-                label: None,
-                timestamp_writes: Some(ComputePassTimestampWrites {
-                    query_set: &query_set,
-                    beginning_of_pass_write_index: Some(2),
-                    end_of_pass_write_index: Some(3),
-                }),
-            });
-
-        overhead_pass.set_pipeline(&pipeline.pipeline);
-        overhead_pass.set_bind_group(0, &pipeline.bind_group, &[]);
-
-        if let Some(callback) = self.finalize_encoder_callback {
-            callback(&mut overhead_pass)
-        }
-        encoder.resolve_query_set(&query_set, 2..4, &query_buf, 2);
-        encoder.copy_buffer_to_buffer(&query_buf, 2, &query_staging_buf, 2, 16);
+        encoder.resolve_query_set(
+            &query_set,
+            0..(TimestampQuery::COUNT as u32),
+            &query_buf,
+            0,
+        );
+        encoder.copy_buffer_to_buffer(
+            &query_buf,
+            0,
+            &query_staging_buf,
+            0,
+            (TimestampQuery::COUNT * size_of::<u64>()) as u64,
+        );
 
         encoder.finish()
     }
@@ -425,27 +447,29 @@ struct TimestampQuery {
     query_buf: wgpu::Buffer,
     /// Mappable buffer to read the query results.
     /// Flags: COPY_SRC | QUERY_RESOLVE,
-    query_staging_buf: wgpu::Buffer,
+    query_staging_buf: AsyncBuffer,
 }
 
 impl TimestampQuery {
-    fn new(device: &Device) -> Self {
+    const COUNT: usize = 2;
+
+    fn new(device: &AsyncDevice) -> Self {
         let query_set = device.create_query_set(&wgpu::QuerySetDescriptor {
             label: Some("Timestamp Query Set"),
-            count: 4,
+            count: Self::COUNT as u32,
             ty: QueryType::Timestamp,
         });
 
-        let query_buf = device.create_buffer(&wgpu::BufferDescriptor {
+        let query_buf = (**device).create_buffer(&wgpu::BufferDescriptor {
             label: None,
-            size: 32, // count * 2
+            size: (Self::COUNT * size_of::<u64>()) as u64,
             usage: wgpu::BufferUsages::COPY_SRC
                 | wgpu::BufferUsages::QUERY_RESOLVE,
             mapped_at_creation: false,
         });
         let query_staging_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: None,
-            size: 32, // same as query_buf
+            size: (Self::COUNT * size_of::<u64>()) as u64,
             usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -456,9 +480,40 @@ impl TimestampQuery {
             query_staging_buf,
         }
     }
+
+    async fn get_timestamp_result<'a>(
+        &'a self,
+    ) -> Result<[u64; Self::COUNT], MapTimestampResultError> {
+        let timestamp_query_slice = self.query_staging_buf.slice(..);
+
+        timestamp_query_slice
+            .map_async(MapMode::Read)
+            .await
+            .map_err(|_| MapTimestampResultError)?;
+
+        let ts_data: [u64; Self::COUNT] = {
+            let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
+            bytemuck::cast_slice(&ts_data_raw)
+                .to_vec()
+                .try_into()
+                .unwrap()
+        };
+
+        println!("ts data: {:?}", ts_data);
+
+        self.query_staging_buf.unmap();
+
+        Ok(ts_data)
+    }
 }
 
+/// There was an error mapping the results of the timestamp query buffer, which
+/// is needed in order to get the benchmark's timing information.
+#[derive(Debug, Clone)]
+pub struct MapTimestampResultError;
+
 /// An error when trying to get a GPU context with [GPUContext::new]
+#[derive(Debug, Clone)]
 pub enum GetGPUContextError {
     /// Failed to get an adapter, a possible reason could be because no backend
     /// was available.
@@ -482,9 +537,10 @@ pub enum GetGPUContextError {
 }
 
 /// Error creating a [ComputePipeline]
+#[derive(Debug)]
 pub enum CreatePipelineError {
     /// Error compiling the shader
-    ShaderCompilationError,
+    ShaderCompilationError(Vec<CompilationMessage>),
     // TODO: Include the compilation info messages
     // TODO: We don't return this yet, need to check the compilation info
     // messages for any errors.
