@@ -7,11 +7,11 @@
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let row: u32 = global_id.x;
     let col: u32 = global_id.y;
-	  let N = matrixSize;
+    let N = matrixSize;
 
 
     // Assume square matrix
-    if (row < N && col < N) {
+    if row < N && col < N {
         var sum: f32 = 0.0;
 
         // Perform the dot product for row of A and column of B

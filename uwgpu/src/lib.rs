@@ -241,7 +241,7 @@ impl<'a> BenchmarkComputePipeline<'a> {
 
 /// This type represents the parameters for running a benchmark.
 ///
-/// The benchmark will run 3 compute passes in the following order:
+/// The benchmark will run 2 compute passes in the following order:
 ///
 /// 1. If `warmup_count` is >0, it will run a compute pass executing the shader
 ///    `warmup_count` times.
@@ -249,12 +249,6 @@ impl<'a> BenchmarkComputePipeline<'a> {
 /// 2. After that it'll run the actual benchmark compute pass which will be
 ///    timed. The time taken will be returned in the [BenchmarkResults]
 ///    `total_time_spent` field.
-///
-/// 3. Lastly it'll run an extra compute pass to calculate "overhead" time. To
-///    do this, it'll execute a pass that is the same as the previous one if
-///    `count` were equal to `0`. In order words it just doesn't execute the
-///    shader. The time taken will be returned in the [BenchmarkResults]
-///    `overhead_time_spent` field.
 #[derive(Clone)]
 pub struct Benchmark<'a> {
     /// The number of warm-up iterations to run before starting the actual
@@ -271,9 +265,11 @@ pub struct Benchmark<'a> {
     /// to a buffer that has the [MAP_READ](wgpu::BufferUsages::MAP_READ)
     /// usage flag set.
     ///
-    /// The callback will be called at the end of the 3 compute passes
-    /// described in the [Benchmark] docs. Right before calling
-    /// `encoder.finish()`.
+    /// The callback will be called after benchmark compute pass. Right before
+    /// calling `encoder.finish()`.
+    ///
+    /// Will NOT be run after the warmup pass, only after the actual benchmark
+    /// passes.
     pub finalize_encoder_callback: Option<&'a dyn Fn(&mut CommandEncoder)>,
 }
 
@@ -350,11 +346,7 @@ impl Benchmark<'_> {
             )
         }
 
-        drop(warmup_pass); // has to be dropped before encoding more commands
-
-        if let Some(callback) = self.finalize_encoder_callback {
-            callback(&mut encoder)
-        }
+        drop(warmup_pass); // has to be dropped before finishing commands
 
         encoder.finish()
     }

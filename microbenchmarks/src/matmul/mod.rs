@@ -13,7 +13,7 @@ mod tests {
     use uwgpu::{
         wgpu::{
             util::BufferInitDescriptor, BufferDescriptor, BufferUsages,
-            ShaderModuleDescriptor, ShaderSource,
+            MapMode, ShaderModuleDescriptor, ShaderSource,
         },
         Benchmark, BenchmarkComputePipeline, GPUContext, PipelineParameters,
     };
@@ -22,11 +22,12 @@ mod tests {
     async fn verify_matmul_works() {
         let gpu = GPUContext::new(None).await.unwrap();
 
-        let matrix_a_data: Vec<f32> = (0u16..512).map(f32::from).collect();
-        let matrix_b_data: Vec<f32> =
-            (0u16..512).rev().map(f32::from).collect();
-        let result_size = 512;
-        let matrix_size = 512;
+        let matrix_a_data: Vec<f32> = (0u16..9).map(f32::from).collect();
+        let matrix_b_data: Vec<f32> = (0u16..9).rev().map(f32::from).collect();
+        let matrix_size = 3;
+
+        let expected_result: [f32; 9] =
+            [9.0, 6.0, 3.0, 54.0, 42.0, 30.0, 99.0, 78.0, 57.0];
 
         let matrix_a_buffer = gpu.create_buffer_init(&BufferInitDescriptor {
             label: Some("Matrix A Buffer"),
@@ -42,7 +43,8 @@ mod tests {
 
         let result_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Result Buffer"),
-            size: (result_size * std::mem::size_of::<f32>()) as u64,
+            size: (matrix_size * matrix_size * std::mem::size_of::<f32>())
+                as u64,
             usage: BufferUsages::STORAGE | BufferUsages::COPY_SRC,
             mapped_at_creation: false,
         });
@@ -74,7 +76,8 @@ mod tests {
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
-            size: (result_size * std::mem::size_of::<f32>()) as u64,
+            size: (matrix_size * matrix_size * std::mem::size_of::<f32>())
+                as u64,
             usage: BufferUsages::MAP_READ | BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -83,15 +86,15 @@ mod tests {
             warmup_count: 0,
             count: 1,
             finalize_encoder_callback: Some(&|encoder| {
-                for _ in 0..1 {
-                    encoder.copy_buffer_to_buffer(
-                        &result_buffer,
-                        0,
-                        &staging_buffer,
-                        0,
-                        (512 * std::mem::size_of::<f32>()) as u64,
-                    )
-                }
+                println!("This is getting called");
+                encoder.copy_buffer_to_buffer(
+                    &result_buffer,
+                    0,
+                    &staging_buffer,
+                    0,
+                    (matrix_size * matrix_size * std::mem::size_of::<f32>())
+                        as u64,
+                )
             }),
         }
         .run(pipeline)
@@ -103,7 +106,21 @@ mod tests {
             results.total_time_spent / 1000000.0
         );
 
-        // TODO: run benchmark, map staging buffer, verify results
-        panic!();
+        let staging_slice = staging_buffer.slice(..);
+        staging_slice.map_async(MapMode::Read).await.unwrap();
+
+        let result_data: Vec<f32> = {
+            let result_data_raw: &[u8] = &*staging_slice.get_mapped_range();
+            bytemuck::cast_slice(&result_data_raw).to_vec()
+        };
+
+        staging_buffer.unmap();
+
+        assert_eq!(result_data, expected_result);
+
+        // TODO: Great start for a first rudimentary benchmark. For the real
+        // matmul I probs want to control more variables, maybe not necessarily
+        // square matrices, maybe try out a few different workgroups, IDK.
+        todo!("Once this microbenchmark is no longer just a test and we don't really need to print info here I'll remove this todo!");
     }
 }
