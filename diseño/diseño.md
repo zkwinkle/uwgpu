@@ -215,9 +215,15 @@ No aplica.
 
 ## 5.7. Interfaces
 
-- Interfaz de biblioteca core
-- Interfaz de biblioteca microbenchmarks (No diseñada)
-- API servidor
+El único servicio proveído por el software será el servidor que recolecta y
+provee los datos históricos. Su interfaz será expuesta a través de métodos
+sencillos de HTTP mostrados en el diagrama de la figura 4, el cual utiliza el lenguaje de components UML.
+
+![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu.](./diagramas/Interfaces Diagram.svg){width=50%}
+
+Este diagrama también muestra cómo la interfaz de usuario web requerirá y
+utilizará la interfaz expuesta por el servidor.
+
 
 ## 5.8. Interfaz de usuario
 
