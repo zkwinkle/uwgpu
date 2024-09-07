@@ -125,10 +125,29 @@ Microbenchmarks](https://vulkan.org/user/pages/09.events/vulkanised-2024/vulkani
 característica específica de bajo nivel. A diferencia de un "benchmark"
 general, un microbenchmark se centra en pruebas específicas, generalmente a
 nivel de componentes.
+- **API**: Interfaz que permite la comunicación entre diferentes sistemas de
+software, como aplicaciones y hardware.
 - **GPU Compute**: Uso de la GPU para realizar cálculos computacionales de
 propósito general.
-- **GPU**: Unidad de Procesamiento Gráfico. **CLI**: Interfaz de Línea de
-Comandos.
+- **GPU**: Unidad de Procesamiento Gráfico.
+- **CLI**: Interfaz de Línea de Comandos.
+- **WebGPU**: API gráfica y de cómputo para la web que permite a los
+navegadores acceder a la GPU para tareas intensivas como gráficos 3D y
+procesamiento paralelo (GPU Compute).
+- **Vulkan**: API de bajo nivel para gráficos y cómputo que ofrece un control del hardware de la GPU de manera nativa. WebGPU puede que opere a través de Vulkan.
+- **wgpu**: Biblioteca de Rust que proporciona una interfaz segura y
+multiplataforma para trabajar con la API WebGPU y otras APIs gráficas.
+- **Pipeline**: Secuencia de etapas que procesan datos en una GPU, utilizadas
+en gráficos o cómputo.
+- **Shader**: Programa ejecutado en la GPU para realizar cálculos específicos,
+como efectos gráficos o cómputo general.
+- **naga**: Analizador sintáctico para shaders en el ecosistema WebGPU que
+automatiza la gestión de recursos y compatibilidad de shaders.
+- **Bindings**: Conexiones que asignan recursos de la aplicación, como buffers
+y texturas, a las variables utilizadas en un shader.
+- **Bind Groups**: Colecciones de recursos agrupadas y enlazadas a la GPU en
+una única operación, optimizando el uso de shaders.
+
 
 # 5. Perspectivas de diseño
 
@@ -252,10 +271,111 @@ No aplica.
 
 # 6. Apéndice - Alternativas de diseño
 
-## 6.1. Creación de bindings/buffers
+## 6.1. Definición de recursos ("bindings") para microbenchmarks
 
-- Usar naga para inspeccionar shader y crear automáticamente
+En esta subsección se destacarán dos alternativas de diseño consideradas para
+definir cómo la biblioteca "uwgpu" obtiene los recursos necesarios para
+ejecutar un microbenchmark en la GPU.
 
-- Permitir múltiples bind groups
+### 6.1.1. Utilización de analizador sintáctico _naga_
 
-- Templating de shaders
+La alternativa de utilizar el analizador sintáctico "naga" implicaba emplear
+esta herramienta para analizar los shaders y determinar automáticamente los
+recursos, como buffers y texturas, que se utilizan en ellos. De esta forma, la
+biblioteca "uwgpu" podría generar automáticamente los "bindings" y los grupos
+necesarios para la ejecución del shader en la GPU.
+
+#### Cumplimiento de Requerimientos
+
+Esta alternativa cumple parcialmente con los requerimientos de permitir una
+fácil creación de microbenchmarks, ya que la automatización de la creación de
+"bindings" podría simplificar el proceso para desarrolladores menos
+familiarizados con los detalles de GPU. Sin embargo, se identificaron varios
+obstáculos técnicos que complicarían su implementación y afectaría el control
+del usuario sobre los recursos utilizados. Además, no se tenía claridad sobre
+la viabilidad técnica del análisis requerido para determinar automáticamente el
+tamaño de los buffers y texturas, lo cual conllevaría un análisis semántico
+complejo que podría no siempre ser preciso.
+
+#### Aspectos Relacionados con la Seguridad Pública, Salud Pública, Costo Total de la Vida y Carbono Neto Cero
+
+- Seguridad pública: no aplica.
+- Salud pública: no aplica.
+- Costo total de la vida: no aplica.
+- Carbono neto cero: la utilización del analizador sintáctico naga podría tener implicaciones indirectas en el consumo energético. Al automatizar la creación de bindings y grupos, se requeriría mayor procesamiento y análisis de datos, lo que podría incrementar el consumo de recursos computacionales. Aunque el impacto es mínimo, en sistemas a gran escala o con ejecuciones frecuentes, la eficiencia energética podría verse afectada negativamente. Sin embargo, dado que esta alternativa no fue seleccionada, se evita un posible incremento en el uso de energía y, por ende, se contribuye marginalmente a la reducción del carbono neto.
+
+
+#### Aspectos Relacionados con Recursos, Cultura, Sociedad y Ambiente
+
+- Recursos: la implementación de esta alternativa requeriría recursos
+adicionales significativos en términos de tiempo de desarrollo y mantenimiento,
+debido a la complejidad del análisis automático de shaders y la integración del
+analizador sintáctico "naga". Además, podría generar una sobrecarga de
+procesamiento que aumente el consumo de recursos computacionales.
+- Cultura: La automatización del proceso de "bindings" podría ser vista
+positivamente en una cultura orientada a la simplificación del desarrollo. Sin
+embargo, para los usuarios experimentados, podría generar frustración por la
+pérdida de control sobre configuraciones específicas que pueden ser críticas en
+microbenchmarks donde el detalle y el control fino son esenciales.
+
+#### Justificación de la Decisión
+
+Se descartó la alternativa de utilizar el analizador sintáctico "naga" debido a
+la complejidad técnica y la falta de viabilidad clara en la determinación de
+recursos de GPU, así como la pérdida de control del usuario. Considerando estos
+factores, esta alternativa no es la más adecuada para cumplir con los objetivos
+de flexibilidad y facilidad de uso del proyecto "uwgpu".
+
+### 6.1.2. Permitir múltiples "bind groups"
+
+La segunda alternativa consistía en permitir que la biblioteca "uwgpu" soporte
+múltiples "bind groups" para los microbenchmarks. Esto significaría que los
+usuarios podrían definir y utilizar varios grupos de "bindings" para un mismo
+microbenchmark, ofreciendo flexibilidad en la organización y gestión de
+recursos.
+
+#### Cumplimiento de Requerimientos
+
+Esta alternativa cumple con los requerimientos de flexibilidad para la creación
+de microbenchmarks más complejos que pudieran necesitar múltiples "bind
+groups". Sin embargo, en el contexto de microbenchmarks, donde generalmente se
+realizan pruebas muy específicas y de bajo nivel, esta funcionalidad adicional
+no aportaría un beneficio significativo para la mayoría de los casos de uso
+previstos.
+
+#### Aspectos Relacionados con la Seguridad Pública, Salud Pública, Costo Total de la Vida y Carbono Neto Cero
+
+- Seguridad pública: no aplica.
+- Salud pública: no aplica.
+- Costo total de la vida: la complejidad añadida por permitir múltiples "bind
+groups" podría conllevar a un aumento en los costos de desarrollo y
+mantenimiento del software. Los desarrolladores tendrían que invertir más
+tiempo en entender y trabajar con la API más compleja, lo cual podría
+traducirse en mayores costos de capacitación y posibles errores de
+implementación. Al no seleccionar esta alternativa, se evita esta complejidad
+adicional, optimizando el tiempo y los recursos necesarios, y potencialmente
+reduciendo el costo asociado al ciclo de vida del software.
+- Carbono neto cero: no aplica.
+
+#### Aspectos Relacionados con Recursos, Cultura, Sociedad y Ambiente
+
+- Recursos: la implementación de esta alternativa aumentaría la complejidad
+de la API de la biblioteca, lo que a su vez podría aumentar el tiempo de
+desarrollo y mantenimiento. Además, la curva de aprendizaje para los nuevos
+usuarios sería más pronunciada debido a la complejidad adicional introducida
+por el manejo de múltiples "bind groups".
+- Cultura: Esta alternativa podría ser vista de forma negativa por los
+desarrolladores que prefieren simplicidad y facilidad de uso en las
+herramientas de benchmarking. En general, la mayoría de los usuarios de "uwgpu"
+valoran una API más simple que permita crear microbenchmarks de manera rápida y
+efectiva.
+
+#### Justificación de la Decisión:
+
+Se descartó la alternativa de permitir múltiples "bind groups" porque el
+beneficio potencial es mínimo en el contexto de microbenchmarks, mientras que
+la complejidad adicional haría que la API de la biblioteca sea menos intuitiva.
+Dado que el objetivo es facilitar la creación de microbenchmarks específicos y
+optimizados, se optó por mantener un enfoque más simple y directo que satisfaga
+las necesidades de la mayoría de los usuarios sin añadir sobrecarga
+innecesaria.
