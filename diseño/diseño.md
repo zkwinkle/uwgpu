@@ -170,7 +170,7 @@ de rendimiento históricos y proporcionarlos a usuarios.
 
 ## 5.2. Composición
 
-![Diagrama de composición de µwgpu.](./diagramas/Composition Diagram.svg){width=70%}
+![Diagrama de composición de µwgpu.](./diagramas/Composition Diagram.svg){height=70%}
 
 El diagrama de la figura 2 muestra, utilizando el lenguaje de diagrama de componentes UML, la composición de los subsistemas de µwgpu:
 
@@ -189,12 +189,14 @@ microbenchmarks para ejecutarlos y obtener sus resultados.
 
 ## 5.3. Lógica
 
-Clases, interfaces, relaciones.
+El diagrama de la figura 3 muestra las clases de la biblioteca para crear
+microbenchmarks "uwgpu". Es un diagrama de clases de UML. Muestra las clases
+expuestar ppor esta API y cómo se componen. Aquellos tipos que no se
+especifican en el diagrama es porque son propios del lenguaje Rust o propios
+del API gráfico wgpu.
 
-- Benchmark
-- BenchmarkComputePipeline
-- GPUContext
-- BenchmarkResults
+![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu.](./diagramas/Logic Diagram.svg){width=50%}
+
 
 ## 5.4. Dependencia
 
@@ -202,7 +204,10 @@ No aplica.
 
 ## 5.5. Información (Datos persistentes)
 
-Por definir. Se contará con un servidor que guarda información histórica de rendimiento para las ejecuciones de microbenchmarks en la página web, se documentará el formato de dicha información una vez que se diseñen los microbenchmarks y exáctamente cuáles datos son de más relevancia para cada uno.
+Por definir. Se contará con un servidor que guarda información histórica de
+rendimiento para las ejecuciones de microbenchmarks en la página web, se
+documentará el formato de dicha información una vez que se diseñen los
+microbenchmarks y exáctamente cuáles datos son de más relevancia para cada uno.
 
 ## 5.6. Uso de patrones
 
@@ -216,8 +221,8 @@ No aplica.
 
 ## 5.8. Interfaz de usuario
 
-- CLI
-- web
+Por definir. Esta sección abarcará el diseño de las interfaces de usuario CLI y
+la web.
 
 ## 5.9. Estructura
 
