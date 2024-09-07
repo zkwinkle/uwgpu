@@ -132,8 +132,6 @@ Comandos.
 
 # 5. Perspectivas de diseño
 
-## 5.1. Contexto
-
 - Design concers de la perspectiva
 
 - Design elements, defined by that viewpoint, specifically the types of design
@@ -152,6 +150,83 @@ viewpoint.
 
 - Each design entity shall have a name, a type, and purpose.
 
+## 5.1. Contexto
+
+El diagrama de la figura 1 muestra los casos de uso que provee el sistema en el
+lenguaje de diagrama de casos de uso UML. Muestra los servicios proveídos por el
+software y su usuario principal.
+
+![Casos de uso del paquete µwgpu.](./diagramas/UML Casos de Uso.svg){width=50%}
+
+El diagrama es bastante simple, dentro del "sistema" de µwgpu se tienen las
+funciones que este paquete de software provee a un desarrollador o
+investigador.
+
+El sistema no requiere de más actores que del usuario directo que utilice el
+software, el cual la mayoría del tiempo será un desarrollador.
+
+También se muestra como un servidor será el encargado de recolectar los datos
+de rendimiento históricos y proporcionarlos a usuarios.
+
+## 5.2. Composición
+
+- biblioteca core
+- biblioteca microbenchmarks
+- interfaz CLI
+- servidor/interfaz web
+
+## 5.3. Lógica
+
+Clases, interfaces, relaciones.
+
+- Benchmark
+- BenchmarkComputePipeline
+- GPUContext
+- BenchmarkResults
+
+## 5.4. Dependencia
+
+No aplica.
+
+## 5.5. Información (Datos persistentes)
+
+Por definir. Se contará con un servidor que guarda información histórica de rendimiento para las ejecuciones de microbenchmarks en la página web, se documentará el formato de dicha información una vez que se diseñen los microbenchmarks y exáctamente cuáles datos son de más relevancia para cada uno.
+
+## 5.6. Uso de patrones
+
+No aplica.
+
+## 5.7. Interfaces
+
+- Interfaz de biblioteca core
+- Interfaz de biblioteca microbenchmarks (No diseñada)
+- API servidor
+
+## 5.8. Interfaz de usuario
+
+- CLI
+- web
+
+## 5.9. Estructura
+
+No aplica
+
+## 5.10. Interacción
+
+No aplica.
+
+## 5.11. Dinámica de estados
+
+No aplica.
+
+## 5.12. Algoritmos
+
+Se documentará posteriorimente. Esta sección incluirá en detalle el diseño de los microbenchmarks creados.
+
+## 5.13. Recursos
+
+No aplica.
+
 # 6. Apéndice - Alternativas de diseño
 
 ## 6.1. Creación de bindings/buffers
@@ -159,3 +234,5 @@ viewpoint.
 - Usar naga para inspeccionar shader y crear automáticamente
 
 - Permitir múltiples bind groups
+
+- Templating de shaders
