@@ -156,7 +156,7 @@ El diagrama de la figura 1 muestra los casos de uso que provee el sistema en el
 lenguaje de diagrama de casos de uso UML. Muestra los servicios proveídos por el
 software y su usuario principal.
 
-![Casos de uso del paquete µwgpu.](./diagramas/UML Casos de Uso.svg){width=50%}
+![Casos de uso de µwgpu.](./diagramas/UML Casos de Uso.svg){width=50%}
 
 El diagrama es bastante simple, dentro del "sistema" de µwgpu se tienen las
 funciones que este paquete de software provee a un desarrollador o
@@ -170,10 +170,22 @@ de rendimiento históricos y proporcionarlos a usuarios.
 
 ## 5.2. Composición
 
-- biblioteca core
-- biblioteca microbenchmarks
-- interfaz CLI
-- servidor/interfaz web
+![Diagrama de composición de µwgpu.](./diagramas/Composition Diagram.svg){width=70%}
+
+El diagrama de la figura 2 muestra, utilizando el lenguaje de diagrama de componentes UML, la composición de los subsistemas de µwgpu:
+
+- La biblioteca principal "uwgpu" que se utilizar para crear microbenchmarks.
+Sus dependencias que cada microbenchmark debe proveer de acuerdo a lo que
+realice y recursos que utilice.
+- La biblioteca de "microbenchmarks". Nótese que este bloque solo se muestra 1
+componente llamado "microbenchmark". En realidad, van a haber muchos
+microbenchmarks con nombres más específicos, pero sus interfaces todas van a
+tener la misma forma: todos proveen los mismos recursos a uwgpu y las mismas
+interfaces a las interfaces de usuario. Por lo tanto se simplificó el bloque a
+mostrar solo 1 "microbenchmark" de ejemplo.
+- Las interfaces de usuario que interactúan con la biblioteca proveedora de
+microbenchmarks para ejecutarlos y obtener sus resultados.
+
 
 ## 5.3. Lógica
 
