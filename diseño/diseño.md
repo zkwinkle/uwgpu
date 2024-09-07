@@ -151,31 +151,13 @@ una única operación, optimizando el uso de shaders.
 
 # 5. Perspectivas de diseño
 
-- Design concers de la perspectiva
-
-- Design elements, defined by that viewpoint, specifically the types of design
-entities, attributes, relationships, and constraints introduced by that
-viewpoint or used by that viewpoint (which may have been defined elsewhere).
-These elements may be realized by one or more design languages; Formal or
-informal consistency and completeness tests to be applied to the view;
-
-- Evaluation or analysis techniques to be applied to a view; and
-
-- Heuristics, patterns, or other guidelines to assist in construction or
-synthesis of a view.
-
-- An SDD shall include a rationale for the selection of each selected
-viewpoint.
-
-- Each design entity shall have a name, a type, and purpose.
-
 ## 5.1. Contexto
 
-El diagrama de la figura 1 muestra los casos de uso que provee el sistema en el
+El diagrama de la figura \ref{casos} muestra los casos de uso que provee el sistema en el
 lenguaje de diagrama de casos de uso UML. Muestra los servicios proveídos por el
 software y su usuario principal.
 
-![Casos de uso de µwgpu.](./diagramas/UML Casos de Uso.svg){width=50%}
+![Casos de uso de µwgpu. \label{casos}](./diagramas/UML Casos de Uso.svg){width=50%}
 
 El diagrama es bastante simple, dentro del "sistema" de µwgpu se tienen las
 funciones que este paquete de software provee a un desarrollador o
@@ -189,9 +171,9 @@ de rendimiento históricos y proporcionarlos a usuarios.
 
 ## 5.2. Composición
 
-![Diagrama de composición de µwgpu.](./diagramas/Composition Diagram.svg){height=70%}
+![Diagrama de composición de µwgpu. \label{comp}](./diagramas/Composition Diagram.svg){height=50%}
 
-El diagrama de la figura 2 muestra, utilizando el lenguaje de diagrama de componentes UML, la composición de los subsistemas de µwgpu:
+El diagrama de la figura \ref{comp} muestra, utilizando el lenguaje de diagrama de componentes UML, la composición de los subsistemas de µwgpu:
 
 - La biblioteca principal "uwgpu" que se utilizar para crear microbenchmarks.
 Sus dependencias que cada microbenchmark debe proveer de acuerdo a lo que
@@ -208,13 +190,13 @@ microbenchmarks para ejecutarlos y obtener sus resultados.
 
 ## 5.3. Lógica
 
-El diagrama de la figura 3 muestra las clases de la biblioteca para crear
+El diagrama de la figura \ref{logic} muestra las clases de la biblioteca para crear
 microbenchmarks "uwgpu". Es un diagrama de clases de UML. Muestra las clases
 expuestar ppor esta API y cómo se componen. Aquellos tipos que no se
 especifican en el diagrama es porque son propios del lenguaje Rust o propios
 del API gráfico wgpu.
 
-![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu.](./diagramas/Logic Diagram.svg){width=50%}
+![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu. \label{logic}](./diagramas/Logic Diagram.svg){width=50%}
 
 
 ## 5.4. Dependencia
@@ -236,9 +218,9 @@ No aplica.
 
 El único servicio proveído por el software será el servidor que recolecta y
 provee los datos históricos. Su interfaz será expuesta a través de métodos
-sencillos de HTTP mostrados en el diagrama de la figura 4, el cual utiliza el lenguaje de components UML.
+sencillos de HTTP mostrados en el diagrama de la figura \ref{interf}, el cual utiliza el lenguaje de components UML.
 
-![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu.](./diagramas/Interfaces Diagram.svg){width=50%}
+![Diagrama de clases de biblioteca para crear microbenchmarks uwgpu. \label{interf}](./diagramas/Interfaces Diagram.svg){width=50%}
 
 Este diagrama también muestra cómo la interfaz de usuario web requerirá y
 utilizará la interfaz expuesta por el servidor.
