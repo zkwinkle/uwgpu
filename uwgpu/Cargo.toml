@@ -16,10 +16,10 @@ env_logger = { workspace = true }
 log = { workspace = true }
 wgpu = { workspace = true }
 bytemuck = { workspace = true }
-
-# TODO: this after moving WASM stuff to web crate
-cfg-if = "1"
 wgpu-async = "22.1.0"
+
+# TODO: remove this after moving WASM stuff to web crate
+cfg-if = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"
