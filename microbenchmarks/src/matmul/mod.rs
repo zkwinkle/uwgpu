@@ -16,6 +16,8 @@ use uwgpu::{
 };
 
 const BENCHMARK_MATRIX_DIMS: usize = 1024;
+const BENCHMARK_WARMUP_COUNT: usize = 50;
+const BENCHMARK_ITERATIONS: usize = 100;
 
 /// Microbenchmark for matrix mulitplication
 ///
@@ -31,8 +33,8 @@ pub async fn matmul_benchmark() -> Result<MatmulResults, BenchmarkError> {
         .map_err(|e| BenchmarkError::PipelineCreation(e))?;
 
     let results = Benchmark {
-        warmup_count: 50,
-        count: 100,
+        warmup_count: BENCHMARK_WARMUP_COUNT,
+        count: BENCHMARK_ITERATIONS,
         finalize_encoder_callback: None,
     }
     .run(pipeline)
