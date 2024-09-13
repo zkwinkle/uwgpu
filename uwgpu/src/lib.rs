@@ -287,6 +287,18 @@ pub struct BenchmarkResults {
     pub total_time_spent: f64,
 }
 
+impl BenchmarkResults {
+    /// Get the total time spent in the time unit given.
+    pub fn total_time(&self, unit: TimeUnit) -> f64 {
+        nano_to_unit(self.total_time_spent, unit)
+    }
+
+    /// Get the time spent per iteration in the time unit given
+    pub fn time_per_iteration(&self, unit: TimeUnit) -> f64 {
+        nano_to_unit(self.total_time_spent, unit) / (self.count as f64)
+    }
+}
+
 impl Benchmark<'_> {
     /// Runs the benchmark using the provided compute pipeline
     ///
@@ -534,4 +546,31 @@ pub enum CreatePipelineError {
     // TODO: Include the compilation info messages
     // TODO: We don't return this yet, need to check the compilation info
     // messages for any errors.
+}
+
+#[derive(Clone, Copy, Debug)]
+/// Used for [BenchmarkResults] methods to indicate which unit to get the
+/// results in.
+pub enum TimeUnit {
+    /// 1s
+    Second,
+
+    /// 1ms
+    Milli,
+
+    /// 1µs
+    Micro,
+
+    /// 1ns
+    Nano,
+}
+
+/// Converts a nanoseconds unit to the given [TimeUnit]
+fn nano_to_unit(nanoseconds: f64, unit: TimeUnit) -> f64 {
+    match unit {
+        TimeUnit::Second => nanoseconds / 1_000_000_000.0,
+        TimeUnit::Milli => nanoseconds / 1_000_000.0,
+        TimeUnit::Micro => nanoseconds / 1000.0,
+        TimeUnit::Nano => nanoseconds,
+    }
 }

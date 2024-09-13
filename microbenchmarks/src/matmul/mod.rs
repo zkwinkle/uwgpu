@@ -5,6 +5,7 @@ use uwgpu::GetGPUContextError;
 use uwgpu::MapTimestampResultError;
 
 use rand::{thread_rng, Rng};
+use uwgpu::TimeUnit;
 use uwgpu::{
     wgpu::{
         util::BufferInitDescriptor, BufferDescriptor, BufferUsages,
@@ -51,13 +52,11 @@ pub struct MatmulResults(BenchmarkResults);
 impl MatmulResults {
     /// Get the total amount of time in seconds spent executing the
     /// microbenchmark
-    pub fn total_time_s(&self) -> f64 {
-        self.0.total_time_spent / 1_000_000_000.0
-    }
+    pub fn total_time_s(&self) -> f64 { self.0.total_time(TimeUnit::Second) }
 
     /// Get the amount of time per iteration in ms
     pub fn time_per_iteration_ms(&self) -> f64 {
-        (self.0.total_time_spent / (self.0.count as f64)) / 1_000_000.0
+        self.0.time_per_iteration(TimeUnit::Milli)
     }
 
     /// Get the amount of FLOPS (floating point operations per second)
@@ -67,8 +66,7 @@ impl MatmulResults {
         const NUM_FLOPS_PER_ITER: usize =
             2 * (BENCHMARK_MATRIX_DIMS.pow(3)) - BENCHMARK_MATRIX_DIMS.pow(2);
 
-        ((NUM_FLOPS_PER_ITER * self.0.count) as f64)
-            / (self.0.total_time_spent / 1_000_000_000_f64)
+        ((NUM_FLOPS_PER_ITER * self.0.count) as f64) / (self.total_time_s())
     }
 }
 
