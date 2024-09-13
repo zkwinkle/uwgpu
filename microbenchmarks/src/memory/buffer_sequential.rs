@@ -1,10 +1,5 @@
-use uwgpu::{BenchmarkComputePipeline, GPUContext};
-
-pub async fn serial_buffer_copy_pipeline(
-    _gpu: &GPUContext,
-) -> BenchmarkComputePipeline {
-    todo!()
-}
+//! Microbenchmark for copying buffer to buffer copy throughput in a sequential
+//! manner
 
 #[cfg(test)]
 mod tests {

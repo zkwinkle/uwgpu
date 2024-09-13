@@ -3,10 +3,15 @@ name = "microbenchmarks"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+serde = ["uwgpu/serde"]
+
 [dependencies]
 uwgpu = { path = "../uwgpu" }
 bytemuck = { workspace = true }
+rand = "0.8.5"
+
+# TODO: Move tokio to dev-dependencies after writing CLI tool
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-rand = "0.8.5"

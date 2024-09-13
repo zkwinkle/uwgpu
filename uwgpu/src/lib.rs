@@ -491,8 +491,6 @@ impl TimestampQuery {
                 .unwrap()
         };
 
-        println!("ts data: {:?}", ts_data);
-
         self.query_staging_buf.unmap();
 
         Ok(ts_data)
