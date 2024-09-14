@@ -43,6 +43,7 @@ Desarrollar un banco de microbenchmarks que permita evaluar y comparar el rendim
 2. Diseñar una arquitectura modular de pipeline gráfico y microbenchmarking, que facilite la creación de microbenchmarks y permita su ejecución en diferentes contextos (interfaces web y CLI).
 3. Implementar las interfaces web y CLI que permitan la ejecución de los microbenchmarks, la recopilación de datos y la interacción con los usuarios, asegurando en el caso de la interfaz web la integración con la base de datos para el almacenamiento y consulta de resultados.
 4. Orquestar la infraestructura necesaria para servir la página web, que incluye la configuración del servidor y la base de datos, garantizando la accesibilidad y el rendimiento adecuados para los usuarios finales.
+5. Tener un historial de cómo se planeó y avanzó el desarrollo del proyecto.
 
 ## 1.7. Interesados
 
@@ -102,68 +103,62 @@ A continuación se detallan los entregables y sus criterios de aceptación por o
 |               |                        |                                |
 |402            | Despliegue de la página web accesible desde internet con un URL público y estable. | En el URL definido se sirve la interfaz web y se verifica el funcionamiento con la base de datos detallado en el documento de requerimientos. |
 
+### Entregables Objetivo Específico 5
+
+| Identificador |       Entregable       |     Criterio de aceptación     |
+|---------------|------------------------|--------------------------------|
+|501            | Plan de Proyecto | Cumple con todas las características detalladas en su instrucción. |
+|               |                        |                                |
+|502            | Informe de avance 1.  | Detalla las actividades realizadas y planeadas al punto de la semana 8 del proyecto. |
+|               |                        |                                |
+|503            | Informe de avance 2.  | Detalla las actividades realizadas y planeadas al punto de la semana 10 del proyecto. |
+|               |                        |                                |
+|504            | Informe de avance 3.  | Detalla las actividades realizadas y planeadas al punto de la semana 12 del proyecto. |
+|               |                        |                                |
+|505            | Informe de avance 4.  | Detalla las actividades realizadas y planeadas al punto de la semana 14 del proyecto. |
+|               |                        |                                |
+|506            | Informe final artículo.  | Detalla el estado final y el proceso que se llevó a cabo para el proyecto. |
 
 \clearpage
 
 ## 2.3. Actividades y propuesta de esfuerzo
 
-
-| Identificador | Actividad                             | Horas estimadas |
-|---------------|---------------------------------------|-----------------|
-| 100 | Experimentar y familiarizar con wgpu. | 10 |
-|               |                                       |                 |
-| 200 | Definir requisitos. | 10 |
-|               |                                       |                 |
-| 300 | Crear setup inicial para pruebas con pipeline mínimo y una prueba de multiplicación matricial. | 15 |
-|               |                                       |                 |
-| 400 | Agregar una prueba de ancho de banda de memoria (la de copias entre buffers) para ya tener una prueba de los 2 tipos principales que hay y tener una mejor idea de qué es necesario. | 8 |
-|               |                                       |                 |
-| 500 | Plan de proyecto. | 8 |
-|               |                                       |                 |
-| 600 | Diseñar API y arquitectura de biblioteca de framework para crear microbenchmarks. | 5 |
-|               |                                       |                 |
-| 601 | Diseñar estructura de página web. | 2 |
-|               |                                       |                 |
-| 602 | Diseñar arquitectura de servidor que sirve página web y comunica con base de datos. | 4 |
-|               |                                       |                 |
-| 603 | Redactar el documento de diseño formal. | 8 |
-|               |                                       |                 |
-| 700 | Implementar API y arquitectura de biblioteca, reescribiendo las pruebas existentes para adaptarse a la biblioteca ya definida. | 12 |
-|               |                                       |                 |
-| 701 | Escribir microbenchmarks existentes como una biblioteca separada. | 4 |
-|               |                                       |                 |
-| 702 | Implementar interfaz CLI como wrapper de la biblioteca de microbenchmarks. | 4 |
-|               |                                       |                 |
-| 800 | Implementar servidor que sirve página web con configuración local. | 8 |
-|               |                                       |                 |
-| 801 | Agregar detalles de producción al servidor (como configuración de DB real) | 2 |
-|               |                                       |                 |
-| 900 | Crear el archivo de nix para empaquetar el servidor. | 3 |
-|               |                                       |                 |
-| 901 | Poner el servidor en el servicio de hosting. | 4 |
-|               |                                       |                 |
-| 1000 | Implementar microbenchmark de convolución. | 5 |
-|               |                                       |                 |
-| 1001 | Implementar microbenchmark de reducción. | 5 |
-|               |                                       |                 |
-| 1100 | Implementar microbenchmark de scan. | 5 |
-|               |                                       |                 |
-| 1101 | Implementar microbenchmark de accesos de memoria secuenciales. | 5 |
-|               |                                       |                 |
-| 1200 | Implementar microbenchmark de accesos de memoria desordenados. | 5 |
-|               |                                       |                 |
-| 1201 | Implementar microbenchmark de ancho de banda de copiar de buffer->textura. | 5 |
-|               |                                       |                 |
-| 1300 | Implementar microbenchmark de ancho de banda de copiar entre texturas. | 5 |
-|               |                                       |                 |
-| 1301 | Agregar benchmarks faltantes a herramienta CLI. | 2 |
-|               |                                       |                 |
-| 1500 | Agregar benchmarks faltantes a servidor web, incluyendo alteraciones necesarias en la base de datos y cambios en la interfaz web. | 10 |
-|               |                                       |                 |
-| 1600 | Mejorar la documentación del repositorio para guíar desarrolladores en el uso de la herramienta CLI, ejecutar el servidor de manera local o producción y cómo agregar microbenchmarks. | 4 |
-|               |                                       |                 |
-| 1601 | Redactar informe final. | 10 |
-
+| Identificador | Actividad                       | Horas estimadas | Entregable Relacionado |
+| ------------- | ------------------------------- | --------------- | ---------------------- |
+| 100           | Experimentar y familiarizar con wgpu                                                                                                                                                  | 10              | 101                    |
+| 200           | Definir requisitos                                                                                                                                                                    | 10              | 101                    |
+| 300           | Crear setup inicial para pruebas con pipeline mínimo y una prueba de multiplicación matricial                                                                                         | 15              | 202                    |
+| 400           | Agregar una prueba de ancho de banda de memoria (la de copias entre buffers) para ya tener una prueba de los 2 tipos principales que hay y tener una mejor idea de qué es necesario   | 8               | 202                    |
+| 500           | Plan de proyecto                                                                                                                                                                      | 8               | 501                    |
+| 600           | Diseñar API y arquitectura de biblioteca de framework para crear microbenchmarks                                                                                                      | 5               | 201, 202               |
+| 601           | Diseñar estructura de página web                                                                                                                                                      | 2               | 201, 302               |
+| 602           | Diseñar arquitectura de servidor que sirve página web y comunica con base de datos                                                                                                    | 4               | 201, 302               |
+| 700           | Redactar el documento de diseño formal                                                                                                                                                | 8               | 201                    |
+| 800           | Implementar API y arquitectura de biblioteca, reescribiendo las pruebas existentes para adaptarse a la biblioteca ya definida                                                         | 12              | 202                    |
+| 801           | Crear plantilla para informes de avance                                                                                                                                               | 8               | 502, 503, 504, 505     |
+| 802           | Redactar informe de avance 1                                                                                                                                                          | 4               | 502                    |
+| 900           | Escribir microbenchmarks existentes como una biblioteca separada                                                                                                                      | 4               | 202                    |
+| 901           | Implementar interfaz CLI como wrapper de la biblioteca de microbenchmarks                                                                                                             | 4               | 301                    |
+| 902           | Agregar la capacidad de fácilmente variar el tamaño de workgroup en los microbenchmarks.                                                                                              | 8               | 202                    |
+| 903           | Experimentar con el efecto de la frecuencia del GPU en los microbenchmarks.                                                                                                           | 10              | 202                    |
+| 1000          | Implementar servidor que sirve página web con configuración local                                                                                                                     | 8               | 302                    |
+| 1001          | Agregar detalles de producción al servidor (como configuración de DB real)                                                                                                            | 2               | 302, 402               |
+| 1002          | Redactar informe de avance 2                                                                                                                                                          | 4               | 503                    |
+| 1100          | Crear el archivo de nix para empaquetar el servidor                                                                                                                                   | 3               | 401                    |
+| 1101          | Poner el servidor en el servicio de hosting                                                                                                                                           | 4               | 402                    |
+| 1102          | Implementar microbenchmark de reducción                                                                                                                                               | 5               | 202                    |
+| 1200          | Implementar microbenchmark de convolución                                                                                                                                             | 5               | 202                    |
+| 1201          | Implementar microbenchmark de scan                                                                                                                                                    | 5               | 202                    |
+| 1202          | Redactar informe de avance 3                                                                                                                                                          | 4               | 504                    |
+| 1300          | Implementar microbenchmark de accesos de memoria secuenciales                                                                                                                         | 5               | 202                    |
+| 1301          | Implementar microbenchmark de accesos de memoria desordenados                                                                                                                         | 5               | 202                    |
+| 1400          | Implementar microbenchmark de ancho de banda de copiar de buffer->textura                                                                                                             | 5               | 202                    |
+| 1401          | Implementar microbenchmark de ancho de banda de copiar entre texturas                                                                                                                 | 5               | 202                    |
+| 1402          | Redactar informe de avance 4                                                                                                                                                          | 4               | 505                    |
+| 1500          | Agregar benchmarks faltantes a herramienta CLI                                                                                                                                        | 2               | 301                    |
+| 1501          | Agregar benchmarks faltantes a servidor web, incluyendo alteraciones necesarias en la base de datos y cambios en la interfaz web                                                      | 10              | 302                    |
+| 1600          | Mejorar la documentación del repositorio para guíar desarrolladores en el uso de la herramienta CLI, ejecutar el servidor de manera local o producción y cómo agregar microbenchmarks | 4               | 202, 301, 302          |
+| 1601          | Redactar informe final                                                                                                                                                                | 10              | 506                    |
 El total de horas estimadas para el proyecto es de 168 horas, lo cual implica un promedio de poco de más de 10 horas por semana dedicadas al proyecto.
 
 ## 2.4. Análisis de riesgos
@@ -224,12 +219,12 @@ esa misma semana.
 | 5      | 500                    | 8                                     |
 | 6      | 600, 601, 602          | 11                                    |
 | 7      | 700                    | 8                                     |
-| 8      | 800                    | 12                                    |
-| 9      | 900, 901               | 8                                     |
-| 10     | 1000, 1001             | 10                                    |
+| 8      | 800, 801, 802          | 24                                    |
+| 9      | 900, 901, 902, 903     | 26                                    |
+| 10     | 1000, 1001, 1002       | 14                                    |
 | 11     | 1100, 1101, 1102       | 12                                    |
-| 12     | 1200, 1201             | 10                                    |
+| 12     | 1200, 1201, 1202       | 14                                    |
 | 13     | 1300, 1301             | 10                                    |
-| 14     | 1400, 1401             | 10                                    |
+| 14     | 1400, 1401, 1402       | 14                                    |
 | 15     | 1500, 1501             | 12                                    |
 | 16     | 1600, 1601             | 14                                    |
