@@ -176,7 +176,7 @@ async fn matmul_pipeline<'a, const MATRIX_DIMS: usize>(
             1 + (MATRIX_DIMS / 8) as u32,
             1,
         ),
-        workgroup_size: None,
+        workgroup_size: Some((8, 8, 1)),
     })
     .await
 }
