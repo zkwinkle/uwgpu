@@ -64,7 +64,8 @@ mod tests {
             // WG size = 64
             // 1MiB u32 = 262_144 elements
             // 262_144 / 64 = 4096
-            workgroups: (4096, 1, 1),
+            workgroups_dispatch: (4096, 1, 1),
+            workgroup_size: None,
         })
         .await
         .unwrap();

@@ -7,237 +7,23 @@
 pub use wgpu;
 pub use wgpu_async;
 
-use std::{collections::HashMap, mem::size_of, sync::Arc};
+use std::mem::size_of;
 
 use wgpu::{
-    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder},
-    Backends, BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    BufferDescriptor, CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
-    CompilationInfo, CompilationMessage, CompilationMessageType,
-    ComputePassDescriptor, ComputePassTimestampWrites,
-    ComputePipelineDescriptor, DeviceDescriptor, DeviceLostReason, Features,
-    Instance, InstanceDescriptor, Limits, MapMode, MemoryHints,
-    PowerPreference, QuerySet, QueryType, RequestAdapterOptions,
-    RequestDeviceError, ShaderModule, ShaderModuleDescriptor, Texture,
-    TextureDescriptor,
+    CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
+    ComputePassDescriptor, ComputePassTimestampWrites, MapMode, QuerySet,
+    QueryType,
 };
-use wgpu_async::{AsyncBuffer, AsyncDevice, AsyncQueue};
+use wgpu_async::{AsyncBuffer, AsyncDevice};
+
+mod gpu;
+mod pipeline;
+
+pub use gpu::*;
+pub use pipeline::*;
 
 #[cfg(target_arch = "wasm32")]
 mod wasm_utils;
-
-/// Represents a handle on a GPU device
-pub struct GPUContext {
-    device: AsyncDevice,
-    queue: AsyncQueue,
-}
-
-impl GPUContext {
-    /// Instantiate a new [GPUContext]
-    pub async fn new(
-        required_features: Option<Features>,
-    ) -> Result<Self, GetGPUContextError> {
-        let instance = Instance::new(InstanceDescriptor {
-            backends: Backends::PRIMARY,
-            ..Default::default()
-        });
-
-        let Some(adapter) = instance
-            .request_adapter(&RequestAdapterOptions {
-                power_preference: PowerPreference::HighPerformance,
-                compatible_surface: None,
-                force_fallback_adapter: false,
-            })
-            .await
-        else {
-            return Err(GetGPUContextError::NoAdapter);
-        };
-
-        let features = adapter.features();
-
-        if !(features.intersects(Features::TIMESTAMP_QUERY)) {
-            return Err(GetGPUContextError::DoesNotSupportTimestamps);
-        }
-
-        if let Some(required_feaures) = required_features {
-            if !(features.contains(required_feaures)) {
-                return Err(
-                    GetGPUContextError::DoesNotSupportRequestedFeatures,
-                );
-            }
-        }
-
-        let (device, queue) = adapter
-            .request_device(
-                &DeviceDescriptor {
-                    label: None,
-                    required_features: Features::TIMESTAMP_QUERY
-                        | required_features.unwrap_or(Features::empty()),
-                    required_limits: Limits::default(),
-                    memory_hints: MemoryHints::Performance,
-                },
-                Default::default(),
-            )
-            .await
-            .map_err(|err| GetGPUContextError::RequestDevice(err))?;
-
-        let (device, queue) =
-            wgpu_async::wrap(Arc::new(device), Arc::new(queue));
-
-        Ok(GPUContext { device, queue })
-    }
-
-    /// Set the [device lost
-    /// callback](https://developer.mozilla.org/en-US/docs/Web/API/GPUDevice/lost)
-    ///
-    /// If the callback gets triggered, then this [`BenchmarkPipeline`] will no
-    /// longer be valid, request a new one with [`BenchmarkPipeline::new()`]
-    pub fn set_device_lost_callback(
-        &self,
-        callback: impl Fn(DeviceLostReason, String) + Send + 'static,
-    ) {
-        self.device.set_device_lost_callback(callback)
-    }
-
-    /// Creates a [Buffer], this is just a wrapper for
-    /// [AsyncDevice::create_buffer]
-    pub fn create_buffer(&self, desc: &BufferDescriptor) -> AsyncBuffer {
-        self.device.create_buffer(desc)
-    }
-
-    /// Creates a [Buffer], this is just a wrapper for
-    /// [AsyncDevice::create_buffer_init]
-    pub fn create_buffer_init(
-        &self,
-        desc: &BufferInitDescriptor,
-    ) -> AsyncBuffer {
-        self.device.create_buffer_init(desc)
-    }
-
-    /// Creates a [Texture], this is just a wrapper for [Device::create_texture]
-    pub fn create_texture(&self, desc: &TextureDescriptor) -> Texture {
-        self.device.create_texture(desc)
-    }
-
-    /// Creates a [Texture], this is just a wrapper for
-    /// [DeviceExt::create_texture_with_data]
-    pub fn create_texture_with_data(
-        &self,
-        desc: &TextureDescriptor,
-        order: TextureDataOrder,
-        data: &[u8],
-    ) -> Texture {
-        self.device
-            .create_texture_with_data(&self.queue, desc, order, data)
-    }
-}
-
-/// This type can be used to create a [ComputePipeline] by calling
-/// [ComputePipeline::new()].
-#[derive(Clone)]
-pub struct PipelineParameters<'a> {
-    /// Compute shader to execute
-    pub shader: ShaderModuleDescriptor<'a>,
-
-    /// Entry point of the compute shader.
-    /// Must be the name of a shader function annotated with `@compute` and no
-    /// return value.
-    pub entry_point: &'a str,
-
-    /// This bind group must specify all the bindings used in the shader.
-    /// The key used in the HashMap is the `n` index value of the corresponding
-    /// `@binding(n)` attribute in the shader.
-    ///
-    /// This BindGroup will be assigned to `@group(0)` in the shader,
-    /// the shader should only use that group.
-    ///
-    /// Note: All the executions of the benchmark will reuse this same bind
-    /// group, so for example if the shader uses the same buffer for input
-    /// and output (by overriding it), it will keep overriding the same
-    /// buffer over and over, effectively using last iteration's output as its
-    /// next iteration's input.
-    pub bind_group_0: HashMap<u32, BindingResource<'a>>,
-
-    /// GPU context that is to be used for creating this pipeline.
-    pub gpu: &'a GPUContext,
-
-    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
-    /// z)` dimensions of the grid of workgroups.
-    pub workgroups: (u32, u32, u32),
-}
-
-/// Represents a compute pipeline that can be used to execute one benchmark by
-/// passing it to [Benchmark::run].
-pub struct BenchmarkComputePipeline<'a> {
-    gpu: &'a GPUContext,
-    shader_module: ShaderModule,
-    bind_group: BindGroup,
-    pipeline: wgpu::ComputePipeline,
-    workgroups: (u32, u32, u32),
-}
-
-impl<'a> BenchmarkComputePipeline<'a> {
-    /// If the shader compilation fails this function will error. If it doesn't
-    /// fail we still recommend checking
-    /// [get_shader_compilation_info](Self::get_shader_compilation_info) for any
-    /// warnings.
-    pub async fn new(
-        params: PipelineParameters<'a>,
-    ) -> Result<Self, CreatePipelineError> {
-        let shader_module =
-            params.gpu.device.create_shader_module(params.shader);
-
-        let compilation_info = shader_module.get_compilation_info().await;
-
-        if compilation_info
-            .messages
-            .iter()
-            .any(|msg| msg.message_type == CompilationMessageType::Error)
-        {
-            return Err(CreatePipelineError::ShaderCompilationError(
-                compilation_info.messages,
-            ));
-        }
-
-        let pipeline = params.gpu.device.create_compute_pipeline(
-            &ComputePipelineDescriptor {
-                label: None,
-                layout: None,
-                module: &shader_module,
-                entry_point: params.entry_point,
-                compilation_options: Default::default(),
-                cache: None,
-            },
-        );
-
-        let bind_group =
-            params.gpu.device.create_bind_group(&BindGroupDescriptor {
-                label: None,
-                layout: &pipeline.get_bind_group_layout(0),
-                entries: &params
-                    .bind_group_0
-                    .into_iter()
-                    .map(|(id, resource)| BindGroupEntry {
-                        binding: id,
-                        resource,
-                    })
-                    .collect::<Vec<BindGroupEntry>>(),
-            });
-
-        Ok(Self {
-            gpu: params.gpu,
-            shader_module,
-            bind_group,
-            pipeline,
-            workgroups: params.workgroups,
-        })
-    }
-
-    /// Get the compilation messages from compiling the shader module
-    pub async fn get_shader_compilation_info(&self) -> CompilationInfo {
-        self.shader_module.get_compilation_info().await
-    }
-}
 
 /// This type represents the parameters for running a benchmark.
 ///
@@ -253,9 +39,13 @@ impl<'a> BenchmarkComputePipeline<'a> {
 pub struct Benchmark<'a> {
     /// The number of warm-up iterations to run before starting the actual
     /// benchmarking process.
+    /// This will be executed for each shader invocation specified through the
+    /// [PipelineParameters] `workgroups` field.
     pub warmup_count: usize,
 
     /// The number of iterations of the benchmark to execute.
+    /// This will be executed for each shader invocation specified through the
+    /// [PipelineParameters] `workgroups` field.
     pub count: usize,
 
     /// Optional callback to encode any last commands in the command buffer
@@ -352,9 +142,9 @@ impl Benchmark<'_> {
 
         for _ in 0..self.warmup_count {
             warmup_pass.dispatch_workgroups(
-                pipeline.workgroups.0,
-                pipeline.workgroups.1,
-                pipeline.workgroups.2,
+                pipeline.workgroups_dispatch.0,
+                pipeline.workgroups_dispatch.1,
+                pipeline.workgroups_dispatch.2,
             )
         }
 
@@ -391,9 +181,9 @@ impl Benchmark<'_> {
 
         for _ in 0..self.count {
             bench_pass.dispatch_workgroups(
-                pipeline.workgroups.0,
-                pipeline.workgroups.1,
-                pipeline.workgroups.2,
+                pipeline.workgroups_dispatch.0,
+                pipeline.workgroups_dispatch.1,
+                pipeline.workgroups_dispatch.2,
             )
         }
 
@@ -513,40 +303,6 @@ impl TimestampQuery {
 /// is needed in order to get the benchmark's timing information.
 #[derive(Debug, Clone)]
 pub struct MapTimestampResultError;
-
-/// An error when trying to get a GPU context with [GPUContext::new]
-#[derive(Debug, Clone)]
-pub enum GetGPUContextError {
-    /// Failed to get an adapter, a possible reason could be because no backend
-    /// was available.
-    ///
-    /// For example, if this is running in a browser that doesn't support
-    /// WebGPU.
-    NoAdapter,
-
-    /// Failed to request the device, see [`RequestDeviceError`]
-    RequestDevice(RequestDeviceError),
-
-    /// The adapter doesn't support timestamp queries.
-    ///
-    /// This feature is needed to time the microbenchmarks accurately,
-    /// therefore if the feature is not available we treat it as an error.
-    DoesNotSupportTimestamps,
-
-    /// The adapter doesn't support one of the features requested in the
-    /// parameter to [GPUContext::new].
-    DoesNotSupportRequestedFeatures,
-}
-
-/// Error creating a [ComputePipeline]
-#[derive(Debug)]
-pub enum CreatePipelineError {
-    /// Error compiling the shader
-    ShaderCompilationError(Vec<CompilationMessage>),
-    // TODO: Include the compilation info messages
-    // TODO: We don't return this yet, need to check the compilation info
-    // messages for any errors.
-}
 
 #[derive(Clone, Copy, Debug)]
 /// Used for [BenchmarkResults] methods to indicate which unit to get the
