@@ -1,8 +1,6 @@
 //! Matrix multiplication microbenchmarks
 
 use std::collections::HashMap;
-use uwgpu::GetGPUContextError;
-use uwgpu::MapTimestampResultError;
 
 use rand::{thread_rng, Rng};
 use uwgpu::TimeUnit;
@@ -16,20 +14,27 @@ use uwgpu::{
     GPUContext, PipelineParameters,
 };
 
+use crate::BenchmarkError;
+
 const BENCHMARK_MATRIX_DIMS: usize = 1024;
-const BENCHMARK_WARMUP_COUNT: usize = 50;
-const BENCHMARK_ITERATIONS: usize = 100;
+const BENCHMARK_WARMUP_COUNT: usize = 5;
+const BENCHMARK_ITERATIONS: usize = 10;
 
 /// Microbenchmark for matrix mulitplication
 ///
 /// Multiplies 2 randomly initialized 1024x1024 matrices repeatedly.
-pub async fn matmul_benchmark() -> Result<MatmulResults, BenchmarkError> {
+///
+/// The workgroup size will dictate the size of workgroups used for the
+/// computation.
+pub async fn matmul_benchmark(
+    workgroup_size: &(u32, u32),
+) -> Result<MatmulResults, BenchmarkError> {
     let gpu = GPUContext::new(None)
         .await
         .map_err(|e| BenchmarkError::GPUContext(e))?;
     let buffers =
         Buffers::<BENCHMARK_MATRIX_DIMS>::new_with_random_inputs(&gpu);
-    let pipeline = matmul_pipeline(&gpu, &buffers)
+    let pipeline = matmul_pipeline(&gpu, &buffers, &workgroup_size)
         .await
         .map_err(|e| BenchmarkError::PipelineCreation(e))?;
 
@@ -68,20 +73,6 @@ impl MatmulResults {
 
         ((NUM_FLOPS_PER_ITER * self.0.count) as f64) / (self.total_time_s())
     }
-}
-
-/// An error trying to execute a benchmark
-#[derive(Debug)]
-pub enum BenchmarkError {
-    /// An error trying to get a handle on the GPU context.
-    /// See [GetGPUContextError].
-    GPUContext(GetGPUContextError),
-    /// An error trying to create the compute pipeline for the microbenchmark.
-    /// See [CreatePipelineError].
-    PipelineCreation(CreatePipelineError),
-    /// An error trying to read the timestamp queries from the compute
-    /// pipeline. See [MapTimestampResultError].
-    MapTimestamp(MapTimestampResultError),
 }
 
 /// GPU buffers needed for microbenchmark
@@ -157,6 +148,7 @@ impl<const MATRIX_DIMS: usize> Buffers<MATRIX_DIMS> {
 async fn matmul_pipeline<'a, const MATRIX_DIMS: usize>(
     gpu: &'a GPUContext,
     buffers: &'a Buffers<MATRIX_DIMS>,
+    workgroup_size: &(u32, u32),
 ) -> Result<BenchmarkComputePipeline<'a>, CreatePipelineError> {
     BenchmarkComputePipeline::new(PipelineParameters {
         shader: ShaderModuleDescriptor {
@@ -172,11 +164,11 @@ async fn matmul_pipeline<'a, const MATRIX_DIMS: usize>(
         ]),
         gpu,
         workgroups_dispatch: (
-            1 + (MATRIX_DIMS / 8) as u32,
-            1 + (MATRIX_DIMS / 8) as u32,
+            1 + (MATRIX_DIMS / (workgroup_size.0 as usize)) as u32,
+            1 + (MATRIX_DIMS / (workgroup_size.1 as usize)) as u32,
             1,
         ),
-        workgroup_size: Some((8, 8, 1)),
+        workgroup_size: Some((workgroup_size.0, workgroup_size.1, 1)),
     })
     .await
 }
@@ -217,7 +209,7 @@ mod tests {
         let gpu = GPUContext::new(None).await.unwrap();
         let buffers =
             Buffers::<MATRIX_DIMS>::new_from_inputs(&matrix_a, &matrix_b, &gpu);
-        let pipeline = matmul_pipeline(&gpu, &buffers).await.unwrap();
+        let pipeline = matmul_pipeline(&gpu, &buffers, &(8, 8)).await.unwrap();
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
@@ -270,7 +262,7 @@ mod tests {
 
         let gpu = GPUContext::new(None).await.unwrap();
         let buffers = Buffers::<MATRIX_DIMS>::new_with_random_inputs(&gpu);
-        let pipeline = matmul_pipeline(&gpu, &buffers).await.unwrap();
+        let pipeline = matmul_pipeline(&gpu, &buffers, &(8, 8)).await.unwrap();
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
