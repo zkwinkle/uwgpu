@@ -72,7 +72,7 @@ microbenchmarks custom dentro de la página web y con la herramienta CLI.
 En la tercera semana de estar trabajando en el ejemplo mínimo de biblioteca de
 microbenchmarks y un microbenchmark básico, al fin logré estos objetivos.
 Seguidamente diseñé la API y estructura de la biblioteca para microbenchmarks
-bassado en lo que ya sabía de ejecutar un microbenchmark y características que
+basado en lo que ya sabía de ejecutar un microbenchmark y características que
 sería agradable tener en el producto final. Algo bueno de haber durado tanto
 realizando el ejemplo mínimo es que tuve mucho tiempo para familiarizarme con
 la tecnología y los conceptos de microbenchmark entonces ya tenía los conceptos
@@ -90,7 +90,7 @@ biblioteca de microbenchmarks.
 Finalmente, en esta última semana al fin se agregó una prueba de ancho de banda
 de memoria, una actividad que se había programado para hace unas semanas pero
 que tampoco había podido realizar debido a que me atrasé con el ejemplo mínimo
-de microbenchmark cmoputacional. Algo bueno es que debido a mi experiencia
+de microbenchmark computacional. Algo bueno es que debido a mi experiencia
 incrementada y ya tener la biblioteca de microbenchmarks más desarrollada, esta
 actividad la realicé en menos de la mitad del tiempo programado. También se
 inició con el proceso de reescribir los microbenchmarks existentes como una
