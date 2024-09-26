@@ -1,4 +1,5 @@
-//! Creation of compute pipelines for running microbenchmarks, see [BenchmarkComputePipeline]
+//! Creation of compute pipelines for running microbenchmarks, see
+//! [BenchmarkComputePipeline]
 
 use std::collections::HashMap;
 
