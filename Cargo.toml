@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ "microbenchmarks","uwgpu", "web-server"]
+members = [ "microbenchmarks", "microbenchmarks-cli","uwgpu", "web-server"]
 
 [workspace.dependencies]
 wgpu = "22.1.0"
