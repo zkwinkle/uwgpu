@@ -43,10 +43,12 @@ impl GPUContext {
             return Err(GetGPUContextError::DoesNotSupportTimestamps);
         }
 
-        if let Some(required_feaures) = required_features {
-            if !(features.contains(required_feaures)) {
+        if let Some(required_features) = required_features {
+            if !(features.contains(required_features)) {
                 return Err(
-                    GetGPUContextError::DoesNotSupportRequestedFeatures,
+                    GetGPUContextError::DoesNotSupportRequestedFeatures(
+                        required_features,
+                    ),
                 );
             }
         }
@@ -137,5 +139,5 @@ pub enum GetGPUContextError {
 
     /// The adapter doesn't support one of the features requested in the
     /// parameter to [GPUContext::new].
-    DoesNotSupportRequestedFeatures,
+    DoesNotSupportRequestedFeatures(Features),
 }

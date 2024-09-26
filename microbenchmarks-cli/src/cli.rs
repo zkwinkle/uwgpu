@@ -14,12 +14,14 @@ pub struct Cli {
 pub enum Microbenchmarks {
     /// Run the matmul microbenchmark
     MatMul(MicrobenchmarkParams<2>),
+    /// Run the sequential buffer copy microbenchmark
+    BufferCopySequential(MicrobenchmarkParams<1>),
 }
 
 /// Common parameters shared by microbenchmarks
 #[derive(Args)]
 pub struct MicrobenchmarkParams<const DIMS: usize> {
-    #[arg(short, long, value_parser = parse_array::<2, u32>)]
+    #[arg(short, long, value_parser = parse_array::<DIMS, u32>)]
     pub workgroup: Vec<[u32; DIMS]>,
 }
 

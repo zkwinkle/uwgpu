@@ -1,48 +1,45 @@
 use clap::Parser;
 use cli::{Cli, Microbenchmarks};
+use microbenchmarks::{
+    matmul::matmul_benchmark,
+    memory::buffer_sequential::buffer_sequential_benchmark, BenchmarkError,
+};
 
 mod cli;
+mod print_error;
+mod print_results;
 
-fn main() {
+use print_error::print_error;
+use print_results::PrintableResults;
+
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
 
-    match cli.microbenchmark {
+    let result = run_microbenchmark(cli.microbenchmark).await;
+
+    if let Err(err) = result {
+        print_error(err);
+    }
+}
+
+async fn run_microbenchmark(
+    microbenchmark: Microbenchmarks,
+) -> Result<(), BenchmarkError> {
+    match microbenchmark {
         Microbenchmarks::MatMul(params) => {
-            println!("Workgroups: {:?}", params.workgroup)
+            for wg in params.workgroup {
+                let result = matmul_benchmark(&wg.into()).await?;
+                result.print_results(wg);
+            }
+        }
+        Microbenchmarks::BufferCopySequential(params) => {
+            for wg in params.workgroup {
+                let result = buffer_sequential_benchmark(wg[0]).await?;
+                result.print_results(wg);
+            }
         }
     }
 
-    // // You can check the value provided by positional arguments, or option
-    // // arguments
-    // if let Some(name) = cli.name.as_deref() {
-    //     println!("Value for name: {name}");
-    // }
-
-    // if let Some(config_path) = cli.config.as_deref() {
-    //     println!("Value for config: {}", config_path.display());
-    // }
-
-    // // You can see how many times a particular flag or argument occurred
-    // // Note, only flags can have multiple occurrences
-    // match cli.debug {
-    //     0 => println!("Debug mode is off"),
-    //     1 => println!("Debug mode is kind of on"),
-    //     2 => println!("Debug mode is on"),
-    //     _ => println!("Don't be crazy"),
-    // }
-
-    // // You can check for the existence of subcommands, and if found use their
-    // // matches just as you would the top level cmd
-    // match &cli.command {
-    //     Some(Microbenchmarks::Test { list }) => {
-    //         if *list {
-    //             println!("Printing testing lists...");
-    //         } else {
-    //             println!("Not printing testing lists...");
-    //         }
-    //     }
-    //     None => {}
-    // }
-
-    // Continued program logic goes here...
+    Ok(())
 }

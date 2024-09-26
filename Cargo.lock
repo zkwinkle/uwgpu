@@ -974,6 +974,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "microbenchmarks",
+ "tokio",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@
 
 use uwgpu::{CreatePipelineError, GetGPUContextError, MapTimestampResultError};
 
+pub use uwgpu;
 pub mod matmul;
 pub mod memory;
 
