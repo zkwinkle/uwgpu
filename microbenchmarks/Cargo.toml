@@ -11,7 +11,5 @@ uwgpu = { path = "../uwgpu" }
 bytemuck = { workspace = true }
 rand = "0.8.5"
 
-# TODO: Move tokio to dev-dependencies after writing CLI tool
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-
 [dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
