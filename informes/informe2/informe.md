@@ -62,8 +62,6 @@ Todavía no se ha diseñado la estructura de la página web (601), falta finaliz
 
 # 3. Dificultades encontradas
 
-No se han encontrado dificultades significativas en estas últimas 2 semanas. Pero a continuación se presentan algunas dificultades técnicas menores.
-
 ### Dificultad en toma de decisiones de diseño
 
 Hay muchas pequeñas decisiones de diseño que tomar, desde cómo se presentan las
