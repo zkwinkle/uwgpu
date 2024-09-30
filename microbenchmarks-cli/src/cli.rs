@@ -51,3 +51,15 @@ where
 
     Ok(array)
 }
+
+impl Microbenchmarks {
+    /// Checks if the workgroups parameter is empty
+    pub fn workgroups_empty(&self) -> bool {
+        match self {
+            Microbenchmarks::MatMul(params) => params.workgroup.is_empty(),
+            Microbenchmarks::BufferCopySequential(params) => {
+                params.workgroup.is_empty()
+            }
+        }
+    }
+}

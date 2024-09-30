@@ -16,6 +16,11 @@ use print_results::PrintableResults;
 async fn main() {
     let cli = Cli::parse();
 
+    if cli.microbenchmark.workgroups_empty() {
+        eprintln!("No workgroup sizes specified so no benchmarks will be run. Specify workgroup sizes with -w flag.");
+        return;
+    }
+
     let result = run_microbenchmark(cli.microbenchmark).await;
 
     if let Err(err) = result {
