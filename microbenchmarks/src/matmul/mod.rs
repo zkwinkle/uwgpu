@@ -218,7 +218,7 @@ mod tests {
             mapped_at_creation: false,
         });
 
-        let results = Benchmark {
+        let _results = Benchmark {
             warmup_count: 0,
             count: 1,
             finalize_encoder_callback: Some(&|encoder| {
@@ -234,11 +234,6 @@ mod tests {
         .run(pipeline)
         .await
         .unwrap();
-
-        println!(
-            "Total time spent: {}ms",
-            results.total_time_spent / 1000000.0
-        );
 
         let staging_slice = staging_buffer.slice(..);
         staging_slice.map_async(MapMode::Read).await.unwrap();
@@ -271,7 +266,7 @@ mod tests {
             mapped_at_creation: false,
         });
 
-        let results = Benchmark {
+        let _results = Benchmark {
             warmup_count: 0,
             count: 1,
             finalize_encoder_callback: Some(&|encoder| {
@@ -287,11 +282,6 @@ mod tests {
         .run(pipeline)
         .await
         .unwrap();
-
-        println!(
-            "Total time spent: {}ms",
-            results.total_time_spent / 1000000.0
-        );
 
         let staging_slice = staging_buffer.slice(..);
         staging_slice.map_async(MapMode::Read).await.unwrap();
