@@ -25,6 +25,13 @@ pub use pipeline::*;
 #[cfg(target_arch = "wasm32")]
 mod wasm_utils;
 
+/// According to https://www.w3.org/TR/webgpu/#timestamp, timestamp queries can
+/// return negative time deltas in rare circumstances. To mitigate this effect,
+/// we run many short compute passes to get many timestamp measurements and
+/// ignore any invalid ones. This constant is the max amount of shader
+/// invocations we'll do per compute pass.
+const MAX_COUNT_BETWEEN_QUERIES: usize = 10;
+
 /// This type represents the parameters for running a benchmark.
 ///
 /// The benchmark will run 2 compute passes in the following order:
@@ -68,9 +75,12 @@ pub struct Benchmark<'a> {
 /// All timing quantities are given in nanoseconds
 #[derive(Debug)]
 pub struct BenchmarkResults {
-    /// Total iterations ran, this should be equal to the `count` field in the
-    /// [Benchmark] that was ran, but its also provided here for
-    /// convenience.
+    /// Total iterations that counted towards the result, this can differ from
+    /// the `count` field in the [Benchmark] that was ran due to the fact that
+    /// some of the timestamps that were measured in the benchmark returned
+    /// invalid values (negative deltas).
+    ///
+    /// Reference: https://www.w3.org/TR/webgpu/#timestamp
     pub count: usize,
 
     /// Total time spent executing the benchmark.
@@ -97,11 +107,12 @@ impl Benchmark<'_> {
         &self,
         pipeline: BenchmarkComputePipeline<'a>,
     ) -> Result<BenchmarkResults, MapTimestampResultError> {
-        let timestamp_query = TimestampQuery::new(&pipeline.gpu.device);
+        let timestamp_query =
+            TimestampQuery::new(&pipeline.gpu.device, self.count);
 
         let warmup_command_buf = self.warmup_pass(&pipeline);
         let benchmark_command_buf =
-            self.benchmark_pass(&pipeline, &timestamp_query);
+            self.benchmark_passes(&pipeline, &timestamp_query);
         let resolve_timestamp_pass =
             self.timestamp_pass(&pipeline, &timestamp_query);
 
@@ -112,12 +123,47 @@ impl Benchmark<'_> {
         ]);
 
         let ts_data = timestamp_query.get_timestamp_result().await?;
-        let ts_period = pipeline.gpu.queue.get_timestamp_period();
+        let ts_period = pipeline.gpu.queue.get_timestamp_period() as f64;
+
+        // Accumulator is (total_time, real_count)
+        let (total_time_spent, real_count) = ts_data.chunks(2).fold(
+            (0, 0),
+            |(total_time, real_count), times| {
+                let start_time = times[0];
+                let end_time = times[1];
+                let (time, is_invalid) = end_time.overflowing_sub(start_time);
+                if is_invalid {
+                    println!(
+                        "overflow! start: {}, end: {}",
+                        start_time, end_time
+                    );
+                    (total_time, real_count)
+                } else {
+                    println!(
+                        "GOOD!  time: {}\t total_time: {}",
+                        time,
+                        total_time + time
+                    );
+                    println!(" start: {}, end: {}", start_time, end_time);
+                    (total_time + time, real_count + 1)
+                }
+            },
+        );
+
+        println!(
+            "Total time: {}\t Real count: {}\nTotal time as f64: {}\nts_period: {}",
+            total_time_spent, real_count, total_time_spent as f64, ts_period
+        );
+        let total_time_spent = (total_time_spent as f64) * ts_period;
+
+        // TODO: Total count is the amount of compute passes, not the real count, so we have to fix
+        // that.
+        //
+        // Also maybe clean up code?
 
         Ok(BenchmarkResults {
-            count: self.count,
-            total_time_spent: u64::wrapping_sub(ts_data[1], ts_data[0]) as f64
-                * (ts_period as f64),
+            count: real_count,
+            total_time_spent,
         })
     }
 
@@ -153,41 +199,63 @@ impl Benchmark<'_> {
         encoder.finish()
     }
 
-    /// Benchmark compute pass
-    fn benchmark_pass(
+    /// Benchmark compute passes + end callback commands
+    fn benchmark_passes(
         &self,
         pipeline: &BenchmarkComputePipeline,
         timestamp_query: &TimestampQuery,
     ) -> CommandBuffer {
-        let query_set = &timestamp_query.query_set;
+        let passes_num = self.count / MAX_COUNT_BETWEEN_QUERIES;
 
         let mut encoder = pipeline
             .gpu
             .device
             .create_command_encoder(&CommandEncoderDescriptor { label: None });
 
-        let mut bench_pass =
-            encoder.begin_compute_pass(&ComputePassDescriptor {
-                label: None,
-                timestamp_writes: Some(ComputePassTimestampWrites {
-                    query_set: &query_set,
-                    beginning_of_pass_write_index: Some(0),
-                    end_of_pass_write_index: Some(1),
-                }),
-            });
+        for pass in 0..=passes_num {
+            let (query_set, begin_index, end_index) =
+                timestamp_query.get_query_set(pass);
 
-        bench_pass.set_pipeline(&pipeline.pipeline);
-        bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+            let mut bench_pass =
+                encoder.begin_compute_pass(&ComputePassDescriptor {
+                    label: None,
+                    timestamp_writes: Some(ComputePassTimestampWrites {
+                        query_set: &query_set,
+                        beginning_of_pass_write_index: Some(begin_index),
+                        end_of_pass_write_index: Some(end_index),
+                    }),
+                });
 
-        for _ in 0..self.count {
-            bench_pass.dispatch_workgroups(
-                pipeline.workgroups_dispatch.0,
-                pipeline.workgroups_dispatch.1,
-                pipeline.workgroups_dispatch.2,
-            )
+            bench_pass.set_pipeline(&pipeline.pipeline);
+            bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+
+            let amount = {
+                if pass < passes_num {
+                    MAX_COUNT_BETWEEN_QUERIES
+                } else {
+                    self.count % MAX_COUNT_BETWEEN_QUERIES
+                }
+            };
+
+            // Can happen if the count == MAX_COUNT_BETWEEN_QUERIES
+            if amount == 0 {
+                break;
+            }
+
+            println!("Adding pass i={} with {} runs", pass, amount);
+
+            for _ in 0..amount {
+                bench_pass.dispatch_workgroups(
+                    pipeline.workgroups_dispatch.0,
+                    pipeline.workgroups_dispatch.1,
+                    pipeline.workgroups_dispatch.2,
+                )
+            }
+
+            // Already gets dropped but leaving here as a reminder in case I
+            // change stuff around
+            // drop(bench_pass) // must be dropped before encoding more commands
         }
-
-        drop(bench_pass); // has to be dropped before encoding more commands
 
         if let Some(callback) = self.finalize_encoder_callback {
             callback(&mut encoder)
@@ -203,7 +271,7 @@ impl Benchmark<'_> {
         timestamp_query: &TimestampQuery,
     ) -> CommandBuffer {
         let TimestampQuery {
-            query_set,
+            query_sets,
             query_buf,
             query_staging_buf,
         } = timestamp_query;
@@ -213,71 +281,129 @@ impl Benchmark<'_> {
             .device
             .create_command_encoder(&CommandEncoderDescriptor { label: None });
 
-        encoder.resolve_query_set(
-            &query_set,
-            0..(TimestampQuery::COUNT as u32),
-            &query_buf,
-            0,
-        );
-        encoder.copy_buffer_to_buffer(
-            &query_buf,
-            0,
-            &query_staging_buf,
-            0,
-            (TimestampQuery::COUNT * size_of::<u64>()) as u64,
-        );
+        let num_runs = (self.count + MAX_COUNT_BETWEEN_QUERIES - 1)
+            / MAX_COUNT_BETWEEN_QUERIES;
+        for (i, query_set) in query_sets.iter().enumerate() {
+            let offset = (i * (wgpu::QUERY_SET_MAX_QUERIES as usize)) as u64;
+            let amount = {
+                if i < (query_sets.len() - 1) {
+                    wgpu::QUERY_SET_MAX_QUERIES as usize
+                } else {
+                    (num_runs * 2) % (wgpu::QUERY_SET_MAX_QUERIES as usize)
+                }
+            };
+
+            println!(
+                "Resolving query set i={} with offset {} and amount {}",
+                i, offset, amount
+            );
+
+            encoder.resolve_query_set(
+                &query_set,
+                0..(amount as u32),
+                &query_buf,
+                offset,
+            );
+            encoder.copy_buffer_to_buffer(
+                &query_buf,
+                offset,
+                &query_staging_buf,
+                offset,
+                (amount * size_of::<u64>()) as u64,
+            );
+        }
 
         encoder.finish()
     }
 }
 
-/// Utility struct for passing around the query set and buffers needed to add
+/// Utility struct for passing around the query sets and buffers needed to add
 /// timestamp queries to the [Benchmark] compute passes.
 struct TimestampQuery {
-    /// The timestamp query set
-    query_set: QuerySet,
-    /// Buffer where the timestamp query gets resolved.
+    /// The timestamp query sets
+    query_sets: Vec<QuerySet>,
+    /// Buffer where the timestamp queries gets resolved.
     /// Flags: COPY_SRC | QUERY_RESOLVE,
     query_buf: wgpu::Buffer,
-    /// Mappable buffer to read the query results.
+    /// Mappable buffer to read the queries results.
     /// Flags: COPY_SRC | QUERY_RESOLVE,
     query_staging_buf: AsyncBuffer,
 }
 
 impl TimestampQuery {
-    const COUNT: usize = 2;
+    fn new(device: &AsyncDevice, count: usize) -> Self {
+        let num_runs =
+            (count + MAX_COUNT_BETWEEN_QUERIES - 1) / MAX_COUNT_BETWEEN_QUERIES;
 
-    fn new(device: &AsyncDevice) -> Self {
-        let query_set = device.create_query_set(&wgpu::QuerySetDescriptor {
-            label: Some("Timestamp Query Set"),
-            count: Self::COUNT as u32,
-            ty: QueryType::Timestamp,
-        });
+        let number_of_full_query_sets =
+            (num_runs * 2) / (wgpu::QUERY_SET_MAX_QUERIES as usize);
+
+        let remainder =
+            ((num_runs * 2) % (wgpu::QUERY_SET_MAX_QUERIES as usize)) as u32;
+
+        let total_count = number_of_full_query_sets + remainder as usize;
+
+        println!(
+                "Creating {} full query sets with maybe a remainder set with {} elements", number_of_full_query_sets, remainder,
+            );
+
+        let mut query_sets: Vec<QuerySet> = (0..number_of_full_query_sets)
+            .map(|_| {
+                device.create_query_set(&wgpu::QuerySetDescriptor {
+                    label: Some("Timestamp Query Set"),
+                    count: wgpu::QUERY_SET_MAX_QUERIES,
+                    ty: QueryType::Timestamp,
+                })
+            })
+            .collect();
+
+        if remainder > 0 {
+            query_sets.push(device.create_query_set(
+                &wgpu::QuerySetDescriptor {
+                    label: Some("Timestamp Query Set"),
+                    count: remainder,
+                    ty: QueryType::Timestamp,
+                },
+            ))
+        }
 
         let query_buf = (**device).create_buffer(&wgpu::BufferDescriptor {
             label: None,
-            size: (Self::COUNT * size_of::<u64>()) as u64,
+            size: (total_count * size_of::<u64>()) as u64,
             usage: wgpu::BufferUsages::COPY_SRC
                 | wgpu::BufferUsages::QUERY_RESOLVE,
             mapped_at_creation: false,
         });
         let query_staging_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: None,
-            size: (Self::COUNT * size_of::<u64>()) as u64,
+            size: (total_count * size_of::<u64>()) as u64,
             usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
 
         Self {
-            query_set,
+            query_sets,
             query_buf,
             query_staging_buf,
         }
     }
 
+    /// Returns the appropiate query set for the given compute pass, then the
+    /// 2 indexes returned are the ones that should be passed to
+    /// `beginning_of_pass_write_index` and `end_of_pass_write_index`
+    /// of the [ComputePassTimestampWrites]
+    fn get_query_set(&self, pass: usize) -> (&QuerySet, u32, u32) {
+        let query_set_i = (pass * 2) / (wgpu::QUERY_SET_MAX_QUERIES as usize);
+        let start_index =
+            ((pass * 2) % (wgpu::QUERY_SET_MAX_QUERIES as usize)) as u32;
+        let end_index = start_index + 1;
+
+        (&self.query_sets[query_set_i], start_index, end_index)
+    }
+
     async fn get_timestamp_result<'a>(
         &'a self,
-    ) -> Result<[u64; Self::COUNT], MapTimestampResultError> {
+    ) -> Result<Box<[u64]>, MapTimestampResultError> {
         let timestamp_query_slice = self.query_staging_buf.slice(..);
 
         timestamp_query_slice
@@ -285,12 +411,11 @@ impl TimestampQuery {
             .await
             .map_err(|_| MapTimestampResultError)?;
 
-        let ts_data: [u64; Self::COUNT] = {
+        let ts_data: Box<[u64]> = {
             let ts_data_raw: &[u8] = &*timestamp_query_slice.get_mapped_range();
             bytemuck::cast_slice(&ts_data_raw)
                 .to_vec()
-                .try_into()
-                .unwrap()
+                .into_boxed_slice()
         };
 
         self.query_staging_buf.unmap();
