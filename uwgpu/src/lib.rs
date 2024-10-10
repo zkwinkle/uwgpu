@@ -22,7 +22,7 @@ mod pipeline;
 pub use gpu::*;
 pub use pipeline::*;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wasm")]
 mod wasm_utils;
 
 /// According to https://www.w3.org/TR/webgpu/#timestamp, timestamp queries can
@@ -156,8 +156,8 @@ impl Benchmark<'_> {
         );
         let total_time_spent = (total_time_spent as f64) * ts_period;
 
-        // TODO: Total count is the amount of compute passes, not the real count, so we have to fix
-        // that.
+        // TODO: Total count is the amount of compute passes, not the real
+        // count, so we have to fix that.
         //
         // Also maybe clean up code?
 
@@ -427,6 +427,7 @@ impl TimestampQuery {
 /// There was an error mapping the results of the timestamp query buffer, which
 /// is needed in order to get the benchmark's timing information.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapTimestampResultError;
 
 #[derive(Clone, Copy, Debug)]

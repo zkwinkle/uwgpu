@@ -5,9 +5,8 @@ use std::collections::HashMap;
 
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CompilationInfo, CompilationMessage, CompilationMessageType,
-    ComputePipelineDescriptor, ShaderModule, ShaderModuleDescriptor,
-    ShaderSource,
+    CompilationInfo, ComputePipelineDescriptor, ShaderModule,
+    ShaderModuleDescriptor, ShaderSource,
 };
 
 use crate::gpu::GPUContext;
@@ -43,17 +42,6 @@ impl<'a> BenchmarkComputePipeline<'a> {
 
         let shader_module = params.gpu.device.create_shader_module(shader);
         check_shader_compilation_errors(&shader_module).await?;
-
-        let compilation_info = shader_module.get_compilation_info().await;
-        if compilation_info
-            .messages
-            .iter()
-            .any(|msg| msg.message_type == CompilationMessageType::Error)
-        {
-            return Err(CreatePipelineError::ShaderCompilationError(
-                compilation_info.messages,
-            ));
-        }
 
         let pipeline = params.gpu.device.create_compute_pipeline(
             &ComputePipelineDescriptor {
@@ -149,10 +137,14 @@ async fn check_shader_compilation_errors(
     if compilation_info
         .messages
         .iter()
-        .any(|msg| msg.message_type == CompilationMessageType::Error)
+        .any(|msg| msg.message_type == wgpu::CompilationMessageType::Error)
     {
         return Err(CreatePipelineError::ShaderCompilationError(
-            compilation_info.messages,
+            compilation_info
+                .messages
+                .into_iter()
+                .map(Into::into)
+                .collect(),
         ));
     } else {
         Ok(())
@@ -180,7 +172,75 @@ fn replace_shader_workgroup_variable<'a>(
 
 /// Error creating a [ComputePipeline]
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CreatePipelineError {
     /// Error compiling the shader
     ShaderCompilationError(Vec<CompilationMessage>),
+}
+
+/// A single message from the shader compilation process.
+///
+/// Roughly corresponds to [`GPUCompilationMessage`](https://www.w3.org/TR/webgpu/#gpucompilationmessage),
+/// except that the location uses UTF-8 for all positions.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct CompilationMessage {
+    /// The text of the message.
+    pub message: String,
+    /// The type of the message.
+    pub message_type: CompilationMessageType,
+    /// Where in the source code the message points at.
+    pub location: Option<SourceLocation>,
+}
+
+/// The type of a compilation message.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum CompilationMessageType {
+    /// An error message.
+    Error,
+    /// A warning message.
+    Warning,
+    /// An informational message.
+    Info,
+}
+
+/// A clone of [wgpu::SourceLocation] to implement serialize/deserialize on.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SourceLocation {
+    /// 1-based line number.
+    pub line_number: u32,
+    /// 1-based column in code units (in bytes) of the start of the span.
+    /// Remember to convert accordingly when displaying to the user.
+    pub line_position: u32,
+    /// 0-based Offset in code units (in bytes) of the start of the span.
+    pub offset: u32,
+    /// Length in code units (in bytes) of the span.
+    pub length: u32,
+}
+
+impl From<wgpu::CompilationMessage> for CompilationMessage {
+    fn from(other: wgpu::CompilationMessage) -> Self {
+        Self {
+            message: other.message,
+            message_type: match other.message_type {
+                wgpu::CompilationMessageType::Error => {
+                    CompilationMessageType::Error
+                }
+                wgpu::CompilationMessageType::Warning => {
+                    CompilationMessageType::Warning
+                }
+                wgpu::CompilationMessageType::Info => {
+                    CompilationMessageType::Info
+                }
+            },
+            location: other.location.map(|other| SourceLocation {
+                line_number: other.line_number,
+                line_position: other.line_position,
+                offset: other.offset,
+                length: other.length,
+            }),
+        }
+    }
 }

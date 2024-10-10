@@ -6,7 +6,7 @@ use wgpu::{
     util::{BufferInitDescriptor, DeviceExt, TextureDataOrder},
     Backends, BufferDescriptor, DeviceDescriptor, DeviceLostReason, Features,
     Instance, InstanceDescriptor, Limits, MemoryHints, PowerPreference,
-    RequestAdapterOptions, RequestDeviceError, Texture, TextureDescriptor,
+    RequestAdapterOptions, Texture, TextureDescriptor,
 };
 use wgpu_async::{AsyncBuffer, AsyncDevice, AsyncQueue};
 
@@ -65,7 +65,9 @@ impl GPUContext {
                 Default::default(),
             )
             .await
-            .map_err(|err| GetGPUContextError::RequestDevice(err))?;
+            .map_err(|err| {
+                GetGPUContextError::RequestDevice(err.to_string())
+            })?;
 
         let (device, queue) =
             wgpu_async::wrap(Arc::new(device), Arc::new(queue));
@@ -120,6 +122,7 @@ impl GPUContext {
 
 /// An error when trying to get a GPU context with [GPUContext::new]
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetGPUContextError {
     /// Failed to get an adapter, a possible reason could be because no backend
     /// was available.
@@ -128,8 +131,8 @@ pub enum GetGPUContextError {
     /// WebGPU.
     NoAdapter,
 
-    /// Failed to request the device, see [`RequestDeviceError`]
-    RequestDevice(RequestDeviceError),
+    /// Failed to request the device, originates from a [`RequestDeviceError`]
+    RequestDevice(String),
 
     /// The adapter doesn't support timestamp queries.
     ///

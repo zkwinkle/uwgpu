@@ -29,3 +29,25 @@ pub fn init_logger() {
         }
     }
 }
+
+use wasm_bindgen::prelude::*;
+
+use crate::{CreatePipelineError, GetGPUContextError, MapTimestampResultError};
+
+impl From<GetGPUContextError> for JsValue {
+    fn from(err: GetGPUContextError) -> JsValue {
+        serde_wasm_bindgen::to_value(&err).unwrap()
+    }
+}
+
+impl From<CreatePipelineError> for JsValue {
+    fn from(err: CreatePipelineError) -> JsValue {
+        serde_wasm_bindgen::to_value(&err).unwrap()
+    }
+}
+
+impl From<MapTimestampResultError> for JsValue {
+    fn from(err: MapTimestampResultError) -> JsValue {
+        serde_wasm_bindgen::to_value(&err).unwrap()
+    }
+}
