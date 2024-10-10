@@ -9,6 +9,7 @@ pub use wgpu_async;
 
 use std::mem::size_of;
 
+use thiserror::Error;
 use wgpu::{
     CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
     ComputePassDescriptor, ComputePassTimestampWrites, MapMode, QuerySet,
@@ -21,9 +22,6 @@ mod pipeline;
 
 pub use gpu::*;
 pub use pipeline::*;
-
-#[cfg(feature = "wasm")]
-mod wasm_utils;
 
 /// According to https://www.w3.org/TR/webgpu/#timestamp, timestamp queries can
 /// return negative time deltas in rare circumstances. To mitigate this effect,
@@ -74,6 +72,8 @@ pub struct Benchmark<'a> {
 ///
 /// All timing quantities are given in nanoseconds
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "wasm", wasm_bindgen::prelude::wasm_bindgen)]
 pub struct BenchmarkResults {
     /// Total iterations that counted towards the result, this can differ from
     /// the `count` field in the [Benchmark] that was ran due to the fact that
@@ -426,8 +426,10 @@ impl TimestampQuery {
 
 /// There was an error mapping the results of the timestamp query buffer, which
 /// is needed in order to get the benchmark's timing information.
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Error, Debug, Clone)]
+#[error(
+    "error mapping the results of the timestamp query in order to read them"
+)]
 pub struct MapTimestampResultError;
 
 #[derive(Clone, Copy, Debug)]

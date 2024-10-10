@@ -33,13 +33,10 @@ const BENCHMARK_ITERATIONS: usize = 100000;
 pub async fn buffer_sequential_benchmark(
     workgroup_size: u32,
 ) -> Result<BufferSequentialResults, BenchmarkError> {
-    let gpu = GPUContext::new(None)
-        .await
-        .map_err(|e| BenchmarkError::GPUContext(e))?;
+    let gpu = GPUContext::new(None).await?;
     let buffers = Buffers::new_with_random_inputs(&gpu);
-    let pipeline = buffer_sequential_pipeline(&gpu, &buffers, workgroup_size)
-        .await
-        .map_err(|e| BenchmarkError::PipelineCreation(e))?;
+    let pipeline =
+        buffer_sequential_pipeline(&gpu, &buffers, workgroup_size).await?;
 
     let results = Benchmark {
         warmup_count: BENCHMARK_WARMUP_COUNT,
@@ -47,14 +44,18 @@ pub async fn buffer_sequential_benchmark(
         finalize_encoder_callback: None,
     }
     .run(pipeline)
-    .await
-    .map_err(|e| BenchmarkError::MapTimestamp(e))?;
+    .await?;
 
     Ok(BufferSequentialResults(results))
 }
 
 /// Results from the matrix multiplication microbenchmark. See
 /// [buffer_sequential_benchmark].
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(transparent)
+)]
 pub struct BufferSequentialResults(BenchmarkResults);
 
 impl BufferSequentialResults {

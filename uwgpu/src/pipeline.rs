@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 
+use thiserror::Error;
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
     CompilationInfo, ComputePipelineDescriptor, ShaderModule,
@@ -171,19 +172,28 @@ fn replace_shader_workgroup_variable<'a>(
 }
 
 /// Error creating a [ComputePipeline]
-#[derive(Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Error)]
 pub enum CreatePipelineError {
     /// Error compiling the shader
+    #[error("error compiling shader")]
     ShaderCompilationError(Vec<CompilationMessage>),
 }
+
+//fn print_compilation_messages(messages: &[CompilationMessage]) {
+//    for message in messages {
+//        print!(match message.message_type {
+//    CompilationMessageType::Error => "Error: ",
+//    CompilationMessageType::Warning => "Warning: ",
+//    CompilationMessageType::Info => "Info: ",
+//})
+//    }
+//}
 
 /// A single message from the shader compilation process.
 ///
 /// Roughly corresponds to [`GPUCompilationMessage`](https://www.w3.org/TR/webgpu/#gpucompilationmessage),
 /// except that the location uses UTF-8 for all positions.
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompilationMessage {
     /// The text of the message.
     pub message: String,
@@ -195,7 +205,6 @@ pub struct CompilationMessage {
 
 /// The type of a compilation message.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CompilationMessageType {
     /// An error message.
     Error,
@@ -207,7 +216,6 @@ pub enum CompilationMessageType {
 
 /// A clone of [wgpu::SourceLocation] to implement serialize/deserialize on.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SourceLocation {
     /// 1-based line number.
     pub line_number: u32,

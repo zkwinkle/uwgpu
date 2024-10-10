@@ -27,16 +27,12 @@ const BENCHMARK_ITERATIONS: usize = 10;
 /// The workgroup size will dictate the size of workgroups used for the
 /// computation.
 pub async fn matmul_benchmark(
-    workgroup_size: &(u32, u32),
+    workgroup_size: (u32, u32),
 ) -> Result<MatmulResults, BenchmarkError> {
-    let gpu = GPUContext::new(None)
-        .await
-        .map_err(|e| BenchmarkError::GPUContext(e))?;
+    let gpu = GPUContext::new(None).await?;
     let buffers =
         Buffers::<BENCHMARK_MATRIX_DIMS>::new_with_random_inputs(&gpu);
-    let pipeline = matmul_pipeline(&gpu, &buffers, &workgroup_size)
-        .await
-        .map_err(|e| BenchmarkError::PipelineCreation(e))?;
+    let pipeline = matmul_pipeline(&gpu, &buffers, &workgroup_size).await?;
 
     let results = Benchmark {
         warmup_count: BENCHMARK_WARMUP_COUNT,
@@ -44,14 +40,18 @@ pub async fn matmul_benchmark(
         finalize_encoder_callback: None,
     }
     .run(pipeline)
-    .await
-    .map_err(|e| BenchmarkError::MapTimestamp(e))?;
+    .await?;
 
     Ok(MatmulResults(results))
 }
 
 /// Results from the matrix multiplication microbenchmark. See
 /// [matmul_benchmark].
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(transparent)
+)]
 pub struct MatmulResults(BenchmarkResults);
 
 impl MatmulResults {

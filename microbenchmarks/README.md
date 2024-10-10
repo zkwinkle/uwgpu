@@ -16,3 +16,4 @@ cargo test -p microbenchmarks
 ## Features
 
 - `serde`: Enables serialization via serde on common wgpu types.
+- `wasm`: Enables WASM support for the library.

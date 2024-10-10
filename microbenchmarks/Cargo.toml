@@ -7,12 +7,22 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-serde = ["uwgpu/serde"]
+serde = ["uwgpu/serde", "dep:serde"]
+wasm = ["serde", "uwgpu/wasm", "dep:getrandom", "dep:wasm-bindgen", "dep:wasm-bindgen-futures", "dep:serde-wasm-bindgen", "dep:console_error_panic_hook"]
 
 [dependencies]
 uwgpu = { path = "../uwgpu" }
 bytemuck = { workspace = true }
-rand = "0.8.5"
+rand = "0.8"
+thiserror = { workspace = true }
+
+# WASM dependencies
+getrandom = { version = "0.2", features = ["js"], optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde-wasm-bindgen = { version = "0.4", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+console_error_panic_hook = { version = "0.1.6", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

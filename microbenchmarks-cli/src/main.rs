@@ -34,7 +34,7 @@ async fn run_microbenchmark(
     match microbenchmark {
         Microbenchmarks::MatMul(params) => {
             for wg in params.workgroup {
-                let result = matmul_benchmark(&wg.into()).await?;
+                let result = matmul_benchmark(wg.into()).await?;
                 result.print_results(wg);
             }
         }

@@ -2,11 +2,9 @@
 
 use std::sync::Arc;
 
+use thiserror::Error;
 use wgpu::{
-    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder},
-    Backends, BufferDescriptor, DeviceDescriptor, DeviceLostReason, Features,
-    Instance, InstanceDescriptor, Limits, MemoryHints, PowerPreference,
-    RequestAdapterOptions, Texture, TextureDescriptor,
+    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder}, Backends, BufferDescriptor, DeviceDescriptor, DeviceLostReason, Features, Instance, InstanceDescriptor, Limits, MemoryHints, PowerPreference, RequestAdapterOptions, RequestDeviceError, Texture, TextureDescriptor
 };
 use wgpu_async::{AsyncBuffer, AsyncDevice, AsyncQueue};
 
@@ -66,7 +64,7 @@ impl GPUContext {
             )
             .await
             .map_err(|err| {
-                GetGPUContextError::RequestDevice(err.to_string())
+                GetGPUContextError::RequestDevice(err)
             })?;
 
         let (device, queue) =
@@ -121,26 +119,29 @@ impl GPUContext {
 }
 
 /// An error when trying to get a GPU context with [GPUContext::new]
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Error)]
 pub enum GetGPUContextError {
     /// Failed to get an adapter, a possible reason could be because no backend
     /// was available.
     ///
     /// For example, if this is running in a browser that doesn't support
     /// WebGPU.
+    #[error("failed to get an adapter")]
     NoAdapter,
 
     /// Failed to request the device, originates from a [`RequestDeviceError`]
-    RequestDevice(String),
+    #[error("failed to request the device")]
+    RequestDevice(#[from] RequestDeviceError),
 
     /// The adapter doesn't support timestamp queries.
     ///
     /// This feature is needed to time the microbenchmarks accurately,
     /// therefore if the feature is not available we treat it as an error.
+    #[error("adapter does not support timestamp queries")]
     DoesNotSupportTimestamps,
 
     /// The adapter doesn't support one of the features requested in the
     /// parameter to [GPUContext::new].
+    #[error("adapter does not support requested features")]
     DoesNotSupportRequestedFeatures(Features),
 }

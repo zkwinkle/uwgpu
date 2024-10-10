@@ -7,7 +7,7 @@ edition = "2021"
 spirv = ["wgpu/spirv"]
 naga-ir = ["wgpu/naga-ir"]
 serde = ["wgpu/serde", "dep:serde"]
-wasm = ["serde", "dep:console_error_panic_hook", "dep:web-sys", "dep:wasm-bindgen", "dep:serde-wasm-bindgen"]
+wasm = ["serde", "dep:web-sys", "dep:wasm-bindgen", "dep:serde-wasm-bindgen"]
 
 [dependencies]
 env_logger = { workspace = true }
@@ -15,11 +15,11 @@ log = { workspace = true }
 wgpu = { workspace = true }
 bytemuck = { workspace = true }
 wgpu-async = "22.1.0"
+thiserror = { workspace = true }
 
 # TODO: Figure out what to do about the error panic hook and other stuff
 serde = { version = "1.0", features = ["derive"], optional = true }
 serde-wasm-bindgen = { version = "0.4", optional = true }
 cfg-if = "1"
-console_error_panic_hook = { version = "0.1.6", optional = true }
 web-sys = { version = "0.3", features = ["console"], optional = true }
 wasm-bindgen = { version = "0.2", optional = true }
