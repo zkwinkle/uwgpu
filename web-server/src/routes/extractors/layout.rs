@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use axum::{
     async_trait,
     extract::{FromRequestParts, OriginalUri},
@@ -5,7 +7,7 @@ use axum::{
 };
 use maud::{html, Markup, DOCTYPE};
 
-use crate::components::css::STYLESHEET;
+use crate::components::{css::STYLESHEET, navbar::Navbar};
 //use crate::components::{navbar::Navbar, theme_selector::ThemeSelector};
 
 /// Defines the base layout of a page that will wrap its contents with container
@@ -18,10 +20,6 @@ use crate::components::css::STYLESHEET;
 /// }
 /// ```
 pub struct Layout {
-    #[expect(
-        unused,
-        reason = "Will probably get used once I have a navbar or something"
-    )]
     uri: OriginalUri,
 }
 
@@ -51,12 +49,15 @@ impl Layout {
                 meta name="viewport" content="width=device-width, initial-scale=1";
 
             }
-            div id="theme-container" {
+            div id="theme-container" class="light" {
                 div class="container" {
-                    header {
-                        h1 { "wgpu experiments WIP" }
+                    (Navbar::from_uri(self.uri.deref()))
+                    div class="content-container" {
+                        header {
+                            h1 { "wgpu experiments WIP" }
+                        }
+                        (content)
                     }
-                    (content)
                 }
             }
         }

@@ -1,2 +1,2 @@
 pub mod css;
-// pub mod navbar;
+pub mod navbar;

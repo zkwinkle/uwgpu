@@ -21,19 +21,19 @@
 
 .light {
 	--base00: #ffffff;
-	--base01: #e0e0e0;
-	--base02: #c5c8c6;
-	--base03: #b4b7b4;
-	--base04: #969896;
-	--base05: #373b41;
-	--base06: #282a2e;
-	--base07: #1d1f21;
-	--base08: #CC342B;
-	--base09: #F96A38;
-	--base0A: #FBA922;
-	--base0B: #198844;
-	--base0C: #3971ED;
-	--base0D: #3971ED;
-	--base0E: #A36AC7;
-	--base0F: #3971ED;
+	--base01: #fdfcfa;
+	--base02: #f6f0e8;
+	--base03: #c7b9a1;
+	--base04: #423827;
+	--base05: #292319;
+	--base06: #1d1911;
+	--base07: #050403;
+	--base08: #C23C3C;
+	--base09: #E28C87;
+	--base0A: #E6AD80;
+	--base0B: #96A977;
+	--base0C: #5d89b7;
+	--base0D: #AC5757;
+	--base0E: #bb847b;
+	--base0F: #6464bb;
 }
