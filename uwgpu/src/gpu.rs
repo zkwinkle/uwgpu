@@ -4,12 +4,17 @@ use std::sync::Arc;
 
 use thiserror::Error;
 use wgpu::{
-    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder}, Backends, BufferDescriptor, DeviceDescriptor, DeviceLostReason, Features, Instance, InstanceDescriptor, Limits, MemoryHints, PowerPreference, RequestAdapterOptions, RequestDeviceError, Texture, TextureDescriptor
+    util::{BufferInitDescriptor, DeviceExt, TextureDataOrder},
+    AdapterInfo, Backends, BufferDescriptor, DeviceDescriptor,
+    DeviceLostReason, Features, Instance, InstanceDescriptor, Limits,
+    MemoryHints, PowerPreference, RequestAdapterOptions, RequestDeviceError,
+    Texture, TextureDescriptor,
 };
 use wgpu_async::{AsyncBuffer, AsyncDevice, AsyncQueue};
 
 /// Represents a handle on a GPU device
 pub struct GPUContext {
+    pub(crate) adapter_info: AdapterInfo,
     pub(crate) device: AsyncDevice,
     pub(crate) queue: AsyncQueue,
 }
@@ -34,6 +39,8 @@ impl GPUContext {
         else {
             return Err(GetGPUContextError::NoAdapter);
         };
+
+        let adapter_info = adapter.get_info();
 
         let features = adapter.features();
 
@@ -63,14 +70,16 @@ impl GPUContext {
                 Default::default(),
             )
             .await
-            .map_err(|err| {
-                GetGPUContextError::RequestDevice(err)
-            })?;
+            .map_err(|err| GetGPUContextError::RequestDevice(err))?;
 
         let (device, queue) =
             wgpu_async::wrap(Arc::new(device), Arc::new(queue));
 
-        Ok(GPUContext { device, queue })
+        Ok(GPUContext {
+            device,
+            queue,
+            adapter_info,
+        })
     }
 
     /// Set the [device lost

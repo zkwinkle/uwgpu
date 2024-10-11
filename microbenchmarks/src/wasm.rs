@@ -19,30 +19,16 @@ pub async fn setup() {
 pub async fn wasm_matmul_benchmark(
     workgroup_size_x: u32,
     workgroup_size_y: u32,
-) -> Result<JsValue, JsError> {
-    Ok(matmul_benchmark((workgroup_size_x, workgroup_size_y))
-        .await?
-        .into())
-}
-
-impl From<MatmulResults> for JsValue {
-    fn from(value: MatmulResults) -> JsValue {
-        serde_wasm_bindgen::to_value(&value).unwrap()
-    }
+) -> Result<MatmulResults, JsError> {
+    Ok(matmul_benchmark((workgroup_size_x, workgroup_size_y)).await?)
 }
 
 #[wasm_bindgen]
 /// WASM compatible version of [buffer_sequential_benchmark]
 pub async fn wasm_buffer_sequential_benchmark(
     workgroup_size: u32,
-) -> Result<JsValue, JsError> {
+) -> Result<BufferSequentialResults, JsError> {
     Ok(buffer_sequential_benchmark(workgroup_size).await?.into())
-}
-
-impl From<BufferSequentialResults> for JsValue {
-    fn from(value: BufferSequentialResults) -> JsValue {
-        serde_wasm_bindgen::to_value(&value).unwrap()
-    }
 }
 
 /// Shadow println! when compiling to WASM

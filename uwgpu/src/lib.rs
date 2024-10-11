@@ -1,6 +1,8 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
+#![feature(cfg_eval)]
 
+use adapter_info::AdapterInfo;
 // Re-export so that users of this library can use wgpu types.
 // Upgrading wgpu major version means a semver breaknig change for this library
 // as well. Could use my own type wrappers to avoid that. Idea to dwell on...
@@ -17,6 +19,10 @@ use wgpu::{
 };
 use wgpu_async::{AsyncBuffer, AsyncDevice};
 
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::*;
+
+mod adapter_info;
 mod gpu;
 mod pipeline;
 
@@ -71,9 +77,10 @@ pub struct Benchmark<'a> {
 /// Results from executing a benchmark with [Benchmark::run].
 ///
 /// All timing quantities are given in nanoseconds
-#[derive(Debug)]
+#[cfg_eval]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen::prelude::wasm_bindgen)]
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct BenchmarkResults {
     /// Total iterations that counted towards the result, this can differ from
     /// the `count` field in the [Benchmark] that was ran due to the fact that
@@ -85,8 +92,13 @@ pub struct BenchmarkResults {
 
     /// Total time spent executing the benchmark.
     pub total_time_spent: f64,
+
+    /// Information about the adapter used in the benchmark.
+    #[cfg_attr(feature = "wasm", wasm_bindgen(getter_with_clone))]
+    pub adapter_info: AdapterInfo,
 }
 
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl BenchmarkResults {
     /// Get the total time spent in the time unit given.
     pub fn total_time(&self, unit: TimeUnit) -> f64 {
@@ -125,7 +137,7 @@ impl Benchmark<'_> {
         let ts_data = timestamp_query.get_timestamp_result().await?;
         let ts_period = pipeline.gpu.queue.get_timestamp_period() as f64;
 
-        // Accumulator is (total_time, real_count)
+        // Accumulator inside fold is (total_time, real_count)
         let (total_time_spent, real_count) = ts_data.chunks(2).fold(
             (0, 0),
             |(total_time, real_count), times| {
@@ -156,14 +168,10 @@ impl Benchmark<'_> {
         );
         let total_time_spent = (total_time_spent as f64) * ts_period;
 
-        // TODO: Total count is the amount of compute passes, not the real
-        // count, so we have to fix that.
-        //
-        // Also maybe clean up code?
-
         Ok(BenchmarkResults {
             count: real_count,
             total_time_spent,
+            adapter_info: pipeline.gpu.adapter_info.clone().into(),
         })
     }
 
@@ -432,9 +440,10 @@ impl TimestampQuery {
 )]
 pub struct MapTimestampResultError;
 
-#[derive(Clone, Copy, Debug)]
 /// Used for [BenchmarkResults] methods to indicate which unit to get the
 /// results in.
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub enum TimeUnit {
     /// 1s
     Second,

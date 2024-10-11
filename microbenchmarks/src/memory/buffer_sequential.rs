@@ -49,15 +49,26 @@ pub async fn buffer_sequential_benchmark(
     Ok(BufferSequentialResults(results))
 }
 
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::*;
+
 /// Results from the matrix multiplication microbenchmark. See
 /// [buffer_sequential_benchmark].
+///
+/// Wraps a [BenchmarkResults] with some convenience methods.
+#[cfg_eval]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(transparent)
 )]
-pub struct BufferSequentialResults(BenchmarkResults);
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+pub struct BufferSequentialResults(
+    #[cfg_attr(feature = "wasm", wasm_bindgen(getter_with_clone))]
+    pub  BenchmarkResults,
+);
 
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl BufferSequentialResults {
     /// Get the total amount of time in seconds spent executing the
     /// microbenchmark

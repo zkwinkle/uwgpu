@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
+#![feature(cfg_eval)]
 
 use thiserror::Error;
 use uwgpu::{CreatePipelineError, GetGPUContextError, MapTimestampResultError};

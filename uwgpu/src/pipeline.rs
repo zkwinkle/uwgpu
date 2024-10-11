@@ -6,8 +6,8 @@ use std::collections::HashMap;
 use thiserror::Error;
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CompilationInfo, ComputePipelineDescriptor, ShaderModule,
-    ShaderModuleDescriptor, ShaderSource,
+    CompilationInfo, CompilationMessage, ComputePipelineDescriptor,
+    ShaderModule, ShaderModuleDescriptor, ShaderSource,
 };
 
 use crate::gpu::GPUContext;
@@ -177,78 +177,4 @@ pub enum CreatePipelineError {
     /// Error compiling the shader
     #[error("error compiling shader")]
     ShaderCompilationError(Vec<CompilationMessage>),
-}
-
-//fn print_compilation_messages(messages: &[CompilationMessage]) {
-//    for message in messages {
-//        print!(match message.message_type {
-//    CompilationMessageType::Error => "Error: ",
-//    CompilationMessageType::Warning => "Warning: ",
-//    CompilationMessageType::Info => "Info: ",
-//})
-//    }
-//}
-
-/// A single message from the shader compilation process.
-///
-/// Roughly corresponds to [`GPUCompilationMessage`](https://www.w3.org/TR/webgpu/#gpucompilationmessage),
-/// except that the location uses UTF-8 for all positions.
-#[derive(Debug, Clone)]
-pub struct CompilationMessage {
-    /// The text of the message.
-    pub message: String,
-    /// The type of the message.
-    pub message_type: CompilationMessageType,
-    /// Where in the source code the message points at.
-    pub location: Option<SourceLocation>,
-}
-
-/// The type of a compilation message.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CompilationMessageType {
-    /// An error message.
-    Error,
-    /// A warning message.
-    Warning,
-    /// An informational message.
-    Info,
-}
-
-/// A clone of [wgpu::SourceLocation] to implement serialize/deserialize on.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct SourceLocation {
-    /// 1-based line number.
-    pub line_number: u32,
-    /// 1-based column in code units (in bytes) of the start of the span.
-    /// Remember to convert accordingly when displaying to the user.
-    pub line_position: u32,
-    /// 0-based Offset in code units (in bytes) of the start of the span.
-    pub offset: u32,
-    /// Length in code units (in bytes) of the span.
-    pub length: u32,
-}
-
-impl From<wgpu::CompilationMessage> for CompilationMessage {
-    fn from(other: wgpu::CompilationMessage) -> Self {
-        Self {
-            message: other.message,
-            message_type: match other.message_type {
-                wgpu::CompilationMessageType::Error => {
-                    CompilationMessageType::Error
-                }
-                wgpu::CompilationMessageType::Warning => {
-                    CompilationMessageType::Warning
-                }
-                wgpu::CompilationMessageType::Info => {
-                    CompilationMessageType::Info
-                }
-            },
-            location: other.location.map(|other| SourceLocation {
-                line_number: other.line_number,
-                line_position: other.line_position,
-                offset: other.offset,
-                length: other.length,
-            }),
-        }
-    }
 }
