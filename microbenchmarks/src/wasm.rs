@@ -28,7 +28,7 @@ pub async fn wasm_matmul_benchmark(
 pub async fn wasm_buffer_sequential_benchmark(
     workgroup_size: u32,
 ) -> Result<BufferSequentialResults, JsError> {
-    Ok(buffer_sequential_benchmark(workgroup_size).await?.into())
+    Ok(buffer_sequential_benchmark(workgroup_size).await?)
 }
 
 /// Shadow println! when compiling to WASM

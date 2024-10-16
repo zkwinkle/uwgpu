@@ -9,13 +9,13 @@ use adapter_info::AdapterInfo;
 pub use wgpu;
 pub use wgpu_async;
 
-use std::mem::size_of;
+use std::{mem::size_of, ops::Deref};
 
 use thiserror::Error;
 use wgpu::{
     CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
     ComputePassDescriptor, ComputePassTimestampWrites, MapMode, QuerySet,
-    QueryType,
+    QueryType, Queue,
 };
 use wgpu_async::{AsyncBuffer, AsyncDevice};
 
@@ -128,7 +128,10 @@ impl Benchmark<'_> {
         let resolve_timestamp_pass =
             self.timestamp_pass(&pipeline, &timestamp_query);
 
-        pipeline.gpu.queue.submit([
+        // Chromium will panick if we don't deref to the regular Queue
+        // for some reason.
+        let queue: &Queue = pipeline.gpu.queue.deref();
+        queue.submit([
             warmup_command_buf,
             benchmark_command_buf,
             resolve_timestamp_pass,
@@ -224,19 +227,6 @@ impl Benchmark<'_> {
             let (query_set, begin_index, end_index) =
                 timestamp_query.get_query_set(pass);
 
-            let mut bench_pass =
-                encoder.begin_compute_pass(&ComputePassDescriptor {
-                    label: None,
-                    timestamp_writes: Some(ComputePassTimestampWrites {
-                        query_set: &query_set,
-                        beginning_of_pass_write_index: Some(begin_index),
-                        end_of_pass_write_index: Some(end_index),
-                    }),
-                });
-
-            bench_pass.set_pipeline(&pipeline.pipeline);
-            bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
-
             let amount = {
                 if pass < passes_num {
                     MAX_COUNT_BETWEEN_QUERIES
@@ -249,6 +239,19 @@ impl Benchmark<'_> {
             if amount == 0 {
                 break;
             }
+
+            let mut bench_pass =
+                encoder.begin_compute_pass(&ComputePassDescriptor {
+                    label: None,
+                    timestamp_writes: Some(ComputePassTimestampWrites {
+                        query_set: &query_set,
+                        beginning_of_pass_write_index: Some(begin_index),
+                        end_of_pass_write_index: Some(end_index),
+                    }),
+                });
+
+            bench_pass.set_pipeline(&pipeline.pipeline);
+            bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
 
             println!("Adding pass i={} with {} runs", pass, amount);
 

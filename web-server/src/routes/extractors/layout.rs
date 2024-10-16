@@ -53,9 +53,6 @@ impl Layout {
                 div class="container" {
                     (Navbar::from_uri(self.uri.deref()))
                     div class="content-container" {
-                        header {
-                            h1 { "wgpu experiments WIP" }
-                        }
                         (content)
                     }
                 }
