@@ -34,7 +34,7 @@ pub use pipeline::*;
 /// we run many short compute passes to get many timestamp measurements and
 /// ignore any invalid ones. This constant is the max amount of shader
 /// invocations we'll do per compute pass.
-const MAX_COUNT_BETWEEN_QUERIES: usize = 10;
+const MAX_COUNT_BETWEEN_QUERIES: usize = 100;
 
 /// This type represents the parameters for running a benchmark.
 ///
