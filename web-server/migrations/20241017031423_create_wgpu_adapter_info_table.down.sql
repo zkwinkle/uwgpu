@@ -2,5 +2,5 @@
 
 DROP TABLE wgpu_adapter_info CASCADE;
 
-DROP TYPE WGPU_BACKEND;
-DROP TYPE WGPU_DEVICE_TYPE;
+DROP TYPE wgpu_backend;
+DROP TYPE wgpu_device_type;
