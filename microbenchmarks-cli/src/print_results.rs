@@ -44,6 +44,6 @@ impl PrintableResults<1> for BufferSequentialResults {
     fn print_info(&self) {
         println!("Total time spent: {:.3}s", self.total_time_s());
         println!("Time per iteration: {:.4}ms", self.time_per_iteration_ms(),);
-        println!("Bandwidth (GB/s): {:.3}", self.gb_per_s());
+        println!("Bandwidth (GB/s): {:.3}", self.mb_per_s() / 1000.0);
     }
 }
