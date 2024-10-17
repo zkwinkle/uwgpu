@@ -35,3 +35,11 @@ Website can be found at \[TODO\]
 These must be set when running in production
 
 - `PUBLIC_DIR`: Path to the `public` directory.
+
+## Adding migrations
+
+Use the `sqlx` command. For examlpe in my local development environment:
+
+```sh
+sqlx migrate run --database-url 'postgres://postgres@localhost/uwgp-local'
+```
