@@ -4,6 +4,8 @@ use std::path::Path;
 pub struct AppConfig {
     /// Directory that holds static files like WASM modules
     pub public_dir: &'static Path,
+    /// Database URL
+    pub database_url: &'static str,
 }
 
 /// Create AppConfig to use when running the server binary.
@@ -11,7 +13,12 @@ pub fn create_app_config_from_env() -> AppConfig {
     let public_dir_str: &'static str = Box::new(read_env_public_dir()).leak();
     let public_dir = Path::new(public_dir_str);
 
-    AppConfig { public_dir }
+    let database_url: &'static str = Box::new(read_env_database_url()).leak();
+
+    AppConfig {
+        public_dir,
+        database_url,
+    }
 }
 
 /// Read an environment variable, falling back on the default value only if the
@@ -32,4 +39,12 @@ fn read_env(var_name: &str, default_value_dev: &str) -> String {
 /// not found.
 fn read_env_public_dir() -> String {
     read_env("PUBLIC_DIR", "web-server/public")
+}
+
+/// # Panics
+///
+/// Panics when the "debug" feature is disabled and the environment variable is
+/// not found.
+fn read_env_database_url() -> String {
+    read_env("DATABASE_URL", "postgres://uwgpu-dev@localhost/uwgp-local")
 }
