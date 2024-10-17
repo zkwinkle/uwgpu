@@ -1,13 +1,16 @@
+use crate::data_store::non_empty_string::NonEmptyString;
+
 /// Wrapper for storing [AdapterInfo](uwgpu::wgpu::AdapterInfo) info.
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct DataStoreWgpuAdapterInfo {
     /// Adapter name
     ///
     /// As of October 2024, after testing this on a web target, it appears this
-    /// is always an empty string ("") in the browser.
+    /// is always an empty string (None) in the browser.
     ///
     /// This should be stored in a separate table to avoid doubly storing the
     /// same value (multiple people's computers might return the same name).
-    pub name: String,
+    pub name: Option<NonEmptyString>,
     /// Backend-specific vendor ID of the adapter.
     ///
     /// As of October 2024, after testing this on a web target, it appears this
@@ -26,24 +29,25 @@ pub struct DataStoreWgpuAdapterInfo {
     /// Driver name
     ///
     /// as of october 2024, after testing this on a web target, it appears this
-    /// is always an empty string ("") in the browser.
+    /// is always an empty string (None) in the browser.
     ///
     /// This should be stored in a separate table to avoid doubly storing the
     /// same value (multiple people's computers might return the same name).
-    pub driver: String,
+    pub driver: Option<NonEmptyString>,
     /// Driver info
     ///
     /// As of October 2024, after testing this on a web target, it appears this
-    /// is always an empty string ("") in the browser.
+    /// is always an empty string (None) in the browser.
     ///
     /// This should be stored in a separate table to avoid doubly storing the
     /// same value (multiple people's computers might return the same name).
-    pub driver_info: String,
+    pub driver_info: Option<NonEmptyString>,
     /// Backend used for device
     pub backend: DataStoreWgpuBackend,
 }
 
 /// Datastore wrapper for [Backend](uwgpu::wgpu::Backend) enum.
+#[derive(Debug, Clone, Copy)]
 pub enum DataStoreWgpuBackend {
     /// Vulkan API (Windows, Linux, Android, MacOS via
     /// `vulkan-portability`/MoltenVK)
@@ -60,6 +64,7 @@ pub enum DataStoreWgpuBackend {
 }
 
 /// Datastore wrapper for [DeviceType](uwgpu::wgpu::DeviceType) enum.
+#[derive(Debug, Clone, Copy)]
 pub enum DataStoreWgpuDeviceType {
     /// Other or Unknown.
     Unknown,

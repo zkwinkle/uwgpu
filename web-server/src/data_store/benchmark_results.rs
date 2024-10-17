@@ -6,14 +6,14 @@ mod computational;
 mod memory;
 
 /// Datastore version of a benchmark's execution results.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct DataStoreBenchmarkResults {
-    /// The id of the platform info record corresponding to these results.
-    /// See [DataStorePlatformInfo](super::platform_info::DataStorePlatformInfo)
-    pub platform_info_id: Uuid,
+    /// The id of the platform  record corresponding to these results.
+    /// See [DataStorePlatform](super::platform::DataStorePlatform)
+    pub platform_id: Uuid,
 
     /// Total iterations that counted towards the result
-    pub count: usize,
+    pub count: u32,
     /// Total time spent executing the benchmark.
     pub total_time_spent: f64,
 

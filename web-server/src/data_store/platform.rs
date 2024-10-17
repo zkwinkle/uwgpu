@@ -1,4 +1,4 @@
-use crate::data_store::platform_info::wgpu_adapter_info::DataStoreWgpuAdapterInfo;
+use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuAdapterInfo;
 use sqlx::types::Uuid;
 use user_agent_info::DataStoreUserAgentStringInfo;
 use webgpu_adapter_info::DataStoreWebGpuAdapterInfo;
