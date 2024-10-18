@@ -1,6 +1,8 @@
 use axum::http::Uri;
 use maud::{html, Markup, Render};
 
+use super::benchmark_page::MicrobenchmarkPage::*;
+
 /// Tab / Link in the navbar
 struct NavLink {
     name: &'static str,
@@ -10,79 +12,11 @@ struct NavLink {
 const TABS: &'static [NavLink] = &[
     NavLink {
         name: "Matrix Multiplication",
-        link: "/matmul",
+        link: Matmul.path(),
     },
     NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
-    },
-    NavLink {
-        name: "Buffer Sequential Copy",
-        link: "/buffer_sequential_copy",
+        name: "Buffer Sequential",
+        link: BufferSequential.path(),
     },
 ];
 
