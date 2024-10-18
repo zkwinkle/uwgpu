@@ -7,6 +7,9 @@ pub mod user_agent_info;
 pub mod webgpu_adapter_info;
 pub mod wgpu_adapter_info;
 
+mod interface;
+pub use interface::DataStorePlatformInterface;
+
 /// Datastore version of the platform info that we care to store for each
 /// execution run.
 pub struct DataStorePlatform {
@@ -27,4 +30,14 @@ pub struct DataStorePlatform {
     /// targets, which is also where it's most useful since the wgpu adapter
     /// info is lacking in those platforms.
     pub webgpu_adapter_info: Option<DataStoreWebGpuAdapterInfo>,
+}
+
+/// This structure describes a platform to create in the datastore.
+pub struct DataStoreCreatePlatform {
+    /// Available when user agent header is present.
+    pub user_agent: Option<DataStoreUserAgentStringInfo>,
+    /// Available when benchmark is executed in a web target.
+    pub webgpu_adapter_info: Option<DataStoreWebGpuAdapterInfo>,
+    /// Always available.
+    pub wgpu_adapter_info: DataStoreWgpuAdapterInfo,
 }

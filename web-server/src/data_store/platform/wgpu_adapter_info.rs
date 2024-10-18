@@ -47,7 +47,8 @@ pub struct DataStoreWgpuAdapterInfo {
 }
 
 /// Datastore wrapper for [Backend](uwgpu::wgpu::Backend) enum.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, sqlx::Type)]
+#[sqlx(type_name = "wgpu_backend")]
 pub enum DataStoreWgpuBackend {
     /// Vulkan API (Windows, Linux, Android, MacOS via
     /// `vulkan-portability`/MoltenVK)
@@ -64,7 +65,9 @@ pub enum DataStoreWgpuBackend {
 }
 
 /// Datastore wrapper for [DeviceType](uwgpu::wgpu::DeviceType) enum.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, sqlx::Type)]
+#[sqlx(type_name = "wgpu_device_type")]
+#[sqlx(rename_all = "snake_case")]
 pub enum DataStoreWgpuDeviceType {
     /// Other or Unknown.
     Unknown,
