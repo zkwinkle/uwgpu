@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO platform (user_agent_string_info_id, wgpu_adapter_info_id, webgpu_adapter_info_id)\n                VALUES ($1, $2, $3)\n                ON CONFLICT DO NOTHING\n                RETURNING platform_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "platform_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f2872d4bebb8c395111b051b16dad48bdaa9d7ab0286d063bdf07b98e212d047"
+}

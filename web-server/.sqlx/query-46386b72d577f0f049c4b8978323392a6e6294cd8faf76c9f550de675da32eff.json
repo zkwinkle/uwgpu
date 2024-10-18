@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO wgpu_adapter_info (name, vendor, device, device_type, driver, driver_info, backend)\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                ON CONFLICT DO NOTHING\n                RETURNING wgpu_adapter_info_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "wgpu_adapter_info_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4",
+        "Int4",
+        {
+          "Custom": {
+            "name": "wgpu_device_type",
+            "kind": {
+              "Enum": [
+                "unknown",
+                "integrated_gpu",
+                "discrete_gpu",
+                "virtual_gpu",
+                "cpu"
+              ]
+            }
+          }
+        },
+        "Varchar",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "wgpu_backend",
+            "kind": {
+              "Enum": [
+                "vulkan",
+                "metal",
+                "dx12",
+                "gl",
+                "browser_web_gpu"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "46386b72d577f0f049c4b8978323392a6e6294cd8faf76c9f550de675da32eff"
+}

@@ -23,6 +23,13 @@ To watch:
 cargo w
 ```
 
+To update DB cache for `sqlx` to check queries locally:
+```
+# From web-server dir
+cargo sqlx prepare --database-url 'postgres://postgres@localhost/uwg
+p-local'
+```
+
 ## Production
 
 For the production build, the `debug` flag must be disabled by disabling the

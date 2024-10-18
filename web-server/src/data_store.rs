@@ -1,6 +1,7 @@
 //! The datastore is an abstraction over the DB for writing/reading persistent
 //! data that the server needs.
 
+use benchmark_results::DataStoreBenchmarkResultsInterface;
 use platform::DataStorePlatformInterface;
 use sqlx::{pool::PoolConnection, PgPool};
 
@@ -10,7 +11,10 @@ mod platform;
 mod non_empty_string;
 
 /// Used to interface with the data store.
-pub trait DataStore: DataStorePlatformInterface {}
+pub trait DataStore:
+    DataStorePlatformInterface + DataStoreBenchmarkResultsInterface
+{
+}
 
 /// Datastore implementation backed by a Postgres connection pool.
 #[derive(Clone)]

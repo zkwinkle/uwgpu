@@ -1,14 +1,16 @@
 #[derive(Debug, Clone)]
 pub struct DataStoreMemoryBenchmark {
     /// The kind of memory benchmark this is
-    kind: DataStoreMemoryBenchmarkKind,
+    pub kind: DataStoreMemoryBenchmarkKind,
     /// Bandwidth of memory copied in bytes per second (B/s)
     ///
     /// Example: 1.05MB/s = 1_050_000.0
-    bandwidth: f64,
+    pub bandwidth: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, sqlx::Type)]
+#[sqlx(type_name = "memory_benchmark_kind")]
+#[sqlx(rename_all = "snake_case")]
 pub enum DataStoreMemoryBenchmarkKind {
     /// Buffer sequential memory accesses
     BufferSequential,

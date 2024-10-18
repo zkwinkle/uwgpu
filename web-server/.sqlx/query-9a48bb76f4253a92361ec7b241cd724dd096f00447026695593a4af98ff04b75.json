@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO user_agent_string_info (user_agent_id, user_agent_device_id, user_agent_os_id)\n                VALUES ($1, $2, $3)\n                ON CONFLICT DO NOTHING\n                RETURNING user_agent_string_info_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_agent_string_info_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9a48bb76f4253a92361ec7b241cd724dd096f00447026695593a4af98ff04b75"
+}

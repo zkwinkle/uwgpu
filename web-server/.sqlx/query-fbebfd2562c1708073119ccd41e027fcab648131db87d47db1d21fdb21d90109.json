@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO memory_benchmark (kind, bandwidth)\n                VALUES ($1, $2)\n                ON CONFLICT DO NOTHING\n                RETURNING memory_benchmark_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "memory_benchmark_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "memory_benchmark_kind",
+            "kind": {
+              "Enum": [
+                "buffer_sequential",
+                "buffer_shuffled",
+                "buffer_to_texture",
+                "texture_to_texture"
+              ]
+            }
+          }
+        },
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fbebfd2562c1708073119ccd41e027fcab648131db87d47db1d21fdb21d90109"
+}

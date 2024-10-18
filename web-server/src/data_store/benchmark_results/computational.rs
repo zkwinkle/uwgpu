@@ -1,12 +1,14 @@
 #[derive(Debug, Clone)]
 pub struct DataStoreComputationalBenchmark {
     /// The kind of computational benchmark this is
-    kind: DataStoreComputationalBenchmarkKind,
+    pub kind: DataStoreComputationalBenchmarkKind,
     /// FLOPS (Floating Point Operations Per Second)
-    flops: f64,
+    pub flops: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, sqlx::Type)]
+#[sqlx(type_name = "computational_benchmark_kind")]
+#[sqlx(rename_all = "snake_case")]
 pub enum DataStoreComputationalBenchmarkKind {
     Matmul,
     Reduction,

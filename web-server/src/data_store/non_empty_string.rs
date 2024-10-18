@@ -1,6 +1,5 @@
 //! See [NonEmptyString]
 
-
 /// Represents the storing of a non-empty string in the Database.
 ///
 /// This is used to disambiguate the meaning of [Option<NonEmptyString>].

@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO computational_benchmark (kind, flops)\n                VALUES ($1, $2)\n                ON CONFLICT DO NOTHING\n                RETURNING computational_benchmark_id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "computational_benchmark_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "computational_benchmark_kind",
+            "kind": {
+              "Enum": [
+                "matmul",
+                "reduction",
+                "convolution",
+                "scan"
+              ]
+            }
+          }
+        },
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0d462eed2ae854301f8bb425197f257e59f48cba67125bb6a941052da8c886d6"
+}

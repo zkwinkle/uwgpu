@@ -1,8 +1,8 @@
 --- UP ---
 
-CREATE TYPE wgpu_backend AS ENUM ('vulkan', 'metal', 'dx12', 'gl', 'browser_webgpu');
+CREATE TYPE wgpu_backend AS ENUM ('vulkan', 'metal', 'dx12', 'gl', 'browser_web_gpu');
 
-CREATE TYPE wgpu_device_type AS ENUM ('unknown', 'integrated_gpu', 'discrete_gpu', 'virtual_gpu', 'browser_webgpu');
+CREATE TYPE wgpu_device_type AS ENUM ('unknown', 'integrated_gpu', 'discrete_gpu', 'virtual_gpu', 'cpu');
 
 CREATE TABLE wgpu_adapter_info (
   wgpu_adapter_info_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,

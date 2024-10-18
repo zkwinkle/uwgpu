@@ -1,3 +1,3 @@
 --- DOWN ---
 
-DROP TABLE memory_benchmark CASCADE;
+DROP TABLE benchmark_results CASCADE;
