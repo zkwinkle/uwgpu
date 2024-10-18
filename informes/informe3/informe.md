@@ -40,34 +40,40 @@ avance de las tareas, esto ya que principalmente me he tenido que devolver a
 corregir ciertas características de las bibliotecas que creí ya haber
 finalizado y por estarme familiarizando con nuevas tecnologías.
 
-Concretamente, primero se identificó en la [especificación de
-WebGPU](https://www.w3.org/TR/webgpu/#timestamp) que el resultado de un
-timestamp (mecanismo utilizado para medir los tiempos de ejecución en el GPU)
-puede aleatoriamente dar resultados basura que no se pueden utilizar. Por lo
-tanto, se tuvo que cambiar el mecanismo que utiliza la biblioteca principal
-uwgpu para ejecutar microbenchmarks. Ahora en vez de ejecutar el microbenchmark
-todas las veces que el usuario pide en un solo "compute pass" y medir ese
-tiempo de ejecución, se ejecutan muchos "compute passes" pequeños y se suma el
-tiempo de ejecución de todos ellos; gracias a medir el tiempo con muchos
-timestamps podemos descartar cualquier valor de tiempo que no tenga sentido sin
-preocuparnos por perder la medición del microbenchmark completamente.
+Concretamente, primero se revisitó la actividad de implementar la biblioteca
+para microbenchmarks (800). Se revisitó porque se identificó en la
+[especificación de WebGPU](https://www.w3.org/TR/webgpu/#timestamp) que el
+resultado de un timestamp (mecanismo utilizado para medir los tiempos de
+ejecución en el GPU) puede aleatoriamente dar resultados basura que no se
+pueden utilizar. Por lo tanto, se tuvo que cambiar el mecanismo que utiliza la
+biblioteca principal uwgpu para ejecutar microbenchmarks. Ahora en vez de
+ejecutar el microbenchmark todas las veces que el usuario pide en un solo
+"compute pass" y medir ese tiempo de ejecución, se ejecutan muchos "compute
+passes" pequeños y se suma el tiempo de ejecución de todos ellos; gracias a
+medir el tiempo con muchos timestamps podemos descartar cualquier valor de
+tiempo que no tenga sentido sin preocuparnos por perder la medición del
+microbenchmark completamente.
 
-Segundo, al estar desarrollando el servidor que sirve la página web, al fin se
-pudo probar la biblioteca de microbenchmark en WASM en un navegador. Pero, al
-intentar compilarla para WASM inicialmente salieron muchos errores de
-incompatibilidad. Esto se debe a que no cualquier código puede compilarse para WASM y exponerse con interfaces a JavaScript. Por lo tanto se dedicó una
-cantidad considerable de tiempo a adaptar las bibliotecas para ser compatibles
-con ser compiladas a WASM.
+Segundo, se ha realizado mucho trabajo en implementar el servidor de la página
+web (actividad 1000). Al fin se pudo probar la biblioteca de microbenchmark en
+WASM en un navegador. Pero, al intentar compilarla para WASM inicialmente
+salieron muchos errores de incompatibilidad. Esto se debe a que no cualquier
+código puede compilarse para WASM y exponerse con interfaces a JavaScript. Por
+lo tanto se dedicó una cantidad considerable de tiempo a adaptar las
+bibliotecas para ser compatibles con ser compiladas a WASM.
 
 Tercero, definir el esquema de la base de datos de una manera que sea modificable
 a futuro, que pueda desplegar a mi servidor privado, e interactuar con ella desde
 Rust fueron retos técnicos nuevos para mí, por lo cual el desarrollo del servidor
-en general me ha tomado considerablemente más tiempo del planeado.
+en general me ha tomado considerablemente más tiempo del planeado. Esta tarea
+no se consideró por aparte sino que también forma parte de la actividad 1000.
 
 Finalmente, aparte de esas tareas retadoras, también se pudo avanzar de manera
 regular con algunas otras tareas como diseñar la estructura de la interfaz web
-e implementar estas páginas en el servidor.
+(601) e implementar estas páginas en el servidor (1000).
 
+No se realizaron variaciones con respecto al plan de proyecto, se mantienen las
+actividades ya definidas.
 
 # 3. Dificultades encontradas
 
