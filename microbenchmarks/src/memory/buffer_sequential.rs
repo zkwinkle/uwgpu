@@ -79,11 +79,11 @@ impl BufferSequentialResults {
         self.0.time_per_iteration(TimeUnit::Milli)
     }
 
-    /// Get the Bandwidth of memory copy in MB/s
-    pub fn mb_per_s(&self) -> f64 {
+    /// Get the Bandwidth of memory copy in bytes per second
+    pub fn bandwidth(&self) -> f64 {
         ((BENCHMARK_BUFFER_SIZE * std::mem::size_of::<u32>() * self.0.count)
             as f64)
-            / (self.total_time_s() * 1_000_000.0)
+            / self.total_time_s()
     }
 }
 
