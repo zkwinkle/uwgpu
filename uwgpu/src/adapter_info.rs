@@ -40,6 +40,14 @@ pub struct AdapterInfo {
     pub backend: Backend,
 }
 
+#[cfg(feature = "wasm")]
+#[wasm_bindgen]
+impl AdapterInfo {
+    pub fn to_js(&self) -> Result<JsValue, JsValue> {
+        Ok(serde_wasm_bindgen::to_value(self)?)
+    }
+}
+
 impl From<wgpu::AdapterInfo> for AdapterInfo {
     fn from(value: wgpu::AdapterInfo) -> Self {
         Self {

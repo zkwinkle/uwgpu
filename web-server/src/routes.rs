@@ -11,6 +11,8 @@ mod not_found;
 
 mod home;
 mod microbenchmark_page;
+mod post_results;
+
 use microbenchmark_page::microbenchmark_page;
 
 /// Create the main `Router` for this app.

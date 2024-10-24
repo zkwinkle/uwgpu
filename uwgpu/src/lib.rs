@@ -2,7 +2,6 @@
 #![deny(missing_docs)]
 #![feature(cfg_eval)]
 
-use adapter_info::AdapterInfo;
 // Re-export so that users of this library can use wgpu types.
 // Upgrading wgpu major version means a semver breaknig change for this library
 // as well. Could use my own type wrappers to avoid that. Idea to dwell on...
@@ -43,6 +42,7 @@ mod pipeline;
 
 pub use gpu::*;
 pub use pipeline::*;
+pub use adapter_info::AdapterInfo;
 
 /// According to https://www.w3.org/TR/webgpu/#timestamp, timestamp queries can
 /// return negative time deltas in rare circumstances. To mitigate this effect,

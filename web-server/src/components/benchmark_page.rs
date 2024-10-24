@@ -1,7 +1,8 @@
 use maud::{html, Markup, PreEscaped, Render};
+use serde::{Deserialize, Serialize};
 
 /// A page for a specific benchmark
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum MicrobenchmarkPage {
     Matmul,
     Reduction,
@@ -32,87 +33,123 @@ impl Render for MicrobenchmarkPage {
             div id="execution-results" {}
             script type="module" {
                 (PreEscaped(format!(r#"
-                  import init, {{ {benchmark_name}, TimeUnit }} from "./public/pkg/microbenchmarks.js";
+                import init, {{ {benchmark_name}, TimeUnit }} from "./public/pkg/microbenchmarks.js";
 
-                  let results_div = document.getElementById('execution-results');
-                  let results_header_interval = null;
-                  let results_header;
+                let results_div = document.getElementById('execution-results');
+                let results_header_interval = null;
+                let results_header;
 
-                  let button = document.getElementById('run_{name}_microbenchmark');
-                  button.addEventListener('click', async () => {{
-                      button.disabled = true;
-                      try {{
-                          results_div.innerHTML = "";
-                          await run_microbenchmark();
-                      }} catch (error) {{
-                          setTimeout(() => {{ throw error; }}, 100);
-                          let error_header = document.createElement('h2');
-                          error_header.textContent = "An error has ocurred!";
-                          results_div.appendChild(error_header);
-                          let error_message = document.createElement('p');
-                          error_message.textContent = error.toString();
-                          results_div.appendChild(error_message);
-                      }} finally {{
-                          button.disabled = false;
+                let button = document.getElementById('run_{name}_microbenchmark');
+                button.addEventListener('click', async () => {{
+                    button.disabled = true;
+                    try {{
+                        results_div.innerHTML = "";
+                        await run_microbenchmark();
+                    }} catch (error) {{
+                        let error_header = document.createElement('h2');
+                        error_header.textContent = "An error has ocurred!";
+                        results_div.appendChild(error_header);
+                        let error_message = document.createElement('p');
+                        error_message.textContent = error.toString();
+                        results_div.appendChild(error_message);
 
-                          if (results_header_interval != null) {{
-                              clearInterval(results_header_interval)
-                          }}
-                      }}
-                  }});
+                        setTimeout(() => {{ throw error; }}, 100);
+                    }} finally {{
+                        button.disabled = false;
 
-                  async function run_microbenchmark() {{
-                      await init();
-                      console.log("Init Complete!");
+                        if (results_header_interval != null) {{
+                            clearInterval(results_header_interval)
+                        }}
+                    }}
+                }});
 
-                      for (const workgroup_size of {workgroups_array}) {{
-                          results_header = document.createElement('h4');
-                          results_div.appendChild(results_header);
+                async function run_microbenchmark() {{
+                    await init();
+                    console.log("Init Complete!");
 
-                          results_header.textContent = "...";
+                    for (const workgroup_size of {workgroups_array}) {{
+                        results_header = document.createElement('h4');
+                        results_div.appendChild(results_header);
 
-                          let dotCount = 0;
+                        results_header.textContent = "...";
 
-                          // Animation for ... (while executing next benchmark)
-                          results_header_interval = setInterval(() => {{
-                            dotCount = (dotCount % 3) + 1;
-                            results_header.textContent = ".".repeat(dotCount);
-                          }}, 300);
+                        let dotCount = 0;
 
-                          console.log("workgroup size:", workgroup_size);
+                        // Animation for ... (while executing next benchmark)
+                        results_header_interval = setInterval(() => {{
+                          dotCount = (dotCount % 3) + 1;
+                          results_header.textContent = ".".repeat(dotCount);
+                        }}, 300);
 
-                          let result;
-                          if (Array.isArray(workgroup_size)) {{
-                              result = await {benchmark_name}(...workgroup_size);
-                          }} else {{
-                              result = await {benchmark_name}(workgroup_size);
-                          }}
+                        console.log("workgroup size:", workgroup_size);
 
-                          console.log("results:", result);
+                        let result;
+                        if (Array.isArray(workgroup_size)) {{
+                            result = await {benchmark_name}(...workgroup_size);
+                        }} else {{
+                            result = await {benchmark_name}(workgroup_size);
+                        }}
 
-                          clearInterval(results_header_interval);
-                          results_header_interval = null;
+                        post_results(result, workgroup_size);
 
-                          if (Array.isArray(workgroup_size)) {{
-                              results_header.textContent = "Workgroup size: " + workgroup_size.join('x');
-                          }} else {{
-                              results_header.textContent = "Workgroup size: " + workgroup_size;
-                          }}
+                        console.log("results:", result);
+                        console.log("wgpu adapter info json:", JSON.stringify(result[0].adapter_info.to_js()));
 
-                          let total_time_spent_p = document.createElement('p');
-                          total_time_spent_p.textContent = "Total time spent: " + result[0].total_time(TimeUnit.Second).toFixed(3) + "s";
-                          results_div.appendChild(total_time_spent_p);
+                        clearInterval(results_header_interval);
+                        results_header_interval = null;
 
-                          let time_per_iter_p = document.createElement('p');
-                          time_per_iter_p.textContent = "Time per iteration: " + result[0].time_per_iteration(TimeUnit.Milli).toFixed(3) + "ms";
-                          results_div.appendChild(time_per_iter_p);
+                        if (Array.isArray(workgroup_size)) {{
+                            results_header.textContent = "Workgroup size: " + workgroup_size.join('x');
+                        }} else {{
+                            results_header.textContent = "Workgroup size: " + workgroup_size;
+                        }}
 
-                          let custom_result_p = document.createElement('p');
-                          custom_result_p.textContent = {create_custom_result};
-                          results_div.appendChild(custom_result_p);
-                      }};
-                  }}
-                "#, name=title, benchmark_name=self.wasm_benchmark_function(), workgroups_array=self.benchmark_workgroups(), create_custom_result = self.custom_result()
+                        let total_time_spent_p = document.createElement('p');
+                        total_time_spent_p.textContent = "Total time spent: " + result[0].total_time(TimeUnit.Second).toFixed(3) + "s";
+                        results_div.appendChild(total_time_spent_p);
+
+                        let time_per_iter_p = document.createElement('p');
+                        time_per_iter_p.textContent = "Time per iteration: " + result[0].time_per_iteration(TimeUnit.Milli).toFixed(3) + "ms";
+                        results_div.appendChild(time_per_iter_p);
+
+                        let custom_result_p = document.createElement('p');
+                        custom_result_p.textContent = {create_custom_result};
+                        results_div.appendChild(custom_result_p);
+                    }};
+                }}
+
+                const adapter = await navigator.gpu.requestAdapter();
+                const webgpu_adapter_info = {{
+                    architecture: adapter.info.architecture,
+                    description: adapter.info.description,
+                    device: adapter.info.device,
+                    vendor: adapter.info.vendor,
+                }}
+
+                async function post_results(result, workgroup_size) {{
+                    let workgroup_size_array;
+                    if (Array.isArray(workgroup_size)) {{
+                        workgroup_size_array = workgroup_size;
+                    }} else {{
+                        workgroup_size_array = [workgroup_size];
+                    }}
+
+                    const platform_info = {{
+                        wgpu_adapter_info: result[0].adapter_info.to_js(),
+                        webgpu_adapter_info,
+                    }}
+
+                    const post_result_request = {{
+                        platform_info,
+                        workgroup_size: workgroup_size_array,
+                        benchmark_page: {benchmark_page}
+                    }}
+
+                    console.log("post result request:", post_result_request);
+                    console.log("JSON stringified:", JSON.stringify(post_result_request));
+
+                }}
+                "#, name=title, benchmark_name=self.wasm_benchmark_function(), workgroups_array=self.benchmark_workgroups(), create_custom_result = self.custom_result(), benchmark_page=serde_json::to_string(&self).unwrap()
                 )))
                 }
         // TODO: Historical data component
