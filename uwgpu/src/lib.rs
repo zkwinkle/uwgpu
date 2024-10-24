@@ -22,6 +22,21 @@ use wgpu_async::{AsyncBuffer, AsyncDevice};
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(feature = "wasm")]
+mod wasm_print {
+    /// Shadow println! when compiling to WASM
+    #[macro_export]
+    macro_rules! println {
+        ($($t:tt)*) => (web_sys::console::log_1(&format_args!($($t)*).to_string().into()))
+    }
+
+    /// Shadow eprintln! when compiling to WASM
+    #[macro_export]
+    macro_rules! eprintln {
+        ($($t:tt)*) => (web_sys::console::error_1(&format_args!($($t)*).to_string().into()))
+    }
+}
+
 mod adapter_info;
 mod gpu;
 mod pipeline;
@@ -34,7 +49,7 @@ pub use pipeline::*;
 /// we run many short compute passes to get many timestamp measurements and
 /// ignore any invalid ones. This constant is the max amount of shader
 /// invocations we'll do per compute pass.
-const MAX_COUNT_BETWEEN_QUERIES: usize = 100;
+const MAX_COUNT_BETWEEN_QUERIES: usize = 50;
 
 /// This type represents the parameters for running a benchmark.
 ///
@@ -140,35 +155,49 @@ impl Benchmark<'_> {
         let ts_data = timestamp_query.get_timestamp_result().await?;
         let ts_period = pipeline.gpu.queue.get_timestamp_period() as f64;
 
+        // println!("ts_data: {:?}", ts_data);
+
         // Accumulator inside fold is (total_time, real_count)
-        let (total_time_spent, real_count) = ts_data.chunks(2).fold(
-            (0, 0),
-            |(total_time, real_count), times| {
+        let (total_time_spent, real_count) = ts_data
+            .chunks(2)
+            .enumerate()
+            .fold((0, 0), |(total_time, real_count), (i, times)| {
                 let start_time = times[0];
                 let end_time = times[1];
                 let (time, is_invalid) = end_time.overflowing_sub(start_time);
+
                 if is_invalid {
-                    println!(
-                        "overflow! start: {}, end: {}",
-                        start_time, end_time
-                    );
+                    // println!(
+                    //     "overflow! start: {}, end: {}",
+                    //     start_time, end_time
+                    // );
                     (total_time, real_count)
                 } else {
-                    println!(
-                        "GOOD!  time: {}\t total_time: {}",
-                        time,
-                        total_time + time
-                    );
-                    println!(" start: {}, end: {}", start_time, end_time);
-                    (total_time + time, real_count + 1)
+                    // println!(
+                    //     "GOOD!  time: {}\t total_time: {}",
+                    //     time,
+                    //     total_time + time
+                    // );
+                    // println!(" start: {}, end: {}", start_time, end_time);
+                    let is_last_result = ((i + 1) * 2) == ts_data.len();
+                    let additional_count = if is_last_result {
+                        let residue = self.count % MAX_COUNT_BETWEEN_QUERIES;
+                        if residue == 0 {
+                            MAX_COUNT_BETWEEN_QUERIES
+                        } else {
+                            residue
+                        }
+                    } else {
+                        MAX_COUNT_BETWEEN_QUERIES
+                    };
+                    (total_time + time, real_count + additional_count)
                 }
-            },
-        );
+            });
 
-        println!(
-            "Total time: {}\t Real count: {}\nTotal time as f64: {}\nts_period: {}",
-            total_time_spent, real_count, total_time_spent as f64, ts_period
-        );
+        // println!(
+        //     "Total time: {}\t Real count: {}\nTotal time as f64:
+        // {}\nts_period: {}",     total_time_spent, real_count,
+        // total_time_spent as f64, ts_period );
         let total_time_spent = (total_time_spent as f64) * ts_period;
 
         Ok(BenchmarkResults {
@@ -253,7 +282,7 @@ impl Benchmark<'_> {
             bench_pass.set_pipeline(&pipeline.pipeline);
             bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
 
-            println!("Adding pass i={} with {} runs", pass, amount);
+            // println!("Adding pass i={} with {} runs", pass, amount);
 
             for _ in 0..amount {
                 bench_pass.dispatch_workgroups(
@@ -304,10 +333,10 @@ impl Benchmark<'_> {
                 }
             };
 
-            println!(
-                "Resolving query set i={} with offset {} and amount {}",
-                i, offset, amount
-            );
+            // println!(
+            //     "Resolving query set i={} with offset {} and amount {}",
+            //     i, offset, amount
+            // );
 
             encoder.resolve_query_set(
                 &query_set,
@@ -354,9 +383,9 @@ impl TimestampQuery {
 
         let total_count = number_of_full_query_sets + remainder as usize;
 
-        println!(
-                "Creating {} full query sets with maybe a remainder set with {} elements", number_of_full_query_sets, remainder,
-            );
+        // println!(
+        //         "Creating {} full query sets with maybe a remainder set with
+        // {} elements", number_of_full_query_sets, remainder,     );
 
         let mut query_sets: Vec<QuerySet> = (0..number_of_full_query_sets)
             .map(|_| {
