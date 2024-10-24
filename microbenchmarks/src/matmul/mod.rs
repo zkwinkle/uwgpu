@@ -17,8 +17,8 @@ use uwgpu::{
 use crate::BenchmarkError;
 
 const BENCHMARK_MATRIX_DIMS: usize = 1024;
-const BENCHMARK_WARMUP_COUNT: usize = 5;
-const BENCHMARK_ITERATIONS: usize = 10;
+const BENCHMARK_WARMUP_COUNT: usize = 20;
+const BENCHMARK_ITERATIONS: usize = 30;
 
 /// Microbenchmark for matrix mulitplication
 ///
@@ -79,10 +79,12 @@ impl MatmulResults {
     pub fn flops(&self) -> f64 {
         /// Reference for the amount of FLOPs in a matrix multiplication:
         /// https://math.stackexchange.com/questions/3512976/proof-of-of-flops-in-matrix-multiplication
-        const NUM_FLOPS_PER_ITER: usize =
-            2 * (BENCHMARK_MATRIX_DIMS.pow(3)) - BENCHMARK_MATRIX_DIMS.pow(2);
+        const NUM_FLOPS_PER_ITER: usize = BENCHMARK_MATRIX_DIMS
+            * BENCHMARK_MATRIX_DIMS
+            * (2 * BENCHMARK_MATRIX_DIMS - 1);
 
-        ((NUM_FLOPS_PER_ITER * self.0.count) as f64) / (self.total_time_s())
+        (NUM_FLOPS_PER_ITER as f64 * self.0.count as f64)
+            / (self.total_time_s())
     }
 }
 
