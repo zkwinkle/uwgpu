@@ -1,23 +1,28 @@
-use std::path::Path;
+use std::{path::Path, sync::Arc};
+
+use sqlx::PgPool;
+
+use crate::data_store::{DataStore, PostgresDataStore};
 
 /// Configuration for the server.
 pub struct AppConfig {
     /// Directory that holds static files like WASM modules
     pub public_dir: &'static Path,
-    /// Database URL
-    pub database_url: &'static str,
+    /// See [`PhotomulesDataStore`]
+    pub data_store: Arc<dyn DataStore>,
 }
 
 /// Create AppConfig to use when running the server binary.
-pub fn create_app_config_from_env() -> AppConfig {
+pub async fn create_app_config_from_env() -> AppConfig {
     let public_dir_str: &'static str = Box::new(read_env_public_dir()).leak();
     let public_dir = Path::new(public_dir_str);
 
-    let database_url: &'static str = Box::new(read_env_database_url()).leak();
+    let pool = PgPool::connect(&read_env_database_url()).await.unwrap();
+    let data_store = Arc::new(PostgresDataStore::new(pool));
 
     AppConfig {
+        data_store,
         public_dir,
-        database_url,
     }
 }
 

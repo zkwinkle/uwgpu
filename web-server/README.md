@@ -30,6 +30,11 @@ cargo sqlx prepare --database-url 'postgres://postgres@localhost/uwg
 p-local'
 ```
 
+Make sure the `postgresql` service is running:
+```
+sudo systemctl start postgresql
+```
+
 ## Production
 
 For the production build, the `debug` flag must be disabled by disabling the

@@ -11,8 +11,9 @@ mod platform;
 mod non_empty_string;
 
 /// Used to interface with the data store.
+#[async_trait::async_trait]
 pub trait DataStore:
-    DataStorePlatformInterface + DataStoreBenchmarkResultsInterface
+    Send + Sync + DataStorePlatformInterface + DataStoreBenchmarkResultsInterface
 {
 }
 

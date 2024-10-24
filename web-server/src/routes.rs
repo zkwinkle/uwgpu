@@ -1,4 +1,4 @@
-use axum::{routing::get, Router};
+use axum::{routing::get, Extension, Router};
 use extractors::Layout;
 use tower_http::services::ServeDir;
 
@@ -32,4 +32,5 @@ pub fn create_router(config: AppConfig) -> Router {
             Router::new().fallback_service(ServeDir::new(config.public_dir)),
         )
         .fallback(not_found::not_found)
+        .layer(Extension(config.data_store))
 }

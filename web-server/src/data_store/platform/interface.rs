@@ -16,6 +16,7 @@ use super::{
     DataStoreCreatePlatform, DataStorePlatform,
 };
 
+#[async_trait::async_trait]
 pub trait DataStorePlatformInterface {
     async fn create_or_get_platform(
         &self,
@@ -23,6 +24,7 @@ pub trait DataStorePlatformInterface {
     ) -> Result<DataStorePlatform, sqlx::Error>;
 }
 
+#[async_trait::async_trait]
 impl DataStorePlatformInterface for PostgresDataStore {
     async fn create_or_get_platform(
         &self,

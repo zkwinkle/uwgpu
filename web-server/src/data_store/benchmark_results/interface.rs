@@ -12,6 +12,7 @@ use super::{
     DataStoreBenchmarkResults, DataStoreCreateBenchmarkResult,
 };
 
+#[async_trait::async_trait]
 pub trait DataStoreBenchmarkResultsInterface {
     async fn create_benchmark_results(
         &self,
@@ -19,6 +20,7 @@ pub trait DataStoreBenchmarkResultsInterface {
     ) -> Result<DataStoreBenchmarkResults, sqlx::Error>;
 }
 
+#[async_trait::async_trait]
 impl DataStoreBenchmarkResultsInterface for PostgresDataStore {
     async fn create_benchmark_results(
         &self,
