@@ -33,4 +33,5 @@ pub fn create_router(config: AppConfig) -> Router {
         )
         .fallback(not_found::not_found)
         .layer(Extension(config.data_store))
+        .layer(Extension(config.ua_parser))
 }

@@ -10,6 +10,10 @@ pub struct AppConfig {
     pub public_dir: &'static Path,
     /// See [`PhotomulesDataStore`]
     pub data_store: Arc<dyn DataStore>,
+    /// Example: https://zkwinkle.is-a.dev/microbenchmarks
+    pub server_url: &'static str,
+    /// User agent parser
+    pub ua_parser: Arc<ua_parser::Extractor<'static>>,
 }
 
 /// Create AppConfig to use when running the server binary.
@@ -20,9 +24,17 @@ pub async fn create_app_config_from_env() -> AppConfig {
     let pool = PgPool::connect(&read_env_database_url()).await.unwrap();
     let data_store = Arc::new(PostgresDataStore::new(pool));
 
+    let server_url = Box::leak(Box::new(read_server_url()));
+
+    let regexes = std::fs::File::open("web-server/src/regexes.yaml").unwrap();
+    let regexes: ua_parser::Regexes = serde_yaml::from_reader(regexes).unwrap();
+    let ua_parser = Arc::new(ua_parser::Extractor::try_from(regexes).unwrap());
+
     AppConfig {
         data_store,
         public_dir,
+        server_url,
+        ua_parser,
     }
 }
 
@@ -51,5 +63,13 @@ fn read_env_public_dir() -> String {
 /// Panics when the "debug" feature is disabled and the environment variable is
 /// not found.
 fn read_env_database_url() -> String {
-    read_env("DATABASE_URL", "postgres://uwgpu-dev@localhost/uwgp-local")
+    read_env("DATABASE_URL", "postgres://postgres@localhost/uwgp-local")
+}
+
+/// # Panics
+///
+/// Panics when the "debug" feature is disabled and the environment variable is
+/// not found.
+fn read_server_url() -> String {
+    read_env("SERVER_URL", "http://localhost:31416")
 }
