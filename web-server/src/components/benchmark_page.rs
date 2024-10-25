@@ -24,8 +24,17 @@ impl Render for MicrobenchmarkPage<'_> {
         let title = self.microbenchmark.title();
 
         html! {
-            header { h1 { (title) } }
-            p { (self.microbenchmark.description()) }
+
+        header { h1 { (title) } }
+        p { (self.microbenchmark.description()) }
+
+        div class="microbenchmark-view-selectors" role="tablist" {
+            a href="#execution" id="execution-view-selector" role="tab" aria-controls="execution-view" { "[Microbenchmark Execution]" }
+            a href="#historical" id="historical-view-selector" role="tab" aria-controls="historical-view" { "[Historical Data]" }
+        }
+
+        div id="execution-view" role="tabpanel" {
+            h2 { "Execution" }
             p { "Click the \"Start\" button to execute the microbenchmark suite. For more accurate results please close all other applications." }
             button id=(format!("run_{}_microbenchmark", title)){ "Start" }
 
@@ -173,8 +182,52 @@ impl Render for MicrobenchmarkPage<'_> {
                 url=self.server_url,
                 custom_result_fn=self.microbenchmark.custom_result_function(),
                 )))
+            }
+        }
+
+        div id="historical-view" role="tabpanel" {
+            h2 { "Historical Data" }
+            p { "TODO selectors for filtering and cute table" }
+        }
+
+        script { (PreEscaped(r##"
+        const tabs = document.querySelectorAll("[role='tab']");
+        const views = document.querySelectorAll("[role='tabpanel']");
+
+        function update_view_from_fragment() {
+            // Default to execution view
+            const hash = window.location.hash || "#execution";
+            let active_view_id;
+
+            tabs.forEach(tab => {
+                const is_active = tab.getAttribute("href") === hash;
+
+                tab.classList.toggle("active", is_active);
+                tab.setAttribute("aria-selected", is_active);
+
+                if (is_active) {
+                    active_view_id = tab.getAttribute("aria-controls");
                 }
-        // TODO: Historical data component
+            });
+
+            views.forEach(view => {
+                const is_active = view.id === active_view_id;
+                view.setAttribute("aria-selected", is_active);
+                view.toggleAttribute("hidden", !is_active);
+
+                if (is_active) {
+                    view.removeAttribute("style");
+                } else {
+                    view.style.display = "none";
+                }
+            });
+        }
+
+        update_view_from_fragment();
+
+        window.addEventListener("hashchange", update_view_from_fragment);
+        "##)) }
+
         }
     }
 }

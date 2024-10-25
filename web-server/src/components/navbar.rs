@@ -33,13 +33,13 @@ impl Render for Navbar<'_> {
                 ul {
                     li class="header" { a
                         class=@if self.current_uri.path().eq("/")
-                            { "nav-active" }
+                            { "active" }
                         href=("/")
                         { ("µwgpu") }}
                     @for link in self.links {
                         li { a
                             class=@if self.current_uri.path().starts_with(link.link)
-                                { "nav-active" }
+                                { "active" }
                             href=(link.link)
                             { (link.name) }}
                     }

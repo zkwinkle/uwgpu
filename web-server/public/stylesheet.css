@@ -101,6 +101,10 @@ a:hover {
 	text-decoration: underline;
 }
 
+a.active {
+	color: var(--accent-color);
+}
+
 link {
 	color: var(--link-color);
 }
@@ -124,6 +128,7 @@ blockquote {
 	margin: 0;
 }
 
+/* Navbar */
 .navbar ul li {
 	display: block;
 	padding: 0.5em 1em;
@@ -147,10 +152,7 @@ blockquote {
 	font-size: 1em;
 }
 
-.navbar ul li a.nav-active {
-	color: var(--accent-color);
-}
-
+/* Checkbox to disable data collection on execution */
 .disable-checkbox {
 	margin: 1em 0;
 	display: flex;
@@ -171,6 +173,16 @@ blockquote {
 	vertical-align: middle;
 	/*max-width: calc(100% - 40px); /* Adjust max width for text wrapping */
 }
+
+/* Selectors for execution or historical data view in microbenhcmark pages*/
+.microbenchmark-view-selectors {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	flex-direction: row;
+}
+
 
 /* =================== Responsiveness =================== */
 
@@ -209,6 +221,10 @@ blockquote {
 	h3,
 	h4 {
 		margin: 1em 0 0.5em;
+	}
+
+	.microbenchmark-view-selectors {
+		flex-direction: column;
 	}
 }
 
