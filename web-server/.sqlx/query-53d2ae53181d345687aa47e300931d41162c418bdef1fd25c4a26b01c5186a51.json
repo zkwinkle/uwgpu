@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH ins AS (\n                INSERT INTO user_agent_string_info (user_agent_id, user_agent_device_id, user_agent_os_id)\n                VALUES ($1, $2, $3)\n                ON CONFLICT DO NOTHING\n                RETURNING user_agent_string_info_id\n            )\n            SELECT user_agent_string_info_id FROM ins\n            UNION\n            SELECT user_agent_string_info_id FROM user_agent_string_info\n            WHERE user_agent_id IS NOT DISTINCT FROM $1\n              AND user_agent_device_id IS NOT DISTINCT FROM $2\n              AND user_agent_os_id IS NOT DISTINCT FROM $3\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_agent_string_info_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "53d2ae53181d345687aa47e300931d41162c418bdef1fd25c4a26b01c5186a51"
+}

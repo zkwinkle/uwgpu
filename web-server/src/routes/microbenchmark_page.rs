@@ -1,11 +1,19 @@
 use maud::{html, Markup};
 
-use crate::components::benchmark_page::MicrobenchmarkPage;
+use crate::components::benchmark_page::{
+    MicrobenchmarkKind, MicrobenchmarkPage,
+};
 
 use super::extractors::Layout;
 
 pub fn microbenchmark_page(
-    microbenchmark: MicrobenchmarkPage,
+    server_url: &'static str,
+    microbenchmark: MicrobenchmarkKind,
 ) -> impl Fn(Layout) -> Markup {
-    move |layout: Layout| layout.render(html! {(microbenchmark)})
+    let page = MicrobenchmarkPage {
+        microbenchmark,
+        server_url,
+    };
+
+    move |layout: Layout| layout.render(html! {(page)})
 }

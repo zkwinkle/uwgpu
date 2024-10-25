@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH ins AS (\n                INSERT INTO user_agent_os (operating_system, major, minor, patch, patch_minor)\n                VALUES ($1, $2, $3, $4, $5)\n                ON CONFLICT DO NOTHING\n                RETURNING user_agent_os_id\n            )\n            SELECT user_agent_os_id FROM ins\n            UNION\n            SELECT user_agent_os_id FROM user_agent_os\n            WHERE operating_system = $1\n              AND major IS NOT DISTINCT FROM $2\n              AND minor IS NOT DISTINCT FROM $3\n              AND patch IS NOT DISTINCT FROM $4\n              AND patch_minor IS NOT DISTINCT FROM $5\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_agent_os_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4d71cde97f372163ee9ad12c47773d0f349c6ab05384ddee2187f4c8af75afbd"
+}

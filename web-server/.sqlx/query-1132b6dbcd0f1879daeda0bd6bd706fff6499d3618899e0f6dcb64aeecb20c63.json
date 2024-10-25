@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO wgpu_adapter_info (name, vendor, device, device_type, driver, driver_info, backend)\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                ON CONFLICT DO NOTHING\n                RETURNING wgpu_adapter_info_id\n            ",
+  "query": "\n            WITH ins AS (\n                INSERT INTO wgpu_adapter_info (name, vendor, device, device_type, driver, driver_info, backend)\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                ON CONFLICT DO NOTHING\n                RETURNING wgpu_adapter_info_id\n            )\n            SELECT wgpu_adapter_info_id FROM ins\n            UNION\n            SELECT wgpu_adapter_info_id FROM wgpu_adapter_info\n            WHERE name IS NOT DISTINCT FROM $1\n              AND vendor = $2\n              AND device = $3\n              AND device_type = $4\n              AND driver IS NOT DISTINCT FROM $5\n              AND driver_info IS NOT DISTINCT FROM $6\n              AND backend = $7\n            ",
   "describe": {
     "columns": [
       {
@@ -47,8 +47,8 @@
       ]
     },
     "nullable": [
-      false
+      null
     ]
   },
-  "hash": "46386b72d577f0f049c4b8978323392a6e6294cd8faf76c9f550de675da32eff"
+  "hash": "1132b6dbcd0f1879daeda0bd6bd706fff6499d3618899e0f6dcb64aeecb20c63"
 }

@@ -1,9 +1,12 @@
-use axum::{routing::get, Extension, Router};
+use axum::{
+    routing::{get, post},
+    Extension, Router,
+};
 use extractors::Layout;
 use tower_http::services::ServeDir;
 
 use crate::{
-    app_config::AppConfig, components::benchmark_page::MicrobenchmarkPage::*,
+    app_config::AppConfig, components::benchmark_page::MicrobenchmarkKind::*,
 };
 
 pub mod extractors;
@@ -17,16 +20,21 @@ use microbenchmark_page::microbenchmark_page;
 
 /// Create the main `Router` for this app.
 pub fn create_router(config: AppConfig) -> Router {
+    let url = config.server_url;
+
     Router::new()
         .route("/", get(home::placeholder))
         .route(
             Matmul.path(),
-            get(|l: Layout| async { microbenchmark_page(Matmul)(l) }),
+            get(|l: Layout| async { microbenchmark_page(url, Matmul)(l) }),
         )
         .route(
             BufferSequential.path(),
-            get(|l: Layout| async { microbenchmark_page(BufferSequential)(l) }),
+            get(|l: Layout| async {
+                microbenchmark_page(url, BufferSequential)(l)
+            }),
         )
+        .route("/results", post(post_results::post_results))
         .nest(
             "/public",
             Router::new().fallback_service(ServeDir::new(config.public_dir)),

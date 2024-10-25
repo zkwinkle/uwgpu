@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH ins AS (\n                INSERT INTO platform (user_agent_string_info_id, wgpu_adapter_info_id, webgpu_adapter_info_id)\n                VALUES ($1, $2, $3)\n                ON CONFLICT DO NOTHING\n                RETURNING platform_id\n            )\n            SELECT platform_id FROM ins\n            UNION\n            SELECT platform_id FROM platform\n            WHERE user_agent_string_info_id IS NOT DISTINCT FROM $1\n              AND wgpu_adapter_info_id = $2\n              AND webgpu_adapter_info_id IS NOT DISTINCT FROM $3\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "platform_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "69c579cc77b361b9aeb2f4139e9c31c1a420e94210261156068a76b2bab1ca9a"
+}

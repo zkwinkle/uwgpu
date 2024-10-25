@@ -5,10 +5,9 @@ use benchmark_results::DataStoreBenchmarkResultsInterface;
 use platform::DataStorePlatformInterface;
 use sqlx::{pool::PoolConnection, PgPool};
 
-mod benchmark_results;
-mod platform;
-
-mod non_empty_string;
+pub mod benchmark_results;
+pub mod non_empty_string;
+pub mod platform;
 
 /// Used to interface with the data store.
 #[async_trait::async_trait]

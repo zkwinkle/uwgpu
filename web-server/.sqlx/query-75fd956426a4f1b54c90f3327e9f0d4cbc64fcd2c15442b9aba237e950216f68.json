@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH ins AS (\n                INSERT INTO user_agent (family, major, minor, patch, patch_minor)\n                VALUES ($1, $2, $3, $4, $5)\n                ON CONFLICT DO NOTHING\n                RETURNING user_agent_id\n            )\n            SELECT user_agent_id FROM ins\n            UNION\n            SELECT user_agent_id FROM user_agent\n            WHERE family = $1\n              AND major IS NOT DISTINCT FROM $2\n              AND minor IS NOT DISTINCT FROM $3\n              AND patch IS NOT DISTINCT FROM $4\n              AND patch_minor IS NOT DISTINCT FROM $5\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_agent_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "75fd956426a4f1b54c90f3327e9f0d4cbc64fcd2c15442b9aba237e950216f68"
+}

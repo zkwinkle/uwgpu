@@ -12,6 +12,7 @@ pub use interface::DataStorePlatformInterface;
 
 /// Datastore version of the platform info that we care to store for each
 /// execution run.
+#[derive(Debug)]
 pub struct DataStorePlatform {
     /// The ID of this platform record.
     pub platform_id: Uuid,

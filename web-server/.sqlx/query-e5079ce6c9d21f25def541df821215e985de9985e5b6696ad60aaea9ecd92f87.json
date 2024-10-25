@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH ins AS (\n                INSERT INTO webgpu_adapter_info (architecture, description, device, vendor)\n                VALUES ($1, $2, $3, $4)\n                ON CONFLICT DO NOTHING\n                RETURNING webgpu_adapter_info_id\n            )\n            SELECT webgpu_adapter_info_id FROM ins\n            UNION\n            SELECT webgpu_adapter_info_id FROM webgpu_adapter_info\n            WHERE architecture IS NOT DISTINCT FROM $1\n              AND description IS NOT DISTINCT FROM $2\n              AND device IS NOT DISTINCT FROM $3\n              AND vendor IS NOT DISTINCT FROM $4\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "webgpu_adapter_info_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e5079ce6c9d21f25def541df821215e985de9985e5b6696ad60aaea9ecd92f87"
+}

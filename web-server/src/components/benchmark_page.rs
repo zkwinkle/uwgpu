@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// A page for a specific benchmark
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum MicrobenchmarkPage {
+pub enum MicrobenchmarkKind {
     Matmul,
     Reduction,
     Convolution,
@@ -14,13 +14,18 @@ pub enum MicrobenchmarkPage {
     TextureToTexture,
 }
 
-impl Render for MicrobenchmarkPage {
+pub struct MicrobenchmarkPage<'a> {
+    pub microbenchmark: MicrobenchmarkKind,
+    pub server_url: &'a str,
+}
+
+impl Render for MicrobenchmarkPage<'_> {
     fn render(&self) -> Markup {
-        let title = self.title();
+        let title = self.microbenchmark.title();
 
         html! {
             header { h1 { (title) } }
-            p { (self.description()) }
+            p { (self.microbenchmark.description()) }
             p { "Click the \"Start\" button to execute the microbenchmark suite. For more accurate results please close all other applications." }
             button id=(format!("run_{}_microbenchmark", title)){ "Start" }
 
@@ -142,14 +147,31 @@ impl Render for MicrobenchmarkPage {
                     const post_result_request = {{
                         platform_info,
                         workgroup_size: workgroup_size_array,
-                        benchmark_page: {benchmark_page}
+                        benchmark_kind: {microbenchmark_json},
+                        count: result[0].count,
+                        total_time_spent: result[0].total_time_spent,
+                        custom_result: result.{custom_result_fn}(),
                     }}
 
                     console.log("post result request:", post_result_request);
                     console.log("JSON stringified:", JSON.stringify(post_result_request));
 
+                    fetch("{url}/results", {{
+                      method: 'POST',
+                      headers: {{
+                        'Content-Type': 'application/json',
+                      }},
+                      body: JSON.stringify(post_result_request),
+                    }})
                 }}
-                "#, name=title, benchmark_name=self.wasm_benchmark_function(), workgroups_array=self.benchmark_workgroups(), create_custom_result = self.custom_result(), benchmark_page=serde_json::to_string(&self).unwrap()
+                "#,
+                name=title,
+                benchmark_name=self.microbenchmark.wasm_benchmark_function(),
+                workgroups_array=self.microbenchmark.benchmark_workgroups(),
+                create_custom_result = self.microbenchmark.custom_result(),
+                microbenchmark_json=serde_json::to_string(&self.microbenchmark).unwrap(),
+                url=self.server_url,
+                custom_result_fn=self.microbenchmark.custom_result_function(),
                 )))
                 }
         // TODO: Historical data component
@@ -157,8 +179,8 @@ impl Render for MicrobenchmarkPage {
     }
 }
 
-use MicrobenchmarkPage::*;
-impl MicrobenchmarkPage {
+use MicrobenchmarkKind::*;
+impl MicrobenchmarkKind {
     fn title(&self) -> &'static str {
         match self {
             Matmul => "Matrix Multiplication",
@@ -255,6 +277,14 @@ impl MicrobenchmarkPage {
                 "Bandwidth (GB/s): " + (result.bandwidth() / 1_000_000_000).toFixed(3)
             "#
             }
+        }
+    }
+
+    fn custom_result_function(&self) -> &'static str {
+        match self {
+            Matmul | Reduction | Convolution | Scan => "flops",
+            BufferSequential | BufferShuffled | BufferToTexture
+            | TextureToTexture => "bandwidth",
         }
     }
 }

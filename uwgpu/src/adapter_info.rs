@@ -43,6 +43,8 @@ pub struct AdapterInfo {
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
 impl AdapterInfo {
+    /// Method that allows turning the AdapterInfo into a javascript Object on
+    /// the JS side.
     pub fn to_js(&self) -> Result<JsValue, JsValue> {
         Ok(serde_wasm_bindgen::to_value(self)?)
     }

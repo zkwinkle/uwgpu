@@ -54,17 +54,28 @@ impl DataStorePlatformInterface for PostgresDataStore {
 
         let platform_id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO platform (user_agent_string_info_id, wgpu_adapter_info_id, webgpu_adapter_info_id)
                 VALUES ($1, $2, $3)
                 ON CONFLICT DO NOTHING
                 RETURNING platform_id
+            )
+            SELECT platform_id FROM ins
+            UNION
+            SELECT platform_id FROM platform
+            WHERE user_agent_string_info_id IS NOT DISTINCT FROM $1
+              AND wgpu_adapter_info_id = $2
+              AND webgpu_adapter_info_id IS NOT DISTINCT FROM $3
             "#,
             user_agent_id,
             wgpu_adapter_info_id,
             webgpu_adapter_info_id
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
+
+        tx.commit().await?;
 
         Ok(DataStorePlatform {
             platform_id,
@@ -101,17 +112,26 @@ async fn create_user_agent_string_info(
 
     let id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO user_agent_string_info (user_agent_id, user_agent_device_id, user_agent_os_id)
                 VALUES ($1, $2, $3)
                 ON CONFLICT DO NOTHING
                 RETURNING user_agent_string_info_id
+            )
+            SELECT user_agent_string_info_id FROM ins
+            UNION
+            SELECT user_agent_string_info_id FROM user_agent_string_info
+            WHERE user_agent_id IS NOT DISTINCT FROM $1
+              AND user_agent_device_id IS NOT DISTINCT FROM $2
+              AND user_agent_os_id IS NOT DISTINCT FROM $3
             "#,
             user_agent_id,
             user_agent_device_id,
             user_agent_os_id,
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }
@@ -122,10 +142,20 @@ async fn create_user_agent_os(
 ) -> Result<Uuid, sqlx::Error> {
     let id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO user_agent_os (operating_system, major, minor, patch, patch_minor)
                 VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT DO NOTHING
                 RETURNING user_agent_os_id
+            )
+            SELECT user_agent_os_id FROM ins
+            UNION
+            SELECT user_agent_os_id FROM user_agent_os
+            WHERE operating_system = $1
+              AND major IS NOT DISTINCT FROM $2
+              AND minor IS NOT DISTINCT FROM $3
+              AND patch IS NOT DISTINCT FROM $4
+              AND patch_minor IS NOT DISTINCT FROM $5
             "#,
             &create.operating_system as &NonEmptyString,
             &create.major as &Option<NonEmptyString>,
@@ -134,7 +164,8 @@ async fn create_user_agent_os(
             &create.patch_minor as &Option<NonEmptyString>,
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }
@@ -144,18 +175,27 @@ async fn create_user_agent_device(
     create: &DataStoreUserAgentDevice,
 ) -> Result<Uuid, sqlx::Error> {
     let id: Uuid = sqlx::query_scalar!(
-        r#"
+            r#"
+            WITH ins AS (
                 INSERT INTO user_agent_device (device, brand, model)
                 VALUES ($1, $2, $3)
                 ON CONFLICT DO NOTHING
                 RETURNING user_agent_device_id
+            )
+            SELECT user_agent_device_id FROM ins
+            UNION
+            SELECT user_agent_device_id FROM user_agent_device
+            WHERE device = $1
+              AND brand IS NOT DISTINCT FROM $2
+              AND model IS NOT DISTINCT FROM $3
             "#,
         &create.device as &NonEmptyString,
         &create.brand as &Option<NonEmptyString>,
         &create.model as &Option<NonEmptyString>,
     )
     .fetch_one(tx.deref_mut())
-    .await?;
+    .await?
+    .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }
@@ -166,10 +206,20 @@ async fn create_user_agent(
 ) -> Result<Uuid, sqlx::Error> {
     let id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO user_agent (family, major, minor, patch, patch_minor)
                 VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT DO NOTHING
                 RETURNING user_agent_id
+            )
+            SELECT user_agent_id FROM ins
+            UNION
+            SELECT user_agent_id FROM user_agent
+            WHERE family = $1
+              AND major IS NOT DISTINCT FROM $2
+              AND minor IS NOT DISTINCT FROM $3
+              AND patch IS NOT DISTINCT FROM $4
+              AND patch_minor IS NOT DISTINCT FROM $5
             "#,
             &create.family as &NonEmptyString,
             &create.major as &Option<NonEmptyString>,
@@ -178,7 +228,8 @@ async fn create_user_agent(
             &create.patch_minor as &Option<NonEmptyString>,
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }
@@ -189,10 +240,22 @@ async fn create_wgpu_adapter_info(
 ) -> Result<Uuid, sqlx::Error> {
     let id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO wgpu_adapter_info (name, vendor, device, device_type, driver, driver_info, backend)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 ON CONFLICT DO NOTHING
                 RETURNING wgpu_adapter_info_id
+            )
+            SELECT wgpu_adapter_info_id FROM ins
+            UNION
+            SELECT wgpu_adapter_info_id FROM wgpu_adapter_info
+            WHERE name IS NOT DISTINCT FROM $1
+              AND vendor = $2
+              AND device = $3
+              AND device_type = $4
+              AND driver IS NOT DISTINCT FROM $5
+              AND driver_info IS NOT DISTINCT FROM $6
+              AND backend = $7
             "#,
             &create.name as &Option<NonEmptyString>,
             create.vendor as i32,
@@ -203,7 +266,8 @@ async fn create_wgpu_adapter_info(
             &create.backend as &DataStoreWgpuBackend,
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }
@@ -214,10 +278,19 @@ async fn create_webgpu_adapter_info(
 ) -> Result<Uuid, sqlx::Error> {
     let id: Uuid = sqlx::query_scalar!(
             r#"
+            WITH ins AS (
                 INSERT INTO webgpu_adapter_info (architecture, description, device, vendor)
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT DO NOTHING
                 RETURNING webgpu_adapter_info_id
+            )
+            SELECT webgpu_adapter_info_id FROM ins
+            UNION
+            SELECT webgpu_adapter_info_id FROM webgpu_adapter_info
+            WHERE architecture IS NOT DISTINCT FROM $1
+              AND description IS NOT DISTINCT FROM $2
+              AND device IS NOT DISTINCT FROM $3
+              AND vendor IS NOT DISTINCT FROM $4
             "#,
             &create.architecture as &Option<NonEmptyString>,
             &create.description as &Option<NonEmptyString>,
@@ -225,7 +298,8 @@ async fn create_webgpu_adapter_info(
             &create.vendor as &Option<NonEmptyString>,
         )
         .fetch_one(tx.deref_mut())
-        .await?;
+        .await?
+        .expect("If insertion returns nothing then record must exist and SELECT will get it");
 
     Ok(id)
 }

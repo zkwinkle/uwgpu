@@ -1,7 +1,7 @@
 use axum::http::Uri;
 use maud::{html, Markup, Render};
 
-use super::benchmark_page::MicrobenchmarkPage::*;
+use super::benchmark_page::MicrobenchmarkKind::*;
 
 /// Tab / Link in the navbar
 struct NavLink {
