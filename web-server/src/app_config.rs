@@ -63,7 +63,7 @@ fn read_env_public_dir() -> String {
 /// Panics when the "debug" feature is disabled and the environment variable is
 /// not found.
 fn read_env_database_url() -> String {
-    read_env("DATABASE_URL", "postgres://postgres@localhost/uwgp-local")
+    read_env("DATABASE_URL", "postgres://postgres@localhost/uwgpu-local")
 }
 
 /// # Panics
