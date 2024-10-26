@@ -9,7 +9,7 @@ use crate::{
     app_config::AppConfig, components::benchmark_page::MicrobenchmarkKind::*,
 };
 
-pub mod extractors;
+mod extractors;
 mod not_found;
 
 mod hardware_options;

@@ -38,7 +38,7 @@ pub struct DataStorePlatform {
 ///
 /// Not using the [NonEmptyString] for easy decoding from DB, i can assume the
 /// strings aren't empty tho.
-#[derive(sqlx::FromRow, Serialize, Deserialize)]
+#[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
 pub struct Hardware {
     pub webgpu_vendor: String,
     pub webgpu_architecture: String,
@@ -50,7 +50,7 @@ pub struct Hardware {
 /// to just state them in this enum instead of doing some heuristic query of the
 /// DB to find the available variants. (Like we do for [Hardware] variants for
 /// example.)
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Platform {
     Chromium,
     Firefox,

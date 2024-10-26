@@ -42,7 +42,7 @@ mod pipeline;
 
 pub use gpu::*;
 pub use pipeline::*;
-pub use adapter_info::AdapterInfo;
+pub use adapter_info::{AdapterInfo, Backend, DeviceType};
 
 /// According to https://www.w3.org/TR/webgpu/#timestamp, timestamp queries can
 /// return negative time deltas in rare circumstances. To mitigate this effect,
