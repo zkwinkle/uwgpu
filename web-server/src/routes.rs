@@ -15,6 +15,7 @@ mod not_found;
 mod hardware_options;
 mod home;
 mod microbenchmark_page;
+mod os_options;
 mod post_results;
 
 use microbenchmark_page::microbenchmark_page;
@@ -37,6 +38,7 @@ pub fn create_router(config: AppConfig) -> Router {
         )
         .route("/results", post(post_results::post_results))
         .route("/hardwares", get(hardware_options::hardware_options))
+        .route("/operating_systems", get(os_options::os_options))
         .nest(
             "/public",
             Router::new().fallback_service(ServeDir::new(config.public_dir)),

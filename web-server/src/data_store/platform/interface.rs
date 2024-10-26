@@ -24,7 +24,7 @@ pub trait DataStorePlatformInterface {
         create: DataStoreCreatePlatform,
     ) -> Result<DataStorePlatform, sqlx::Error>;
 
-    /// Returns a list of strings that can later be used to retrieve the
+    /// Returns a list of [Hardware]s that can later be used to retrieve the
     /// platforms that have been submitted that have those hardwares.
     ///
     /// The hardwares are decided by combining the webgpu adapter info `.vendor`
@@ -36,6 +36,17 @@ pub trait DataStorePlatformInterface {
     async fn list_available_hardwares(
         &self,
     ) -> Result<Vec<Hardware>, sqlx::Error>;
+
+    /// Returns a list of strings that can later be used to retrieve the
+    /// platforms that have been submitted that have those operating systems.
+    ///
+    /// The operating systems are taken from the user agent OS info.
+    ///
+    /// In the future we might separate them by OS version if that were ever
+    /// revelant.
+    async fn list_available_operating_systems(
+        &self,
+    ) -> Result<Vec<String>, sqlx::Error>;
 }
 
 #[async_trait::async_trait]
@@ -114,6 +125,21 @@ impl DataStorePlatformInterface for PostgresDataStore {
                 webgpu_adapter_info
             WHERE
                 vendor IS NOT NULL AND architecture IS NOT NULL;
+            "#,
+        )
+        .fetch_all(client.acquire().await?)
+        .await
+    }
+
+    async fn list_available_operating_systems(
+        &self,
+    ) -> Result<Vec<String>, sqlx::Error> {
+        let mut client = self.client().await?;
+
+        sqlx::query_scalar!(
+            r#"
+            SELECT DISTINCT operating_system
+            FROM user_agent_os;
             "#,
         )
         .fetch_all(client.acquire().await?)

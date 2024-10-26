@@ -19,6 +19,13 @@ impl Render for HistoricalData {
             }
         }
 
+        div class="data-filter" {
+            label for="hardware-selector" { "OS Filter" }
+            select id="hardware-selector" hx-get="/operating_systems" hx-trigger="load" hx-swap="beforeend" {
+                option { "--" }
+            }
+        }
+
         }
     }
 }

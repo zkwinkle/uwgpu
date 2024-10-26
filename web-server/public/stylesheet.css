@@ -199,6 +199,7 @@ blockquote {
 .data-filter label {
 	font-size: 1.15em;
 	font-weight: bold;
+	width: 8em;
 	flex-shrink: 0;
 }
 
