@@ -42,17 +42,20 @@ h1,
 h2,
 h3,
 h4 {
-	margin: 1em 0 1em;
 	line-height: 1.2;
 	color: var(--fg-bright);
 }
 
+h1 {
+	margin: 1em 0 1em;
+}
+
 h2 {
-	margin: 2em 0 0.5em;
+	margin: 2em 0 1em;
 }
 
 h3 {
-	margin: 1em 0 0.25em;
+	margin: 1em 0 0.5em;
 }
 
 h4 {
@@ -181,6 +184,32 @@ blockquote {
 	align-items: center;
 	gap: 10px;
 	flex-direction: row;
+}
+
+/* Filters in the historical data view */
+.data-filter {
+	margin: 1em 0 0 0;
+	display: flex;
+	justify-content: left;
+	align-items: center;
+	gap: 5px;
+	flex-direction: row;
+}
+
+.data-filter label {
+	font-size: 1.15em;
+	font-weight: bold;
+	flex-shrink: 0;
+}
+
+.data-filter select {
+	padding: 2px;
+	font-size: 1em;
+	border: 1px solid var(--fg-dark);
+	border-radius: 4px;
+	background-color: var(--bg-bright);
+	cursor: pointer;
+	flex-grow: 1;
 }
 
 

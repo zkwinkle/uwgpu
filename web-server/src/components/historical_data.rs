@@ -12,9 +12,11 @@ impl Render for HistoricalData {
     fn render(&self) -> Markup {
         html! {
 
-        label for="hardware-selector" { "Hardware Filter" }
-        select id="hardware-selector" hx-get="/hardwares" hx-trigger="load" hx-swap="beforeend" {
-            option { "--" }
+        div class="data-filter" {
+            label for="hardware-selector" { "Hardware Filter" }
+            select id="hardware-selector" hx-get="/hardwares" hx-trigger="load" hx-swap="beforeend" {
+                option { "--" }
+            }
         }
 
         }
