@@ -44,6 +44,22 @@ pub struct Hardware {
     pub webgpu_architecture: String,
 }
 
+/// Supported general "platforms" for filtering results
+///
+/// These all have different ways of being queried for, so that's why we decide
+/// to just state them in this enum instead of doing some heuristic query of the
+/// DB to find the available variants. (Like we do for [Hardware] variants for
+/// example.)
+#[derive(Serialize, Deserialize)]
+pub enum Platform {
+    Chromium,
+    Firefox,
+    OtherBrowser,
+    NativeVulkan,
+    NativeMetal,
+    NativeDx12,
+}
+
 /// This structure describes a platform to create in the datastore.
 pub struct DataStoreCreatePlatform {
     /// Available when user agent header is present.
