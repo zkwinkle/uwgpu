@@ -6,6 +6,7 @@ use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuBackend;
 use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuDeviceType;
 use crate::data_store::{non_empty_string::NonEmptyString, PostgresDataStore};
 
+use super::Hardware;
 use super::{
     user_agent_info::{
         DataStoreUserAgent, DataStoreUserAgentDevice, DataStoreUserAgentOs,
@@ -22,6 +23,19 @@ pub trait DataStorePlatformInterface {
         &self,
         create: DataStoreCreatePlatform,
     ) -> Result<DataStorePlatform, sqlx::Error>;
+
+    /// Returns a list of strings that can later be used to retrieve the
+    /// platforms that have been submitted that have those hardwares.
+    ///
+    /// The hardwares are decided by combining the webgpu adapter info `.vendor`
+    /// and `.architecture` fields.
+    ///
+    /// TODO: In the future, when more data is available to build better
+    /// heuristics, can also take into account the user agent device info
+    /// perhaps and the wgpu info.
+    async fn list_available_hardwares(
+        &self,
+    ) -> Result<Vec<Hardware>, sqlx::Error>;
 }
 
 #[async_trait::async_trait]
@@ -83,6 +97,27 @@ impl DataStorePlatformInterface for PostgresDataStore {
             wgpu_adapter_info: create.wgpu_adapter_info,
             webgpu_adapter_info: create.webgpu_adapter_info,
         })
+    }
+
+    async fn list_available_hardwares(
+        &self,
+    ) -> Result<Vec<Hardware>, sqlx::Error> {
+        let mut client = self.client().await?;
+
+        sqlx::query_as!(
+            Hardware,
+            r#"
+            SELECT DISTINCT
+                vendor as "webgpu_vendor!",
+                architecture as "webgpu_architecture!"
+            FROM
+                webgpu_adapter_info
+            WHERE
+                vendor IS NOT NULL AND architecture IS NOT NULL;
+            "#,
+        )
+        .fetch_all(client.acquire().await?)
+        .await
     }
 }
 

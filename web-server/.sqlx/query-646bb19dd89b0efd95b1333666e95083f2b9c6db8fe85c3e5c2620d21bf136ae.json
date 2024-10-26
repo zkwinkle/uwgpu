@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT DISTINCT\n                vendor as \"webgpu_vendor!\",\n                architecture as \"webgpu_architecture!\"\n            FROM\n                webgpu_adapter_info\n            WHERE\n                vendor IS NOT NULL AND architecture IS NOT NULL;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "webgpu_vendor!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "webgpu_architecture!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "646bb19dd89b0efd95b1333666e95083f2b9c6db8fe85c3e5c2620d21bf136ae"
+}

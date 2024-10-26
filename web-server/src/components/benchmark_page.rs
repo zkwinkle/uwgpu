@@ -1,8 +1,11 @@
 use maud::{html, Markup, PreEscaped, Render};
 use serde::{Deserialize, Serialize};
 
+use super::historical_data::HistoricalData;
+use MicrobenchmarkKind::*;
+
 /// A page for a specific benchmark
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 pub enum MicrobenchmarkKind {
     Matmul,
     Reduction,
@@ -187,7 +190,7 @@ impl Render for MicrobenchmarkPage<'_> {
 
         div id="historical-view" role="tabpanel" {
             h2 { "Historical Data" }
-            p { "TODO selectors for filtering and cute table" }
+            (HistoricalData {microbenchmark: self.microbenchmark})
         }
 
         script { (PreEscaped(r##"
@@ -232,7 +235,6 @@ impl Render for MicrobenchmarkPage<'_> {
     }
 }
 
-use MicrobenchmarkKind::*;
 impl MicrobenchmarkKind {
     fn title(&self) -> &'static str {
         match self {

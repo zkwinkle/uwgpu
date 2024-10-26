@@ -47,7 +47,7 @@ impl Layout {
             head {
                 ( STYLESHEET )
                 meta name="viewport" content="width=device-width, initial-scale=1";
-
+                script src="/public/htmx.min.js" {}
             }
             div id="theme-container" class="light" {
                 div class="container" {
