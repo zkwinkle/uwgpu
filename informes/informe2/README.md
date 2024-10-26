@@ -1,4 +1,4 @@
-# Plantilla para informes de avance
+# Informe de avance 2
 
 ## Compilación
 

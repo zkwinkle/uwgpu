@@ -13,6 +13,7 @@ pub mod extractors;
 mod not_found;
 
 mod hardware_options;
+mod historic_data_table;
 mod home;
 mod microbenchmark_page;
 mod os_options;
@@ -39,6 +40,10 @@ pub fn create_router(config: AppConfig) -> Router {
         .route("/results", post(post_results::post_results))
         .route("/hardwares", get(hardware_options::hardware_options))
         .route("/operating_systems", get(os_options::os_options))
+        .route(
+            "/statistic_table",
+            get(historic_data_table::historica_data_table),
+        )
         .nest(
             "/public",
             Router::new().fallback_service(ServeDir::new(config.public_dir)),
