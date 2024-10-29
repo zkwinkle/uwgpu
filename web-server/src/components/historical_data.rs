@@ -16,8 +16,16 @@ const PLATFORM_OPTIONS: &'static [Platform] =
 impl Render for HistoricalData {
     fn render(&self) -> Markup {
         html! {
-        form hx-get="/statistic_table" hx-trigger="load, change" hx-target="#stats-table" {
-            div hx-target="unset" hx-include="unset" {
+        form
+            hx-get="/statistic_table"
+            hx-trigger="load, change"
+            hx-target="#stats-table"
+            hx-vals=(format!(
+                r#"{{"microbenchmark": {}}}"#,
+                serde_json::to_string(&self.microbenchmark).unwrap()
+                ))
+            {
+            div hx-target="unset" {
             div class="data-filter" {
                 label for="hardware-selector" { "Hardware Filter" }
                 // TODO: Include benchmark kind with hx-vals

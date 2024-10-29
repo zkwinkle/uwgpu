@@ -5,7 +5,9 @@ use axum::Extension;
 use maud::{html, Markup};
 use serde::Deserialize;
 
-use crate::api_types::{BenchmarkResultsFilters, Hardware, Platform};
+use crate::api_types::{
+    BenchmarkResultsFilters, Hardware, MicrobenchmarkKind, Platform,
+};
 use crate::data_store::DataStore;
 use crate::error::ServerError;
 
@@ -14,6 +16,11 @@ pub struct QueryParams {
     hardware: String,
     operating_system: String,
     platform: String,
+    /// Only field that can be decoded by axum because it can't be an empty
+    /// string and it's manually set from hx-vals instead of grabbing it from
+    /// a <select> element (htmx will automatically wrap it with "quotes",
+    /// making serde_json think it's a string and not an object)
+    microbenchmark: MicrobenchmarkKind,
 }
 
 #[cfg_attr(feature = "debug", axum::debug_handler)]
@@ -46,6 +53,7 @@ pub async fn historica_data_table(
         hardware,
         operating_system,
         platform,
+        microbenchmark: qp.microbenchmark,
     };
 
     Ok(html! {

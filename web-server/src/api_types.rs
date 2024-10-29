@@ -36,6 +36,7 @@ pub struct BenchmarkResultsFilters {
     pub hardware: Option<Hardware>,
     pub operating_system: Option<String>,
     pub platform: Option<Platform>,
+    pub microbenchmark: MicrobenchmarkKind,
 }
 
 /// Fields used when listing and querying available hardware
