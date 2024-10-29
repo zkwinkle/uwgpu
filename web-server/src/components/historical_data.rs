@@ -1,7 +1,6 @@
-use crate::data_store::platform::Platform;
-
-use super::benchmark_page::MicrobenchmarkKind;
 use maud::{html, Markup, Render};
+
+use crate::api_types::{MicrobenchmarkKind, Platform};
 
 /// Component for viewing statistics of the historical data stored in the DB
 /// Allows for filtering depending on hardware, OS, and "platform" (browser or

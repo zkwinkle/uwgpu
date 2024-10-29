@@ -5,9 +5,8 @@ use axum::{
 use extractors::Layout;
 use tower_http::services::ServeDir;
 
-use crate::{
-    app_config::AppConfig, components::benchmark_page::MicrobenchmarkKind::*,
-};
+use crate::api_types::MicrobenchmarkKind::*;
+use crate::app_config::AppConfig;
 
 mod extractors;
 mod not_found;

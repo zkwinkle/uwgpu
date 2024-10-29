@@ -1,7 +1,8 @@
 use maud::{html, Markup};
 
-use crate::components::benchmark_page::{
-    MicrobenchmarkKind, MicrobenchmarkPage,
+use crate::{
+    api_types::MicrobenchmarkKind,
+    components::benchmark_page::MicrobenchmarkPage,
 };
 
 use super::extractors::Layout;

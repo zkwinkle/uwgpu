@@ -32,7 +32,7 @@ use axum::{
 use serde::Deserialize;
 use uwgpu::{AdapterInfo, Backend, DeviceType};
 
-use crate::components::benchmark_page::MicrobenchmarkKind;
+use crate::api_types::MicrobenchmarkKind;
 
 #[derive(Deserialize, Debug)]
 pub struct PostResultsRequest {

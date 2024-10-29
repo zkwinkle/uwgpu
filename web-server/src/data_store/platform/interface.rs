@@ -2,11 +2,11 @@ use std::ops::DerefMut;
 
 use sqlx::{types::Uuid, Acquire, Postgres, Transaction};
 
+use crate::api_types::Hardware;
 use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuBackend;
 use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuDeviceType;
 use crate::data_store::{non_empty_string::NonEmptyString, PostgresDataStore};
 
-use super::Hardware;
 use super::{
     user_agent_info::{
         DataStoreUserAgent, DataStoreUserAgentDevice, DataStoreUserAgentOs,

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::Extension;
 use maud::{html, Markup};
 
-use crate::data_store::platform::Hardware;
+use crate::api_types::Hardware;
 use crate::data_store::DataStore;
 use crate::error::ServerError;
 

@@ -1,10 +1,11 @@
+use std::sync::Arc;
+
 use axum::extract::Query;
-use axum::{Extension, Json};
+use axum::Extension;
 use maud::{html, Markup};
 use serde::Deserialize;
-use serde_json::Value;
 
-use crate::data_store::platform::{Hardware, Platform};
+use crate::api_types::{BenchmarkResultsFilters, Hardware, Platform};
 use crate::data_store::DataStore;
 use crate::error::ServerError;
 
@@ -15,18 +16,12 @@ pub struct QueryParams {
     platform: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct QueryFilters {
-    hardware: Option<Hardware>,
-    operating_system: Option<String>,
-    platform: Option<Platform>,
-}
-
 #[cfg_attr(feature = "debug", axum::debug_handler)]
 /// This endpoint returns a table with statistics of the historical data for
 /// benchmark results.
 /// The type of result taken into account can be filtered down.
 pub async fn historica_data_table(
+    Extension(data_store): Extension<Arc<dyn DataStore>>,
     Query(qp): Query<QueryParams>,
 ) -> Result<Markup, ServerError> {
     let hardware: Option<Hardware> = if qp.hardware.is_empty() {
@@ -47,7 +42,7 @@ pub async fn historica_data_table(
         Some(qp.operating_system)
     };
 
-    let filters = QueryFilters {
+    let filters = BenchmarkResultsFilters {
         hardware,
         operating_system,
         platform,

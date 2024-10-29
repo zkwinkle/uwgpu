@@ -1,21 +1,7 @@
 use maud::{html, Markup, PreEscaped, Render};
-use serde::{Deserialize, Serialize};
 
 use super::historical_data::HistoricalData;
-use MicrobenchmarkKind::*;
-
-/// A page for a specific benchmark
-#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
-pub enum MicrobenchmarkKind {
-    Matmul,
-    Reduction,
-    Convolution,
-    Scan,
-    BufferSequential,
-    BufferShuffled,
-    BufferToTexture,
-    TextureToTexture,
-}
+use crate::api_types::MicrobenchmarkKind::{self, *};
 
 pub struct MicrobenchmarkPage<'a> {
     pub microbenchmark: MicrobenchmarkKind,
@@ -24,12 +10,12 @@ pub struct MicrobenchmarkPage<'a> {
 
 impl Render for MicrobenchmarkPage<'_> {
     fn render(&self) -> Markup {
-        let title = self.microbenchmark.title();
+        let title = self.title();
 
         html! {
 
         header { h1 { (title) } }
-        p { (self.microbenchmark.description()) }
+        p { (self.description()) }
 
         div class="microbenchmark-view-selectors" role="tablist" {
             a href="#execution" id="execution-view-selector" role="tab" aria-controls="execution-view" { "[Microbenchmark Execution]" }
@@ -178,12 +164,12 @@ impl Render for MicrobenchmarkPage<'_> {
                 }}
                 "#,
                 name=title,
-                benchmark_name=self.microbenchmark.wasm_benchmark_function(),
-                workgroups_array=self.microbenchmark.benchmark_workgroups(),
-                create_custom_result = self.microbenchmark.custom_result(),
+                benchmark_name=self.wasm_benchmark_function(),
+                workgroups_array=self.benchmark_workgroups(),
+                create_custom_result = self.custom_result(),
                 microbenchmark_json=serde_json::to_string(&self.microbenchmark).unwrap(),
                 url=self.server_url,
-                custom_result_fn=self.microbenchmark.custom_result_function(),
+                custom_result_fn=self.custom_result_function(),
                 )))
             }
         }
@@ -235,9 +221,9 @@ impl Render for MicrobenchmarkPage<'_> {
     }
 }
 
-impl MicrobenchmarkKind {
+impl MicrobenchmarkPage<'_> {
     fn title(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             Matmul => "Matrix Multiplication",
             Reduction => "Reduction",
             Convolution => "Convolution",
@@ -250,7 +236,7 @@ impl MicrobenchmarkKind {
     }
 
     fn description(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             Matmul => "This microbenchmark tests the performance of multiplying two 1024x1024 matrices of 32bit floats together.",
             Reduction => todo!(),
             Convolution => todo!(),
@@ -270,21 +256,8 @@ impl MicrobenchmarkKind {
         }
     }
 
-    pub const fn path(&self) -> &'static str {
-        match self {
-            Matmul => "/matmul",
-            Reduction => "/reduction",
-            Convolution => "/convolution",
-            Scan => "/scan",
-            BufferSequential => "/buffer_sequential",
-            BufferShuffled => "/buffer_shuffled",
-            BufferToTexture => "buffer_to_texture",
-            TextureToTexture => "texture_to_texture",
-        }
-    }
-
     fn wasm_benchmark_function(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             Matmul => "wasm_matmul_benchmark",
             Reduction => todo!(),
             Convolution => todo!(),
@@ -297,7 +270,7 @@ impl MicrobenchmarkKind {
     }
 
     fn benchmark_workgroups(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             // Accessing same-row should be faster than accessing different rows
             // which is why we use column-dominant workgroups
             Matmul => "[[4, 8], [2, 16], [1, 32], [8, 8], [4, 16], [2, 32], [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32], [4, 64], [2, 128], [1, 256]]",
@@ -320,7 +293,7 @@ impl MicrobenchmarkKind {
     /// The code should be an expression to create a string for the line with
     /// the custom result.
     fn custom_result(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             Matmul | Reduction | Convolution | Scan => {
                 r#"
                 "GFLOPS: " + (result.flops() / 1_000_000_000).toFixed(3)
@@ -336,7 +309,7 @@ impl MicrobenchmarkKind {
     }
 
     fn custom_result_function(&self) -> &'static str {
-        match self {
+        match self.microbenchmark {
             Matmul | Reduction | Convolution | Scan => "flops",
             BufferSequential | BufferShuffled | BufferToTexture
             | TextureToTexture => "bandwidth",

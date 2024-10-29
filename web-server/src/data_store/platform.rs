@@ -1,5 +1,4 @@
 use crate::data_store::platform::wgpu_adapter_info::DataStoreWgpuAdapterInfo;
-use serde::{Deserialize, Serialize};
 use sqlx::types::Uuid;
 use user_agent_info::DataStoreUserAgentStringInfo;
 use webgpu_adapter_info::DataStoreWebGpuAdapterInfo;
@@ -32,32 +31,6 @@ pub struct DataStorePlatform {
     /// targets, which is also where it's most useful since the wgpu adapter
     /// info is lacking in those platforms.
     pub webgpu_adapter_info: Option<DataStoreWebGpuAdapterInfo>,
-}
-
-/// Fields used when listing and querying available hardware
-///
-/// Not using the [NonEmptyString] for easy decoding from DB, i can assume the
-/// strings aren't empty tho.
-#[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
-pub struct Hardware {
-    pub webgpu_vendor: String,
-    pub webgpu_architecture: String,
-}
-
-/// Supported general "platforms" for filtering results
-///
-/// These all have different ways of being queried for, so that's why we decide
-/// to just state them in this enum instead of doing some heuristic query of the
-/// DB to find the available variants. (Like we do for [Hardware] variants for
-/// example.)
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Platform {
-    Chromium,
-    Firefox,
-    OtherBrowser,
-    NativeVulkan,
-    NativeMetal,
-    NativeDx12,
 }
 
 /// This structure describes a platform to create in the datastore.
