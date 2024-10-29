@@ -119,6 +119,32 @@ blockquote {
 	color: color-mix(in srgb, var(--fg-dark) 80%, var(--bg-brighter));
 }
 
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+table th,
+table td {
+	padding: 0.7em 0.9em;
+	border: 1px solid var(--black);
+	text-align: left;
+}
+
+table th {
+	background-color: color-mix(in srgb, var(--bg-bright) 70%, var(--bg-brighter));
+	font-weight: bold;
+	font-size: 1.25em;
+}
+
+table tr:nth-child(even) {
+	background-color: var(--bg-bright);
+}
+
+table tr:hover {
+	background-color: var(--bg-brighter);
+}
+
 .navbar {
 	display: flex;
 	flex-direction: column;
@@ -213,6 +239,23 @@ blockquote {
 	flex-grow: 1;
 }
 
+#refresh-button {
+	padding: 0.2em;
+	padding-top: 0.3em;
+	border: none;
+	background: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 1.5em;
+}
+
+#refresh-button svg {
+	color: var(--success-color);
+	width: 25px;
+	height: 25px;
+}
 
 /* =================== Responsiveness =================== */
 

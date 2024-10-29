@@ -68,7 +68,6 @@ impl Render for MicrobenchmarkPage<'_> {
 
                 async function run_microbenchmark() {{
                     await init();
-                    console.log("Init Complete!");
 
                     for (const workgroup_size of {workgroups_array}) {{
                         results_header = document.createElement('h4');
@@ -84,8 +83,6 @@ impl Render for MicrobenchmarkPage<'_> {
                           results_header.textContent = ".".repeat(dotCount);
                         }}, 300);
 
-                        console.log("workgroup size:", workgroup_size);
-
                         let result;
                         if (Array.isArray(workgroup_size)) {{
                             result = await {benchmark_name}(...workgroup_size);
@@ -94,9 +91,6 @@ impl Render for MicrobenchmarkPage<'_> {
                         }}
 
                         post_results(result, workgroup_size);
-
-                        console.log("results:", result);
-                        console.log("wgpu adapter info json:", JSON.stringify(result[0].adapter_info.to_js()));
 
                         clearInterval(results_header_interval);
                         results_header_interval = null;
@@ -151,9 +145,6 @@ impl Render for MicrobenchmarkPage<'_> {
                         custom_result: result.{custom_result_fn}(),
                     }}
 
-                    console.log("post result request:", post_result_request);
-                    console.log("JSON stringified:", JSON.stringify(post_result_request));
-
                     fetch("{url}/results", {{
                       method: 'POST',
                       headers: {{
@@ -175,7 +166,6 @@ impl Render for MicrobenchmarkPage<'_> {
         }
 
         div id="historical-view" role="tabpanel" {
-            h2 { "Historical Data" }
             (HistoricalData {microbenchmark: self.microbenchmark})
         }
 

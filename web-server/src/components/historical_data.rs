@@ -16,9 +16,11 @@ const PLATFORM_OPTIONS: &'static [Platform] =
 impl Render for HistoricalData {
     fn render(&self) -> Markup {
         html! {
+        h2 { "Historical Data" }
         form
+            id="stats-filters"
             hx-get="/statistic_table"
-            hx-trigger="load, change"
+            hx-trigger="load, change, click from:#refresh-button"
             hx-target="#stats-table"
             hx-vals=(format!(
                 r#"{{"microbenchmark": {}}}"#,
@@ -28,7 +30,6 @@ impl Render for HistoricalData {
             div hx-target="unset" {
             div class="data-filter" {
                 label for="hardware-selector" { "Hardware Filter" }
-                // TODO: Include benchmark kind with hx-vals
                 select name="hardware" id="hardware-selector" hx-get="/hardwares" hx-trigger="load" hx-swap="beforeend" {
                     option value="" { "--" }
                 }
@@ -54,6 +55,12 @@ impl Render for HistoricalData {
             }
         }
 
+        button id="refresh-button" {
+            svg xmlns="http://www.w3.org/2000/svg" x-bind:width="size" x-bind:height="size" viewBox="0 0 24 24" fill="none" stroke="currentColor" x-bind:stroke-width="stroke" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" stroke-width="2" {
+              path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"{}
+              path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"{}
+            }
+        }
         span id="stats-table" {}
 
         }
