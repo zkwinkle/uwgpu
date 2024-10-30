@@ -56,12 +56,96 @@ impl Layout {
         head {
             ( STYLESHEET )
             meta name="viewport" content="width=device-width, initial-scale=1";
-            script src="/public/htmx.min.js" {}
+            script defer src="/public/htmx.min.js" {}
 
             // Utility functions shared across pages. All functions in here
             // should get used in all pages, which is fine because we just have
             // the home page and microbenchmark pages (October 2024)
-            script {(PreEscaped( format!(r##"
+            script defer type="module" {(PreEscaped( format!(r##"
+                let wasm_module = await import("./public/pkg/microbenchmarks.js");
+                const TimeUnit = wasm_module.TimeUnit;
+                const init = wasm_module.default;
+
+                window.run_microbenchmark = run_microbenchmark;
+
+                async function run_microbenchmark(microbenchmark_json,
+                                                  wasm_benchmark_fn_str,
+                                                  workgroups_array,
+                                                  custom_result_fn_str,
+                                                  create_custom_result_fn,
+                                                  results_div,
+                                                  disable_checkbox,
+                                                  ) {{
+                    let results_header_interval = null;
+                    try {{
+                        await init();
+
+                        // Shuffle so first ones don't have more executions than
+                        // later ones.
+                        shuffle(workgroups_array);
+                        for (const workgroup_size of workgroups_array) {{
+                            let results_header = document.createElement('h4');
+                            results_div.appendChild(results_header);
+
+                            results_header.textContent = "...";
+
+                            let dotCount = 0;
+
+                            // Animation for ... (while executing next benchmark)
+                            results_header_interval = setInterval(() => {{
+                              dotCount = (dotCount % 3) + 1;
+                              results_header.textContent = ".".repeat(dotCount);
+                            }}, 300);
+
+                            let result;
+                            const wasm_benchmark_fn = wasm_module[wasm_benchmark_fn_str];
+                            if (Array.isArray(workgroup_size)) {{
+                                result = await wasm_benchmark_fn(...workgroup_size);
+                            }} else {{
+                                result = await wasm_benchmark_fn(workgroup_size);
+                            }}
+
+                            if (!disable_checkbox.checked) {{
+                                post_results(result, workgroup_size, microbenchmark_json, result[custom_result_fn_str]());
+                            }}
+
+                            clearInterval(results_header_interval);
+                            results_header_interval = null;
+
+                            if (Array.isArray(workgroup_size)) {{
+                                results_header.textContent = "Workgroup size: " + workgroup_size.join('x');
+                            }} else {{
+                                results_header.textContent = "Workgroup size: " + workgroup_size;
+                            }}
+
+                            let total_time_spent_p = document.createElement('p');
+                            total_time_spent_p.textContent = "Total time spent: " + result[0].total_time(TimeUnit.Second).toFixed(3) + "s";
+                            results_div.appendChild(total_time_spent_p);
+
+                            let time_per_iter_p = document.createElement('p');
+                            time_per_iter_p.textContent = "Time per iteration: " + result[0].time_per_iteration(TimeUnit.Milli).toFixed(3) + "ms";
+                            results_div.appendChild(time_per_iter_p);
+
+                            let custom_result_p = document.createElement('p');
+                            custom_result_p.textContent = create_custom_result_fn(result);
+                            results_div.appendChild(custom_result_p);
+                        }};
+                    }} catch (error) {{
+                        let error_header = document.createElement('h2');
+                        error_header.textContent = "An error has ocurred!";
+                        results_div.appendChild(error_header);
+                        let error_message = document.createElement('p');
+                        error_message.textContent = error.toString();
+                        results_div.appendChild(error_message);
+
+                        setTimeout(() => {{ throw error; }}, 100);
+                    }} finally {{
+                        if (results_header_interval != null) {{
+                            clearInterval(results_header_interval)
+                        }}
+                    }}
+                }}
+
                 async function post_results(result, workgroup_size, microbenchmark_kind_json, custom_result) {{
 
                     const adapter = await navigator.gpu.requestAdapter();
@@ -100,7 +184,16 @@ impl Layout {
                       }},
                       body: JSON.stringify(post_result_request),
                     }})
-                }}"##, url=self.public_server_url) ))
+                }}
+
+                function shuffle(a) {{
+                    for (let i = a.length - 1; i >= 0; i--) {{
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [a[i], a[j]] = [a[j], a[i]];
+                    }}
+                }}
+
+                "##, url=self.public_server_url) ))
             }
         }
         div id="theme-container" class="light" {

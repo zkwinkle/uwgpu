@@ -33,96 +33,25 @@ impl Render for MicrobenchmarkPage {
             }
             }
             div id="execution-results" {}
-            script type="module" {
+            script defer {
                 (PreEscaped(format!(r#"
-                import init, {{ {benchmark_name}, TimeUnit }} from "./public/pkg/microbenchmarks.js";
-
                 let results_div = document.getElementById('execution-results');
-                let results_header_interval = null;
-                let results_header;
 
                 let button = document.getElementById('run_{name}_microbenchmark');
+                let disable_checkbox = document.getElementById('disable_data_collection');
                 button.addEventListener('click', async () => {{
                     button.disabled = true;
+                    results_div.innerHTML = "";
                     try {{
-                        results_div.innerHTML = "";
-                        await run_microbenchmark();
-                    }} catch (error) {{
-                        let error_header = document.createElement('h2');
-                        error_header.textContent = "An error has ocurred!";
-                        results_div.appendChild(error_header);
-                        let error_message = document.createElement('p');
-                        error_message.textContent = error.toString();
-                        results_div.appendChild(error_message);
-
-                        setTimeout(() => {{ throw error; }}, 100);
+                        await {run_microbenchmark};
                     }} finally {{
                         button.disabled = false;
-
-                        if (results_header_interval != null) {{
-                            clearInterval(results_header_interval)
-                        }}
                     }}
                 }});
 
-                async function run_microbenchmark() {{
-                    await init();
-
-                    for (const workgroup_size of {workgroups_array}) {{
-                        results_header = document.createElement('h4');
-                        results_div.appendChild(results_header);
-
-                        results_header.textContent = "...";
-
-                        let dotCount = 0;
-
-                        // Animation for ... (while executing next benchmark)
-                        results_header_interval = setInterval(() => {{
-                          dotCount = (dotCount % 3) + 1;
-                          results_header.textContent = ".".repeat(dotCount);
-                        }}, 300);
-
-                        let result;
-                        if (Array.isArray(workgroup_size)) {{
-                            result = await {benchmark_name}(...workgroup_size);
-                        }} else {{
-                            result = await {benchmark_name}(workgroup_size);
-                        }}
-
-                        let disable_checkbox = document.getElementById('disable_data_collection');
-                        if (!disable_checkbox.checked) {{
-                            post_results(result, workgroup_size, {microbenchmark_json}, result.{custom_result_fn}());
-                        }}
-
-                        clearInterval(results_header_interval);
-                        results_header_interval = null;
-
-                        if (Array.isArray(workgroup_size)) {{
-                            results_header.textContent = "Workgroup size: " + workgroup_size.join('x');
-                        }} else {{
-                            results_header.textContent = "Workgroup size: " + workgroup_size;
-                        }}
-
-                        let total_time_spent_p = document.createElement('p');
-                        total_time_spent_p.textContent = "Total time spent: " + result[0].total_time(TimeUnit.Second).toFixed(3) + "s";
-                        results_div.appendChild(total_time_spent_p);
-
-                        let time_per_iter_p = document.createElement('p');
-                        time_per_iter_p.textContent = "Time per iteration: " + result[0].time_per_iteration(TimeUnit.Milli).toFixed(3) + "ms";
-                        results_div.appendChild(time_per_iter_p);
-
-                        let custom_result_p = document.createElement('p');
-                        custom_result_p.textContent = {create_custom_result};
-                        results_div.appendChild(custom_result_p);
-                    }};
-                }}
                 "#,
                 name=title,
-                benchmark_name=self.wasm_benchmark_function(),
-                workgroups_array=self.benchmark_workgroups(),
-                create_custom_result = self.custom_result(),
-                microbenchmark_json=serde_json::to_string(&self.microbenchmark).unwrap(),
-                custom_result_fn=self.custom_result_function(),
+                run_microbenchmark=self.run_microbenchmark_fn(),
                 )))
             }
         }
@@ -174,6 +103,32 @@ impl Render for MicrobenchmarkPage {
 }
 
 impl MicrobenchmarkPage {
+
+    /// Crafts the call to the JS `run_microbenchmark` function defined on the
+    /// [Layout](crate::routes::extractors::Layout) based on the specific
+    /// microbenchmark.
+    ///
+    /// This function assumes the existence of 2 variables:
+    ///
+    /// - `results_div`: the element results will be appended to.
+    /// - `disable_checkbox`: Checkbox element that if checked will disable
+    ///                       POSTing results.
+    fn run_microbenchmark_fn(&self) -> String {
+        format!(r#"run_microbenchmark({microbenchmark_json},
+                                      "{wasm_benchmark_fn_str}",
+                                      {workgroups_array},
+                                      "{custom_result_fn_str}",
+                                      (result) => {create_custom_result},
+                                      results_div,
+                                      disable_checkbox)"#,
+            microbenchmark_json=serde_json::to_string(&self.microbenchmark).unwrap(),
+            wasm_benchmark_fn_str=self.wasm_benchmark_function(),
+            workgroups_array=self.benchmark_workgroups(),
+            custom_result_fn_str=self.custom_result_function(),
+            create_custom_result = self.custom_result(),
+        )
+    }
+
     fn title(&self) -> &'static str {
         match self.microbenchmark {
             Matmul => "Matrix Multiplication",
