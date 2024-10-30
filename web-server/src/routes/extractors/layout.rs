@@ -67,6 +67,7 @@ impl Layout {
                 const init = wasm_module.default;
 
                 window.run_microbenchmark = run_microbenchmark;
+                window.shuffle = shuffle;
 
                 async function run_microbenchmark(microbenchmark_json,
                                                   wasm_benchmark_fn_str,

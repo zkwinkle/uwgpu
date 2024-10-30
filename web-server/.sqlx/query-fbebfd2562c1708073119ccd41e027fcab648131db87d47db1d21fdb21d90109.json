@@ -18,6 +18,7 @@
               "Enum": [
                 "buffer_sequential",
                 "buffer_shuffled",
+                "buffer_to_buffer",
                 "buffer_to_texture",
                 "texture_to_texture"
               ]

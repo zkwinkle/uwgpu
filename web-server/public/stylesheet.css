@@ -59,13 +59,13 @@ h3 {
 }
 
 h4 {
-	margin: 3em 0 1.5em;
+	margin: 1em 0 0.75em;
 	color: var(--white);
 }
 
 p {
 	margin-top: 0;
-	margin-bottom: 1em;
+	margin-bottom: 0.5em;
 }
 
 hr {
@@ -145,6 +145,14 @@ table tr:hover {
 	background-color: var(--bg-brighter);
 }
 
+button {
+	font-size: 1.25em;
+	background-color: var(--bg-bright);
+	color: var(--fg);
+	border: 1px solid var(--fg-bright);
+	border-radius: 5px;
+}
+
 .navbar {
 	display: flex;
 	flex-direction: column;
@@ -211,6 +219,11 @@ table tr:hover {
 	align-items: center;
 	gap: 10px;
 	flex-direction: row;
+}
+
+#execution-view {
+	display: flex;
+	flex-direction: column;
 }
 
 /* Filters in the historical data view */

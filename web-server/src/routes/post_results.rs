@@ -132,8 +132,8 @@ fn benchmark_kind_to_data_store(
                 },
             )
         }
-        BufferSequential | BufferShuffled | BufferToTexture
-        | TextureToTexture => {
+        BufferSequential | BufferShuffled | BufferToBuffer
+        | BufferToTexture | TextureToTexture => {
             DataStoreBenchmarkKind::Memory(DataStoreMemoryBenchmark {
                 kind: unwrap_memory_kind_to_data_store(benchmark),
                 bandwidth: custom_result_value,
@@ -152,8 +152,8 @@ fn unwrap_computational_kind_to_data_store(
         Reduction => DataStoreComputationalBenchmarkKind::Reduction,
  Convolution => DataStoreComputationalBenchmarkKind::Convolution,
  Scan => DataStoreComputationalBenchmarkKind::Scan,
-        BufferSequential | BufferShuffled | BufferToTexture |
-        TextureToTexture => panic!("unwrap_computational_kind_to_data_store should not be called on memory benchmark {:?}", kind),
+        BufferSequential | BufferShuffled | BufferToBuffer
+        | BufferToTexture | TextureToTexture => panic!("unwrap_computational_kind_to_data_store should not be called on memory benchmark {:?}", kind),
     }
 }
 
@@ -166,6 +166,7 @@ fn unwrap_memory_kind_to_data_store(
         Matmul | Reduction | Convolution | Scan => panic!("unwrap_memory_kind_to_data_store should not be called on computational benchmark {:?}", kind),
         BufferSequential => DataStoreMemoryBenchmarkKind::BufferSequential,
         BufferShuffled => DataStoreMemoryBenchmarkKind::BufferShuffled,
+        BufferToBuffer => DataStoreMemoryBenchmarkKind::BufferToBuffer,
         BufferToTexture => DataStoreMemoryBenchmarkKind::BufferToTexture,
         TextureToTexture => DataStoreMemoryBenchmarkKind::TextureToTexture,
     }

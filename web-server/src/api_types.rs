@@ -1,33 +1,8 @@
 use serde::{Deserialize, Serialize};
-use MicrobenchmarkKind::*;
 
-/// A specific benchmark supported by the website.
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, sqlx::Type)]
-pub enum MicrobenchmarkKind {
-    Matmul,
-    Reduction,
-    Convolution,
-    Scan,
-    BufferSequential,
-    BufferShuffled,
-    BufferToTexture,
-    TextureToTexture,
-}
+mod microbenchmark_kind;
 
-impl MicrobenchmarkKind {
-    pub const fn path(&self) -> &'static str {
-        match self {
-            Matmul => "/matmul",
-            Reduction => "/reduction",
-            Convolution => "/convolution",
-            Scan => "/scan",
-            BufferSequential => "/buffer_sequential",
-            BufferShuffled => "/buffer_shuffled",
-            BufferToTexture => "buffer_to_texture",
-            TextureToTexture => "texture_to_texture",
-        }
-    }
-}
+pub use microbenchmark_kind::MicrobenchmarkKind;
 
 /// Statistics that can be obtained for a given microbenchmark.
 #[derive(Debug)]

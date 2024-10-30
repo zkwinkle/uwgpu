@@ -153,6 +153,9 @@ impl DataStoreBenchmarkResultsInterface for PostgresDataStore {
             BufferShuffled => {
                 query.bind(DataStoreMemoryBenchmarkKind::BufferShuffled)
             }
+            BufferToBuffer => {
+                query.bind(DataStoreMemoryBenchmarkKind::BufferToBuffer)
+            }
             BufferToTexture => {
                 query.bind(DataStoreMemoryBenchmarkKind::BufferToTexture)
             }
@@ -331,8 +334,8 @@ impl FromRow<'_, PgRow> for BenchmarkResultsStatistics {
 fn custom_metric_column(microbenchmark: MicrobenchmarkKind) -> &'static str {
     match microbenchmark {
         Matmul | Reduction | Convolution | Scan => "flops",
-        BufferSequential | BufferShuffled | BufferToTexture
-        | TextureToTexture => "bandwidth",
+        BufferSequential | BufferShuffled | BufferToBuffer
+        | BufferToTexture | TextureToTexture => "bandwidth",
     }
 }
 
@@ -341,8 +344,8 @@ fn microbenchmark_table_join(
 ) -> &'static str {
     match microbenchmark {
         Matmul | Reduction | Convolution | Scan => "computational_benchmark",
-        BufferSequential | BufferShuffled | BufferToTexture
-        | TextureToTexture => "memory_benchmark",
+        BufferSequential | BufferShuffled | BufferToBuffer
+        | BufferToTexture | TextureToTexture => "memory_benchmark",
     }
 }
 

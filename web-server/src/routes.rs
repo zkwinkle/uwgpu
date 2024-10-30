@@ -23,14 +23,14 @@ use microbenchmark_page::microbenchmark_page;
 /// Create the main `Router` for this app.
 pub fn create_router(config: AppConfig) -> Router {
     Router::new()
-        .route("/", get(home::placeholder))
+        .route("/", get(home::home))
         .route(
             Matmul.path(),
             get(|l: Layout| async { microbenchmark_page(Matmul)(l) }),
         )
         .route(
-            BufferSequential.path(),
-            get(|l: Layout| async { microbenchmark_page(BufferSequential)(l) }),
+            BufferToBuffer.path(),
+            get(|l: Layout| async { microbenchmark_page(BufferToBuffer)(l) }),
         )
         .route("/results", post(post_results::post_results))
         .route("/hardwares", get(hardware_options::hardware_options))

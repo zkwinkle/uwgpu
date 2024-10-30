@@ -97,7 +97,7 @@ fn custom_metric_name(microbenchmark: MicrobenchmarkKind) -> &'static str {
     use MicrobenchmarkKind::*;
     match microbenchmark {
         Matmul | Reduction | Convolution | Scan => "GFLOPS",
-        BufferSequential | BufferShuffled | BufferToTexture
-        | TextureToTexture => "Bandwidth (GB/s)",
+        BufferSequential | BufferShuffled | BufferToBuffer
+        | BufferToTexture | TextureToTexture => "Bandwidth (GB/s)",
     }
 }
