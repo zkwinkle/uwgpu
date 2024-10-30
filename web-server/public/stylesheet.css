@@ -192,6 +192,7 @@ table tr:hover {
 	width: 1.2em;
 	height: 1.2em;
 	vertical-align: middle;
+	accent-color: var(--accent-color2);
 }
 
 .disable-checkbox label {
