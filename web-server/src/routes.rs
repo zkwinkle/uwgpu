@@ -22,19 +22,15 @@ use microbenchmark_page::microbenchmark_page;
 
 /// Create the main `Router` for this app.
 pub fn create_router(config: AppConfig) -> Router {
-    let url = config.server_url;
-
     Router::new()
         .route("/", get(home::placeholder))
         .route(
             Matmul.path(),
-            get(|l: Layout| async { microbenchmark_page(url, Matmul)(l) }),
+            get(|l: Layout| async { microbenchmark_page(Matmul)(l) }),
         )
         .route(
             BufferSequential.path(),
-            get(|l: Layout| async {
-                microbenchmark_page(url, BufferSequential)(l)
-            }),
+            get(|l: Layout| async { microbenchmark_page(BufferSequential)(l) }),
         )
         .route("/results", post(post_results::post_results))
         .route("/hardwares", get(hardware_options::hardware_options))
@@ -48,6 +44,7 @@ pub fn create_router(config: AppConfig) -> Router {
             Router::new().fallback_service(ServeDir::new(config.public_dir)),
         )
         .fallback(not_found::not_found)
+        .layer(Extension(config.server_url))
         .layer(Extension(config.data_store))
         .layer(Extension(config.ua_parser))
 }

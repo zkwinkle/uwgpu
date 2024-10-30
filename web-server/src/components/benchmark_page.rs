@@ -3,12 +3,11 @@ use maud::{html, Markup, PreEscaped, Render};
 use super::historical_data::HistoricalData;
 use crate::api_types::MicrobenchmarkKind::{self, *};
 
-pub struct MicrobenchmarkPage<'a> {
+pub struct MicrobenchmarkPage {
     pub microbenchmark: MicrobenchmarkKind,
-    pub server_url: &'a str,
 }
 
-impl Render for MicrobenchmarkPage<'_> {
+impl Render for MicrobenchmarkPage {
     fn render(&self) -> Markup {
         let title = self.title();
 
@@ -92,7 +91,7 @@ impl Render for MicrobenchmarkPage<'_> {
 
                         let disable_checkbox = document.getElementById('disable_data_collection');
                         if (!disable_checkbox.checked) {{
-                            post_results(result, workgroup_size);
+                            post_results(result, workgroup_size, {microbenchmark_json}, result.{custom_result_fn}());
                         }}
 
                         clearInterval(results_header_interval);
@@ -117,52 +116,12 @@ impl Render for MicrobenchmarkPage<'_> {
                         results_div.appendChild(custom_result_p);
                     }};
                 }}
-
-                const adapter = await navigator.gpu.requestAdapter();
-                const webgpu_adapter_info = {{
-                    architecture: adapter.info.architecture,
-                    description: adapter.info.description,
-                    device: adapter.info.device,
-                    vendor: adapter.info.vendor,
-                }}
-
-                async function post_results(result, workgroup_size) {{
-                    let workgroup_size_array;
-                    if (Array.isArray(workgroup_size)) {{
-                        workgroup_size_array = workgroup_size;
-                    }} else {{
-                        workgroup_size_array = [workgroup_size];
-                    }}
-
-                    const platform_info = {{
-                        wgpu_adapter_info: result[0].adapter_info.to_js(),
-                        webgpu_adapter_info,
-                    }}
-
-                    const post_result_request = {{
-                        platform_info,
-                        workgroup_size: workgroup_size_array,
-                        benchmark_kind: {microbenchmark_json},
-                        count: result[0].count,
-                        total_time_spent: result[0].total_time_spent,
-                        custom_result: result.{custom_result_fn}(),
-                    }}
-
-                    fetch("{url}/results", {{
-                      method: 'POST',
-                      headers: {{
-                        'Content-Type': 'application/json',
-                      }},
-                      body: JSON.stringify(post_result_request),
-                    }})
-                }}
                 "#,
                 name=title,
                 benchmark_name=self.wasm_benchmark_function(),
                 workgroups_array=self.benchmark_workgroups(),
                 create_custom_result = self.custom_result(),
                 microbenchmark_json=serde_json::to_string(&self.microbenchmark).unwrap(),
-                url=self.server_url,
                 custom_result_fn=self.custom_result_function(),
                 )))
             }
@@ -214,7 +173,7 @@ impl Render for MicrobenchmarkPage<'_> {
     }
 }
 
-impl MicrobenchmarkPage<'_> {
+impl MicrobenchmarkPage {
     fn title(&self) -> &'static str {
         match self.microbenchmark {
             Matmul => "Matrix Multiplication",
