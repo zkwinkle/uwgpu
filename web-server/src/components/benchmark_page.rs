@@ -28,8 +28,8 @@ impl Render for MicrobenchmarkPage<'_> {
             button id=(format!("run_{}_microbenchmark", title)){ "Start" }
 
             div class="disable-checkbox" {
-                input type="checkbox" id=(format!("disable_{}_data_collection", title));
-                label for=(format!("disable_{}_data_collection", title)) {
+                input type="checkbox" id="disable_data_collection" ;
+                label for="disable_data_collection" {
                 "Select this checkbox to opt out of data collection. Benchmark results contribute to a growing database of performance data. Please consider submitting your data to support this project."
             }
             }
@@ -90,7 +90,10 @@ impl Render for MicrobenchmarkPage<'_> {
                             result = await {benchmark_name}(workgroup_size);
                         }}
 
-                        post_results(result, workgroup_size);
+                        let disable_checkbox = document.getElementById('disable_data_collection');
+                        if (!disable_checkbox.checked) {{
+                            post_results(result, workgroup_size);
+                        }}
 
                         clearInterval(results_header_interval);
                         results_header_interval = null;
