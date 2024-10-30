@@ -149,8 +149,17 @@ button {
 	font-size: 1.25em;
 	background-color: var(--bg-bright);
 	color: var(--fg);
-	border: 1px solid var(--fg-bright);
+	border: 1px outset var(--fg-bright);
 	border-radius: 5px;
+	cursor: pointer;
+}
+
+button:disabled {
+	background-color: var(--bg-brighter);
+	color: var(--fg-dark);
+	cursor: not-allowed;
+	opacity: 0.5;
+	border: 1px solid var(--fg-dark);
 }
 
 .navbar {
