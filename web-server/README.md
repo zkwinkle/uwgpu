@@ -55,3 +55,9 @@ Use the `sqlx` command. For examlpe in my local development environment:
 ```sh
 sqlx migrate run --database-url 'postgres://postgres@localhost/uwgp-local'
 ```
+
+## TODOs
+
+- [ ] (optional) make benchmarks take count and warmup count as params
+- [ ] (optional) make web benchmarks take longer
+- [ ] CSV download.
