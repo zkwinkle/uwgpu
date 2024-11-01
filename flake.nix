@@ -6,12 +6,6 @@ inputs = {
 
     crane.url = "github:ipetkov/crane";
 
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rust-analyzer-src.follows = "";
-    };
-
     flake-utils.url = "github:numtide/flake-utils";
 
     rust-overlay = {
@@ -20,7 +14,7 @@ inputs = {
     };
   };
 
-  outputs = { self, nixpkgs, crane, fenix, flake-utils, rust-overlay, ... }:
+  outputs = { self, nixpkgs, crane, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
 				pkgs = import nixpkgs {
@@ -38,7 +32,6 @@ inputs = {
 					(p: p.rust-bin.selectLatestNightlyWith
 						(toolchain: toolchain.default.override {
 							targets = [ "wasm32-unknown-unknown" ];
-							extensions = [ "llvm-tools-preview" ];
 						})
 					);
         src = craneLib.cleanCargoSource ./.;
@@ -48,13 +41,6 @@ inputs = {
           strictDeps = true;
           doCheck = false;
         };
-
-        craneLibLLvmTools = craneLib.overrideToolchain
-          (fenix.packages.${system}.complete.withComponents [
-            "cargo"
-            "llvm-tools"
-            "rustc"
-          ]);
 
         fileSetForCrate = crate: lib.fileset.toSource {
           root = ./.;
@@ -72,9 +58,7 @@ inputs = {
 
           src = fileSetForCrate ./crates/microbenchmarks;
 					nativeBuildInputs = [
-						pkgs.cargo-binutils
 						pkgs.wasm-pack
-						pkgs.lld
 						# binaryen for wasm-opt, used by wasm-pack
 						pkgs.binaryen
 						# used by wasm-pack
@@ -82,10 +66,6 @@ inputs = {
 					];
 
           WASM_PACK_CACHE = "$TMPDIR/.wasm-pack-cache";
-					# Needed because dependencies build was failing with:
-					# > error: the `-Z unstable-options` flag must also be passed to enable
-					#	the flag `check-cfg`
-					RUSTFLAGS="-Z unstable-options";
 					buildPhaseCargoCommand = ''
 						wasm-pack build --release crates/microbenchmarks -d "$(realpath .)"/pkg --target web --no-typescript --mode no-install -- --features wasm
 					'';
@@ -115,8 +95,6 @@ inputs = {
       {
         packages = {
           inherit web-server;
-        } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
-          my-workspace-llvm-coverage = craneLibLLvmTools.cargoLlvmCov (commonArgs);
         };
 			});
 }
