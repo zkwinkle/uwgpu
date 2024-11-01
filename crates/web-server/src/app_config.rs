@@ -26,7 +26,7 @@ pub async fn create_app_config_from_env() -> AppConfig {
 
     let server_url = Box::leak(Box::new(read_server_url()));
 
-    let regexes = std::fs::File::open("web-server/src/regexes.yaml").unwrap();
+    let regexes = std::fs::File::open("crates/web-server/src/regexes.yaml").unwrap();
     let regexes: ua_parser::Regexes = serde_yaml::from_reader(regexes).unwrap();
     let ua_parser = Arc::new(ua_parser::Extractor::try_from(regexes).unwrap());
 
@@ -55,7 +55,7 @@ fn read_env(var_name: &str, default_value_dev: &str) -> String {
 /// Panics when the "debug" feature is disabled and the environment variable is
 /// not found.
 fn read_env_public_dir() -> String {
-    read_env("PUBLIC_DIR", "web-server/public")
+    read_env("PUBLIC_DIR", "crates/web-server/public")
 }
 
 /// # Panics
