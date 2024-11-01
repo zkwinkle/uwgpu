@@ -1,5 +1,3 @@
-use std::net::SocketAddr;
-
 use web_server::{create_app_config_from_env, create_router};
 
 #[tokio::main]
@@ -13,7 +11,7 @@ async fn main() {
 
     #[cfg(feature = "debug")]
     let router = {
-        let sock_address: SocketAddr = listener.local_addr().unwrap();
+        let sock_address = listener.local_addr().unwrap();
 
         tracing_subscriber::fmt()
             .with_max_level(tracing_subscriber::filter::LevelFilter::TRACE)

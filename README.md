@@ -20,6 +20,16 @@ Compilar y ejecutar CLI:
 cargo cli <microbenchmark>
 ```
 
+# Nix Flake
+
+A `flake.nix` file is supplied, currently it only offers a package for the
+`web-server` crate.
+
+To build the package, use the following command:
+```sh
+nix build '.#web-server' --extra-experimental-features "nix-command flakes" --show-trace
+```
+
 # TODO
 
 Writing this down here so I don't forget, I should create a separate crate with the types that can be sent to the server as requests, and methods to
