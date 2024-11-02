@@ -34,10 +34,8 @@ inputs = {
 							targets = [ "wasm32-unknown-unknown" ];
 						})
 					);
-        src = craneLib.cleanCargoSource ./.;
 
         commonArgs = {
-          inherit src;
           strictDeps = true;
           doCheck = false;
         };
@@ -67,7 +65,7 @@ inputs = {
 
           WASM_PACK_CACHE = "$TMPDIR/.wasm-pack-cache";
 					buildPhaseCargoCommand = ''
-						wasm-pack build --release crates/microbenchmarks -d "$(realpath .)"/pkg --target web --no-typescript --mode no-install -- --features wasm
+						wasm-pack build --release crates/microbenchmarks -d "$(realpath .)"/pkg --target web --no-typescript --mode no-install --no-pack -- --features wasm
 					'';
 					installPhaseCommand = ''
 						mv pkg $out/
