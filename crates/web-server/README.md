@@ -46,14 +46,17 @@ Website can be found at \[TODO\]
 
 These must be set when running in production
 
-- `PUBLIC_DIR`: Path to the `public` directory.
+- `PUBLIC_DIR`: URL for the postgres DB to use.
+- `DATABASE_URL`: Path to the `public` directory.
+- `SERVER_URL`: The public URL of the server.
 
 ## Adding migrations
 
 Use the `sqlx` command. For examlpe in my local development environment:
 
 ```sh
-sqlx migrate run --database-url 'postgres://postgres@localhost/uwgp-local'
+sqlx migrate migrate add create_some_table
+sqlx run --database-url 'postgres://postgres@localhost/uwgp-local'
 ```
 
 ## TODOs

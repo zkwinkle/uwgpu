@@ -77,18 +77,11 @@ inputs = {
         web-server = craneLib.buildPackage (commonArgs // {
           pname = "uwgpu-web-server";
 					version = "0.1";
-					nativeBuildInputs = [
-						pkgs.makeWrapper
-					];
           cargoExtraArgs = "-p web-server --no-default-features";
           src = fileSetForCrate ./crates/web-server;
 					postInstall = ''
             cp -r crates/web-server/public $out/public
             cp --no-preserve=mode -r ${microbenchmarks-wasm} $out/public/pkg
-            wrapProgram $out/bin/web-server \
-            --set PUBLIC_DIR "$out/public" \
-            --set SERVER_URL "https://zkwinkle.is-a.dev/uwgpu" \
-            --set DATABASE_URL "postgres://postgres@localhost/uwgpu"
             '';
         });
       in
