@@ -1,20 +1,19 @@
-# Micro WebGPU Compute
+# **µwgpu**
 
-## Comandos
+## Commands
 
-Watch el servidor web:
+For launching and watching the web-server crate:
 
 ```sh
 cargo w
 ```
 
-Compilar WASM que el servidor pueda acceder:
-
+To compile the microbenchmark's library as a WASM pack that the server can use:
 ```sh
-wasm-pack build uwgpu -d ../web-server/public/pkg --target web
+wasm-pack build crates/microbenchmarks -d ../web-server/public/pkg --target web --no-typescript --mode no-install --no-pack -- --features wasm
 ```
 
-Compilar y ejecutar CLI:
+Compile and run CLI:
 
 ```sh
 cargo cli <microbenchmark>
@@ -32,9 +31,5 @@ nix build '.#web-server' --extra-experimental-features "nix-command flakes" --sh
 
 # TODO
 
-Writing this down here so I don't forget, I should create a separate crate with the types that can be sent to the server as requests, and methods to
-build them (like the post results request).
-
-I could compile it to WASM and use it from the JS code to ensure data integrity/consistency.
-
-Then I could also use the types in the CLI so that the CLI can easily report its results.
+- Create a separate crate with API types that can be sent to the server as requests, and methods to build them (like the post results request). Can be compiled to WASM and used from JS code to ensure data integrity/consistency.
+- Make CLI also report results. (Can also use the separate crate with API types).
