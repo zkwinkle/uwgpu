@@ -5,6 +5,7 @@ use crate::api_types::MicrobenchmarkKind::{self, *};
 
 pub struct MicrobenchmarkPage {
     pub microbenchmark: MicrobenchmarkKind,
+    pub server_url: &'static str,
 }
 
 impl Render for MicrobenchmarkPage {
@@ -54,7 +55,10 @@ impl Render for MicrobenchmarkPage {
         }
 
         div id="historical-view" role="tabpanel" {
-            (HistoricalData {microbenchmark: self.microbenchmark})
+            (HistoricalData {
+                microbenchmark:self.microbenchmark,
+                server_url: self.server_url
+            })
         }
 
         script { (PreEscaped(r##"

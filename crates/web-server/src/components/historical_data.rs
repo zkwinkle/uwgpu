@@ -7,6 +7,7 @@ use crate::api_types::{MicrobenchmarkKind, Platform};
 /// native drivers).
 pub struct HistoricalData {
     pub microbenchmark: MicrobenchmarkKind,
+    pub server_url: &'static str,
 }
 
 /// TODO: Include other browsers and native platforms
@@ -15,11 +16,13 @@ const PLATFORM_OPTIONS: &'static [Platform] =
 
 impl Render for HistoricalData {
     fn render(&self) -> Markup {
+        let link = |path: &str| format!("{}{}", self.server_url, path);
+
         html! {
         h2 { "Historical Data" }
         form
             id="stats-filters"
-            hx-get="/statistic_table"
+            hx-get=(link("/statistic_table"))
             hx-trigger="load, change, click from:#refresh-button"
             hx-target="#stats-table"
             hx-vals=(format!(
@@ -30,14 +33,14 @@ impl Render for HistoricalData {
             div hx-target="unset" {
             div class="data-filter" {
                 label for="hardware-selector" { "Hardware Filter" }
-                select name="hardware" id="hardware-selector" hx-get="/hardwares" hx-trigger="load" hx-swap="beforeend" {
+                select name="hardware" id="hardware-selector" hx-get=(link("/hardwares")) hx-trigger="load" hx-swap="beforeend" {
                     option value="" { "--" }
                 }
             }
 
             div class="data-filter" {
                 label for="os-selector" { "OS Filter" }
-                select name="operating_system" id="os-selector" hx-get="/operating_systems" hx-trigger="load" hx-swap="beforeend" {
+                select name="operating_system" id="os-selector" hx-get=(link("/operating_systems")) hx-trigger="load" hx-swap="beforeend" {
                     option value="" { "--" }
                 }
             }

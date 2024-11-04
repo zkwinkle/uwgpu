@@ -50,19 +50,21 @@ where
 
 impl Layout {
     pub fn render(self, content: Markup) -> Markup {
+        let link = |path: &str| format!("{}{}", self.public_server_url, path);
+
         html! {
 
         (DOCTYPE)
         head {
-            link rel="stylesheet" type="text/css" href=(format!("{}/public/stylesheet.css", self.public_server_url));
+            link rel="stylesheet" type="text/css" href=(link("/stylesheet.css"));
             meta name="viewport" content="width=device-width, initial-scale=1";
-            script defer src=(format!("{}/public/htmx.min.js", self.public_server_url)) {}
+            script defer src=(link("/htmx.min.js")) {}
 
             // Utility functions shared across pages. All functions in here
             // should get used in all pages, which is fine because we just have
             // the home page and microbenchmark pages (October 2024)
             script defer type="module" {(PreEscaped( format!(r##"
-                let wasm_module = await import("./public/pkg/microbenchmarks.js");
+                let wasm_module = await import("./pkg/microbenchmarks.js");
                 const TimeUnit = wasm_module.TimeUnit;
                 const init = wasm_module.default;
 
@@ -199,7 +201,7 @@ impl Layout {
         }
         div id="theme-container" class="light" {
             div class="container" {
-                (Navbar::from_uri(self.request_uri.deref()))
+                (Navbar::from_urls(self.public_server_url, self.request_uri.deref()))
                 div class="content-container" {
                     (content)
                 }

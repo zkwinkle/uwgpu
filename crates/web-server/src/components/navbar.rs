@@ -23,25 +23,27 @@ const TABS: &'static [NavLink] = &[
 /// A navbar with certain navlinks
 pub struct Navbar<'a> {
     links: &'static [NavLink],
+    public_server_url: &'a str,
     current_uri: &'a Uri,
 }
 
 impl Render for Navbar<'_> {
     fn render(&self) -> Markup {
+        let url = |path: &str| format!("{}{}", self.public_server_url, path);
         html! {
             nav class="navbar" {
                 ul {
                     li class="header" { a
                         class=@if self.current_uri.path().eq("/")
                             { "active" }
-                        href=("/")
+                        href=(url("/"))
                         { ("µwgpu") }}
-                    @for link in self.links {
+                    @for tab in self.links {
                         li { a
-                            class=@if self.current_uri.path().starts_with(link.link)
+                            class=@if self.current_uri.path().starts_with(tab.link)
                                 { "active" }
-                            href=(link.link)
-                            { (link.name) }}
+                            href=(url(tab.link))
+                            { (tab.name) }}
                     }
                 }
             }
@@ -51,10 +53,14 @@ impl Render for Navbar<'_> {
 
 impl Navbar<'_> {
     /// Generate the site's navbar
-    pub fn from_uri(uri: &Uri) -> Navbar {
+    pub fn from_urls<'a>(
+        public_server_url: &'a str,
+        current_uri: &'a Uri,
+    ) -> Navbar<'a> {
         Navbar {
             links: &TABS,
-            current_uri: uri,
+            public_server_url,
+            current_uri,
         }
     }
 }

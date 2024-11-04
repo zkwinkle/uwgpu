@@ -9,8 +9,10 @@ use super::extractors::Layout;
 
 pub fn microbenchmark_page(
     microbenchmark: MicrobenchmarkKind,
-) -> impl Fn(Layout) -> Markup {
-    let page = MicrobenchmarkPage { microbenchmark };
-
-    move |layout: Layout| layout.render(html! {(page)})
+) -> impl Fn(Layout, &'static str) -> Markup {
+    move |layout: Layout, server_url: &'static str| {
+        layout.render(
+            html! {( MicrobenchmarkPage { microbenchmark, server_url } )},
+        )
+    }
 }
