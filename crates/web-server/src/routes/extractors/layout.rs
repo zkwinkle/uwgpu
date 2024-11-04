@@ -7,7 +7,7 @@ use axum::{
 };
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
-use crate::components::{css::STYLESHEET, navbar::Navbar};
+use crate::components::navbar::Navbar;
 //use crate::components::{navbar::Navbar, theme_selector::ThemeSelector};
 
 /// Defines the base layout of a page that will wrap its contents with container
@@ -54,9 +54,9 @@ impl Layout {
 
         (DOCTYPE)
         head {
-            ( STYLESHEET )
+            link rel="stylesheet" type="text/css" href=(format!("{}/public/stylesheet.css", self.public_server_url));
             meta name="viewport" content="width=device-width, initial-scale=1";
-            script defer src="/public/htmx.min.js" {}
+            script defer src=(format!("{}/public/htmx.min.js", self.public_server_url)) {}
 
             // Utility functions shared across pages. All functions in here
             // should get used in all pages, which is fine because we just have
