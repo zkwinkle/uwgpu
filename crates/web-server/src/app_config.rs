@@ -26,8 +26,8 @@ pub async fn create_app_config_from_env() -> AppConfig {
 
     let server_url = Box::leak(Box::new(read_server_url()));
 
-    let regexes = std::fs::File::open("crates/web-server/src/regexes.yaml").unwrap();
-    let regexes: ua_parser::Regexes = serde_yaml::from_reader(regexes).unwrap();
+    let regexes = include_str!("regexes.yaml");
+    let regexes: ua_parser::Regexes = serde_yaml::from_str(regexes).unwrap();
     let ua_parser = Arc::new(ua_parser::Extractor::try_from(regexes).unwrap());
 
     AppConfig {
