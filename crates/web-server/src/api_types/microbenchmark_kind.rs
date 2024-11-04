@@ -60,10 +60,11 @@ impl MicrobenchmarkKind {
         match self {
             // Accessing same-row should be faster than accessing different rows
             // which is why we use column-dominant workgroups
-            //Matmul => "[[4, 8], [2, 16], [1, 32], [8, 8], [4, 16], [2, 32],
-            // [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
-            // [4, 64], [2, 128], [1, 256]]",
-            Matmul => "[[4, 8], [2, 16], [1, 32]]",
+            Matmul => {
+                "[[4, 8], [2, 16], [1, 32], [8, 8], [4, 16], [2, 32],
+             [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
+             [4, 64], [2, 128], [1, 256]]"
+            }
             Reduction => todo!(),
             Convolution => todo!(),
             Scan => todo!(),
