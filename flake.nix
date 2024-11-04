@@ -79,6 +79,7 @@
           src = fileSetForCrate ./crates/web-server;
           postInstall = ''
             cp -r crates/web-server/public $out/public
+            cp -r crates/web-server/migrations $out/migrations
             cp --no-preserve=mode -r ${microbenchmarks-wasm} $out/public/pkg
           '';
         });
