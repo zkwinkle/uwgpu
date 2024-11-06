@@ -79,9 +79,12 @@ impl ReductionSumResults {
     }
 
     /// Get the amount of FLOPS (floating point operations per second)
-    /// TODO: Calculate proper value
+    ///
+    /// Note: The reduction might've carried out some extra sums, but it
+    /// would've been with padded out zeroes that don't affect the result,
+    /// so I'm not counting those.
     pub fn flops(&self) -> f64 {
-        const NUM_FLOPS_PER_ITER: usize = BENCHMARK_BUFFER_SIZE;
+        const NUM_FLOPS_PER_ITER: usize = BENCHMARK_BUFFER_SIZE - 1;
 
         (NUM_FLOPS_PER_ITER as f64 * self.0.count as f64)
             / (self.total_time_s())
