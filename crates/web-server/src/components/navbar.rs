@@ -15,6 +15,10 @@ const TABS: &'static [NavLink] = &[
         link: Matmul.path(),
     },
     NavLink {
+        name: "Reduction",
+        link: Reduction.path(),
+    },
+    NavLink {
         name: "Buffer To Buffer",
         link: BufferToBuffer.path(),
     },

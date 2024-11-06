@@ -107,7 +107,7 @@ impl MicrobenchmarkPage {
     fn description(&self) -> &'static str {
         match self.microbenchmark {
             Matmul => "This microbenchmark tests the performance of multiplying two 1024x1024 matrices of 32bit floats together.",
-            Reduction => todo!(),
+            Reduction => "This microbenchmark tests the performance of a single-pass reduction sum on a 1MiB buffer of random data",
             Convolution => todo!(),
             Scan => todo!(),
             BufferSequential => {

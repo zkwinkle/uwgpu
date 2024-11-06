@@ -11,6 +11,7 @@ pub mod wasm;
 pub use uwgpu;
 pub mod matmul;
 pub mod memory;
+pub mod reduction_sum;
 
 /// An error trying to execute a benchmark
 #[derive(Debug, Clone, Error)]

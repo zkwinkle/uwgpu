@@ -45,7 +45,7 @@ impl MicrobenchmarkKind {
     fn wasm_benchmark_function(&self) -> &'static str {
         match self {
             Matmul => "wasm_matmul_benchmark",
-            Reduction => todo!(),
+            Reduction => "wasm_reduction_sum_benchmark",
             Convolution => todo!(),
             Scan => todo!(),
             BufferSequential => todo!(),
@@ -65,7 +65,7 @@ impl MicrobenchmarkKind {
              [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
              [4, 64], [2, 128], [1, 256]]"
             }
-            Reduction => todo!(),
+            Reduction => "[8]",
             Convolution => todo!(),
             Scan => todo!(),
             BufferSequential => todo!(),
