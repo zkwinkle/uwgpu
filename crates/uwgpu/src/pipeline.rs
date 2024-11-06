@@ -119,15 +119,21 @@ pub struct PipelineParameters<'a, 'b> {
 
     /// The size of workgroups to dispatch.
     ///
-    /// If [Some], the pipeline will look for and replace a `$workgroup$`
-    /// placeholder with the size given here, it is expected this will be used
-    /// to programatically set the `@workgroup_size` of the shader.
+    /// If [Some], the pipeline will look for and replace every instance of
+    /// `$workgroup$` placeholder with the size given here, it is expected this
+    /// will be used to programatically set the `@workgroup_size` of the
+    /// shader.
     ///
     /// The shader entrypoint would look like:
     ///
     /// ```wgsl
     /// @compute @workgroup_size($workgroup$)fn computeSomething( /* ... */ )
     /// ```
+    ///
+    /// Additionally, it will also replace the following placeholders.
+    /// - `$workgroup_x$`: workgroup_size.0
+    /// - `$workgroup_y$`: workgroup_size.1
+    /// - `$workgroup_z$`: workgroup_size.2
     pub workgroup_size: Option<(u32, u32, u32)>,
 }
 
@@ -160,7 +166,23 @@ fn replace_shader_workgroup_variable<'a>(
 ) -> ShaderModuleDescriptor<'a> {
     let source = match &shader.source {
         ShaderSource::Wgsl(source) => {
-            ShaderSource::Wgsl(source.replace("$workgroup$", &format!("{}, {}, {}", wg_size.0, wg_size.1, wg_size.2)).into())
+            let mut source: String = source.replace("$workgroup$",
+                &format!("{}, {}, {}", wg_size.0, wg_size.1, wg_size.2)
+            ).into();
+
+            if let Some(_) = source.find("$workgroup_x$") {
+                source = source.replace("$workgroup_x$", &wg_size.0.to_string());
+            }
+
+            if let Some(_) = source.find("$workgroup_y$") {
+                source = source.replace("$workgroup_y$", &wg_size.1.to_string());
+            }
+
+            if let Some(_) = source.find("$workgroup_z$") {
+                source = source.replace("$workgroup_z$", &wg_size.2.to_string());
+            }
+
+            ShaderSource::Wgsl(source.into())
         },
         source @ _ => unimplemented!("No support for workgroup size variation in the given type (\"{:?}\") of shader source yet", source),
     };
