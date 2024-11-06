@@ -65,7 +65,7 @@ impl MicrobenchmarkKind {
              [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
              [4, 64], [2, 128], [1, 256]]"
             }
-            Reduction => "[8]",
+            Reduction => "[8, 16, 32, 64, 128, 256]",
             Convolution => todo!(),
             Scan => todo!(),
             BufferSequential => todo!(),

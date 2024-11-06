@@ -18,8 +18,8 @@ use crate::BenchmarkError;
 
 /// 1MiB size buffer (of f32)
 const BENCHMARK_BUFFER_SIZE: usize = 262_144;
-const BENCHMARK_WARMUP_COUNT: usize = 5;
-const BENCHMARK_ITERATIONS: usize = 10;
+const BENCHMARK_WARMUP_COUNT: usize = 2000;
+const BENCHMARK_ITERATIONS: usize = 20000;
 
 /// Microbenchmark for a reduction sum operation. Sums all the elements of an
 /// array.
@@ -79,10 +79,8 @@ impl ReductionSumResults {
     }
 
     /// Get the amount of FLOPS (floating point operations per second)
-    /// TODO: Change
+    /// TODO: Calculate proper value
     pub fn flops(&self) -> f64 {
-        /// Reference for the amount of FLOPs in a matrix multiplication:
-        /// https://math.stackexchange.com/questions/3512976/proof-of-of-flops-in-matrix-multiplication
         const NUM_FLOPS_PER_ITER: usize = BENCHMARK_BUFFER_SIZE;
 
         (NUM_FLOPS_PER_ITER as f64 * self.0.count as f64)

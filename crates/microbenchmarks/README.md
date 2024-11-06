@@ -17,3 +17,9 @@ cargo test -p microbenchmarks
 
 - `serde`: Enables serialization via serde on common wgpu types.
 - `wasm`: Enables WASM support for the library.
+
+## TODOs
+
+- [ ] Fix reduction sum, right now it's flaky, sometimes gives the correct
+      result but sometimes not. The test `reduction_works` can be used to try it
+      out.
