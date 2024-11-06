@@ -69,15 +69,6 @@ pub struct ReductionSumResults(
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl ReductionSumResults {
-    /// Get the total amount of time in seconds spent executing the
-    /// microbenchmark
-    pub fn total_time_s(&self) -> f64 { self.0.total_time(TimeUnit::Second) }
-
-    /// Get the amount of time per iteration in ms
-    pub fn time_per_iteration_ms(&self) -> f64 {
-        self.0.time_per_iteration(TimeUnit::Milli)
-    }
-
     /// Get the amount of FLOPS (floating point operations per second)
     ///
     /// Note: The reduction might've carried out some extra sums, but it
@@ -87,7 +78,7 @@ impl ReductionSumResults {
         const NUM_FLOPS_PER_ITER: usize = BENCHMARK_BUFFER_SIZE - 1;
 
         (NUM_FLOPS_PER_ITER as f64 * self.0.count as f64)
-            / (self.total_time_s())
+            / (self.0.total_time(TimeUnit::Second))
     }
 }
 
