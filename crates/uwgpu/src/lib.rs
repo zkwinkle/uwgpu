@@ -12,7 +12,7 @@ use std::{mem::size_of, ops::Deref};
 
 use thiserror::Error;
 use wgpu::{
-    CommandBuffer, CommandEncoder, CommandEncoderDescriptor,
+    CommandBuffer, CommandEncoder, CommandEncoderDescriptor, ComputePass,
     ComputePassDescriptor, ComputePassTimestampWrites, MapMode, QuerySet,
     QueryType, Queue,
 };
@@ -73,6 +73,20 @@ pub struct Benchmark<'a> {
     /// This will be executed for each shader invocation specified through the
     /// [PipelineParameters] `workgroups` field.
     pub count: usize,
+
+    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
+    /// z)` dimensions of the grid of workgroups.
+    ///
+    /// If more than one workgroup dispatch is given, each "benchmark
+    /// execution" will include calling the shader repeatedly with each of
+    /// the dispatches given.
+    pub workgroups_dispatch: Vec<(u32, u32, u32)>,
+
+    /// If [Some], this callback will be called before each workgroup dispatch.
+    /// First argument is the index of the dispatch_workgroups call.
+    /// For example if `workgroups_dispatch` has a len of 3 this will pass 0,
+    /// 1, 2.
+    pub dispatch_callback: Option<&'a dyn Fn(usize, &mut ComputePass)>,
 
     /// Optional callback to encode any last commands in the command buffer
     /// before execution.
@@ -224,17 +238,16 @@ impl Benchmark<'_> {
             });
 
         warmup_pass.set_pipeline(&pipeline.pipeline);
-        warmup_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+        warmup_pass.set_bind_group(0, &pipeline.bind_group_0, &[]);
 
         for _ in 0..self.warmup_count {
-            for (i, dispatch) in pipeline.workgroups_dispatch.iter().enumerate()
-            {
-                warmup_pass
-                    .dispatch_workgroups(dispatch.0, dispatch.1, dispatch.2);
-
-                if let Some(callback) = pipeline.dispatch_callback {
+            for (i, dispatch) in self.workgroups_dispatch.iter().enumerate() {
+                if let Some(callback) = self.dispatch_callback {
                     callback(i, &mut warmup_pass);
                 }
+
+                warmup_pass
+                    .dispatch_workgroups(dispatch.0, dispatch.1, dispatch.2);
             }
         }
 
@@ -284,21 +297,20 @@ impl Benchmark<'_> {
                 });
 
             bench_pass.set_pipeline(&pipeline.pipeline);
-            bench_pass.set_bind_group(0, &pipeline.bind_group, &[]);
+            bench_pass.set_bind_group(0, &pipeline.bind_group_0, &[]);
 
             // println!("Adding pass i={} with {} runs", pass, amount);
 
             for _ in 0..amount {
-                for (i, dispatch) in
-                    pipeline.workgroups_dispatch.iter().enumerate()
+                for (i, dispatch) in self.workgroups_dispatch.iter().enumerate()
                 {
+                    if let Some(callback) = self.dispatch_callback {
+                        callback(i, &mut bench_pass);
+                    }
+
                     bench_pass.dispatch_workgroups(
                         dispatch.0, dispatch.1, dispatch.2,
                     );
-
-                    if let Some(callback) = pipeline.dispatch_callback {
-                        callback(i, &mut bench_pass);
-                    }
                 }
             }
 

@@ -6,9 +6,8 @@ use std::collections::HashMap;
 use thiserror::Error;
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CompilationInfo, CompilationMessage, ComputePass,
-    ComputePipelineDescriptor, ShaderModule, ShaderModuleDescriptor,
-    ShaderSource,
+    CompilationInfo, CompilationMessage, ComputePipelineDescriptor,
+    ShaderModule, ShaderModuleDescriptor, ShaderSource,
 };
 
 use crate::gpu::GPUContext;
@@ -18,10 +17,8 @@ use crate::gpu::GPUContext;
 pub struct BenchmarkComputePipeline<'a> {
     pub(crate) gpu: &'a GPUContext,
     pub(crate) shader_module: ShaderModule,
-    pub(crate) bind_group: BindGroup,
+    pub(crate) bind_group_0: BindGroup,
     pub(crate) pipeline: wgpu::ComputePipeline,
-    pub(crate) workgroups_dispatch: Box<[(u32, u32, u32)]>,
-    pub(crate) dispatch_callback: Option<&'a dyn Fn(usize, &mut ComputePass)>,
 }
 
 /// This type can be used to create a [BenchmarkComputePipeline] by calling
@@ -71,18 +68,6 @@ pub struct PipelineParameters<'a, 'b> {
     /// - `$workgroup_y$`: workgroup_size.1
     /// - `$workgroup_z$`: workgroup_size.2
     pub workgroup_size: Option<(u32, u32, u32)>,
-
-    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
-    /// z)` dimensions of the grid of workgroups.
-    ///
-    /// If more than one workgroup dispatch is given, each "benchmark
-    /// execution" will include calling the shader repeatedly with each of
-    /// the dispatches given.
-    pub workgroups_dispatch: &'b [(u32, u32, u32)],
-
-    /// If [Some], this callback will be called after each workgroup dispatch.
-    /// First argument is the index of the dispatch_workgroups call.
-    pub dispatch_callback: Option<&'a dyn Fn(usize, &mut ComputePass)>,
 }
 
 impl<'a> BenchmarkComputePipeline<'a> {
@@ -135,10 +120,24 @@ impl<'a> BenchmarkComputePipeline<'a> {
         Ok(Self {
             gpu: params.gpu,
             shader_module,
-            bind_group,
+            bind_group_0: bind_group,
             pipeline,
-            workgroups_dispatch: params.workgroups_dispatch.into(),
-            dispatch_callback: params.dispatch_callback,
+        })
+    }
+
+    /// Create a bind group in this pipeline
+    pub fn create_bind_group(&self, params: BindGroupParams) -> BindGroup {
+        self.gpu.device.create_bind_group(&BindGroupDescriptor {
+            label: params.label,
+            layout: &self.pipeline.get_bind_group_layout(params.group),
+            entries: &params
+                .entries
+                .into_iter()
+                .map(|(id, resource)| BindGroupEntry {
+                    binding: id,
+                    resource,
+                })
+                .collect::<Vec<BindGroupEntry>>(),
         })
     }
 
@@ -146,6 +145,21 @@ impl<'a> BenchmarkComputePipeline<'a> {
     pub async fn get_shader_compilation_info(&self) -> CompilationInfo {
         self.shader_module.get_compilation_info().await
     }
+}
+
+/// Describes a group of bindings and the resources to be bound.
+///
+/// For use with [`BenchmarkComputePipeline::create_bind_group`].
+///
+/// Corresponds to [wgpu `BindGroupDescriptor`](wgpu::BindGroupDescriptor).
+#[derive(Clone, Debug)]
+pub struct BindGroupParams<'a, 'b> {
+    /// Debug label of the bind group.
+    pub label: Option<&'a str>,
+    /// The group number of this bind group
+    pub group: u32,
+    /// The resources to bind to this bind group.
+    pub entries: HashMap<u32, BindingResource<'b>>,
 }
 
 async fn check_shader_compilation_errors(

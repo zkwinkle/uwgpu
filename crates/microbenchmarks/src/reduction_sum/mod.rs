@@ -41,6 +41,11 @@ pub async fn reduction_sum_benchmark(
         warmup_count: BENCHMARK_WARMUP_COUNT,
         count: BENCHMARK_ITERATIONS,
         finalize_encoder_callback: None,
+        workgroups_dispatch: workgroups_dispatch(
+            BENCHMARK_BUFFER_SIZE,
+            workgroup_size,
+        ),
+        dispatch_callback: None,
     }
     .run(pipeline)
     .await?;
@@ -196,14 +201,19 @@ async fn reduction_sum_pipeline<'a, const BUFFER_SIZE: usize>(
         ]),
         gpu,
         workgroup_size: Some((workgroup_size, 1, 1)),
-        workgroups_dispatch: &[(
-            1 + (BUFFER_SIZE.div_ceil(workgroup_size as usize)) as u32,
-            1,
-            1,
-        )],
-        dispatch_callback: None,
     })
     .await
+}
+
+fn workgroups_dispatch(
+    buffer_size: usize,
+    workgroup_size: u32,
+) -> Vec<(u32, u32, u32)> {
+    vec![(
+        1 + (buffer_size.div_ceil(workgroup_size as usize)) as u32,
+        1,
+        1,
+    )]
 }
 
 #[cfg(test)]
@@ -247,6 +257,11 @@ mod tests {
         let _results = Benchmark {
             warmup_count: 0,
             count: 1,
+            workgroups_dispatch: workgroups_dispatch(
+                BUFFER_SIZE,
+                workgroup_size,
+            ),
+            dispatch_callback: None,
             finalize_encoder_callback: Some(&|encoder| {
                 encoder.copy_buffer_to_buffer(
                     &buffers.result_buffer,
@@ -301,6 +316,11 @@ mod tests {
         let _results = Benchmark {
             warmup_count: 0,
             count: 1,
+            workgroups_dispatch: workgroups_dispatch(
+                BUFFER_SIZE,
+                workgroup_size,
+            ),
+            dispatch_callback: None,
             finalize_encoder_callback: Some(&|encoder| {
                 encoder.copy_buffer_to_buffer(
                     &buffers.result_buffer,

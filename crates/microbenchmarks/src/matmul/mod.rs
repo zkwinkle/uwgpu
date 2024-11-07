@@ -38,6 +38,11 @@ pub async fn matmul_benchmark(
         warmup_count: BENCHMARK_WARMUP_COUNT,
         count: BENCHMARK_ITERATIONS,
         finalize_encoder_callback: None,
+        workgroups_dispatch: workgroups_dispatch(
+            BENCHMARK_MATRIX_DIMS,
+            workgroup_size,
+        ),
+        dispatch_callback: None,
     }
     .run(pipeline)
     .await?;
@@ -177,14 +182,19 @@ async fn matmul_pipeline<'a, const MATRIX_DIMS: usize>(
         ]),
         gpu,
         workgroup_size: Some((workgroup_size.0, workgroup_size.1, 1)),
-        workgroups_dispatch: &[(
-            1 + (MATRIX_DIMS / (workgroup_size.0 as usize)) as u32,
-            1 + (MATRIX_DIMS / (workgroup_size.1 as usize)) as u32,
-            1,
-        )],
-        dispatch_callback: None,
     })
     .await
+}
+
+fn workgroups_dispatch(
+    matrix_dims: usize,
+    workgroup_size: (u32, u32),
+) -> Vec<(u32, u32, u32)> {
+    vec![(
+        1 + (matrix_dims / (workgroup_size.0 as usize)) as u32,
+        1 + (matrix_dims / (workgroup_size.1 as usize)) as u32,
+        1,
+    )]
 }
 
 #[cfg(test)]
@@ -220,10 +230,13 @@ mod tests {
             })
             .collect();
 
+        let workgroup_size = (8, 8);
         let gpu = GPUContext::new(None).await.unwrap();
         let buffers =
             Buffers::<MATRIX_DIMS>::new_from_inputs(&matrix_a, &matrix_b, &gpu);
-        let pipeline = matmul_pipeline(&gpu, &buffers, &(8, 8)).await.unwrap();
+        let pipeline = matmul_pipeline(&gpu, &buffers, &workgroup_size)
+            .await
+            .unwrap();
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
@@ -235,6 +248,11 @@ mod tests {
         let _results = Benchmark {
             warmup_count: 0,
             count: 1,
+            workgroups_dispatch: workgroups_dispatch(
+                BENCHMARK_MATRIX_DIMS,
+                workgroup_size,
+            ),
+            dispatch_callback: None,
             finalize_encoder_callback: Some(&|encoder| {
                 encoder.copy_buffer_to_buffer(
                     &buffers.result_buffer,
@@ -269,9 +287,12 @@ mod tests {
         const MATRIX_DIMS: usize = 5;
         const MATRIX_SIZE: usize = MATRIX_DIMS * MATRIX_DIMS;
 
+        let workgroup_size = (8, 8);
         let gpu = GPUContext::new(None).await.unwrap();
         let buffers = Buffers::<MATRIX_DIMS>::new_with_random_inputs(&gpu);
-        let pipeline = matmul_pipeline(&gpu, &buffers, &(8, 8)).await.unwrap();
+        let pipeline = matmul_pipeline(&gpu, &buffers, &workgroup_size)
+            .await
+            .unwrap();
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
@@ -283,6 +304,11 @@ mod tests {
         let _results = Benchmark {
             warmup_count: 0,
             count: 1,
+            workgroups_dispatch: workgroups_dispatch(
+                BENCHMARK_MATRIX_DIMS,
+                workgroup_size,
+            ),
+            dispatch_callback: None,
             finalize_encoder_callback: Some(&|encoder| {
                 encoder.copy_buffer_to_buffer(
                     &buffers.result_buffer,

@@ -42,6 +42,11 @@ pub async fn buffer_sequential_benchmark(
         warmup_count: BENCHMARK_WARMUP_COUNT,
         count: BENCHMARK_ITERATIONS,
         finalize_encoder_callback: None,
+        workgroups_dispatch: workgroups_dispatch(
+            BENCHMARK_BUFFER_SIZE,
+            workgroup_size,
+        ),
+        dispatch_callback: None,
     }
     .run(pipeline)
     .await?;
@@ -147,14 +152,15 @@ async fn buffer_sequential_pipeline<'a>(
         gpu: &gpu,
 
         workgroup_size: Some((workgroup_size, 1, 1)),
-        workgroups_dispatch: &[(
-            1 + (BENCHMARK_BUFFER_SIZE / (workgroup_size as usize)) as u32,
-            1,
-            1,
-        )],
-        dispatch_callback: None,
     })
     .await
+}
+
+fn workgroups_dispatch(
+    buffer_size: usize,
+    workgroup_size: u32,
+) -> Vec<(u32, u32, u32)> {
+    vec![(1 + (buffer_size / (workgroup_size as usize)) as u32, 1, 1)]
 }
 
 #[cfg(test)]
@@ -181,9 +187,11 @@ mod tests {
         let buffers =
             Buffers::new_from_source_data(source_buffer_data.as_slice(), &gpu);
 
-        let pipeline = buffer_sequential_pipeline(&gpu, &buffers, 64)
-            .await
-            .unwrap();
+        let workgroup_size = 64;
+        let pipeline =
+            buffer_sequential_pipeline(&gpu, &buffers, workgroup_size)
+                .await
+                .unwrap();
 
         let staging_buffer = gpu.create_buffer(&BufferDescriptor {
             label: Some("Staging Buffer"),
@@ -204,6 +212,11 @@ mod tests {
                     2u64.pow(20),
                 )
             }),
+            workgroups_dispatch: workgroups_dispatch(
+                BENCHMARK_BUFFER_SIZE,
+                workgroup_size,
+            ),
+            dispatch_callback: None,
         }
         .run(pipeline)
         .await
