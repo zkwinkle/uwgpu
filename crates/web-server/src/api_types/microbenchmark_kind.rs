@@ -49,7 +49,7 @@ impl MicrobenchmarkKind {
             Convolution => "wasm_convolution_benchmark",
             Scan => "wasm_scan_benchmark",
             BufferSequential => todo!(),
-            BufferToBuffer => "wasm_buffer_sequential_benchmark",
+            BufferToBuffer => "wasm_buffer_to_buffer_benchmark",
             BufferShuffled => todo!(),
             BufferToTexture => todo!(),
             TextureToTexture => todo!(),

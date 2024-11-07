@@ -106,15 +106,15 @@ impl Render for MicrobenchmarkPage {
 impl MicrobenchmarkPage {
     fn description(&self) -> &'static str {
         match self.microbenchmark {
-            Matmul => "This microbenchmark tests the performance of multiplying two 1024x1024 matrices of 32bit floats together.",
-            Reduction => "This microbenchmark tests the performance of a single-pass reduction sum on a 1MiB buffer of random data.",
+            Matmul => "This microbenchmark tests the performance of a naive matrix multiplication between two 1024x1024 matrices of 32bit floats.",
+            Reduction => "This microbenchmark tests the performance of a naive single-pass reduction sum on a 1MiB buffer of random data.",
             Convolution => "This microbenchmark tests the performance of a naive convolution between a 1024x1024 matrix and a 3x3 kernel.",
             Scan => "This microbenchmark tests the performance of a naive multi-pass scan using the Sklansky technique over a 1MB buffer of random data.",
             BufferSequential => {
                 "This microbenchmark tests the performance of accessing buffer elements in a sequential manner."
             }
             BufferToBuffer => {
-                "This microbenchmark tests the performance of copying memory between buffers."
+                "This microbenchmark tests the performance of copying memory between buffers in the GPU. It's a naive un-optimized implementation so it won't reflect the true bandwidth of your GPU."
             }
             BufferShuffled => {
                 todo!()

@@ -11,7 +11,7 @@ pub mod wasm;
 pub use uwgpu;
 pub mod convolution;
 pub mod matmul;
-pub mod memory;
+pub mod memcpy;
 pub mod reduction_sum;
 pub mod scan;
 

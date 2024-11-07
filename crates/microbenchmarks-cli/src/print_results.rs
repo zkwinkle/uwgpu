@@ -1,5 +1,5 @@
 use microbenchmarks::{
-    matmul::MatmulResults, memory::buffer_sequential::BufferSequentialResults,
+    matmul::MatmulResults, memcpy::buffer_to_buffer::BufferToBufferResults,
 };
 
 /// Trait for implementing on the different benchmark results to simplify
@@ -36,9 +36,9 @@ impl PrintableResults<2> for MatmulResults {
     }
 }
 
-impl PrintableResults<1> for BufferSequentialResults {
+impl PrintableResults<1> for BufferToBufferResults {
     fn microbenchmark_label(&self) -> String {
-        "Sequential Copy Between Buffers".to_string()
+        "Copy Between Buffers".to_string()
     }
 
     fn print_info(&self) {

@@ -5,8 +5,8 @@ use wasm_bindgen::prelude::*;
 
 use crate::convolution::{convolution_benchmark, ConvolutionResults};
 use crate::matmul::{matmul_benchmark, MatmulResults};
-use crate::memory::buffer_sequential::{
-    buffer_sequential_benchmark, BufferSequentialResults,
+use crate::memcpy::buffer_to_buffer::{
+    buffer_to_buffer_benchmark, BufferToBufferResults,
 };
 use crate::reduction_sum::{reduction_sum_benchmark, ReductionSumResults};
 use crate::scan::{scan_benchmark, ScanResults};
@@ -52,11 +52,11 @@ pub async fn wasm_scan_benchmark(
 }
 
 #[wasm_bindgen]
-/// WASM compatible version of [buffer_sequential_benchmark]
-pub async fn wasm_buffer_sequential_benchmark(
+/// WASM compatible version of [buffer_to_buffer]
+pub async fn wasm_buffer_to_buffer_benchmark(
     workgroup_size: u32,
-) -> Result<BufferSequentialResults, JsError> {
-    Ok(buffer_sequential_benchmark(workgroup_size).await?)
+) -> Result<BufferToBufferResults, JsError> {
+    Ok(buffer_to_buffer_benchmark(workgroup_size).await?)
 }
 
 /// Shadow println! when compiling to WASM

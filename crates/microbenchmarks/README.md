@@ -5,7 +5,12 @@
 ## Microbenchmarks
 
 - matmul
-- copy buffers sequential
+- convolution
+- reduction sum
+- scan (prefix sum)
+- memcpy between buffers
+- memcpy buffer->texture
+- memcpy between textures
 
 ## To Test
 

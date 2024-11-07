@@ -1,5 +1,4 @@
-//! Microbenchmark for copying buffer to buffer copy throughput in a sequential
-//! manner
+//! Microbenchmark for copying buffer to buffer copy throughput
 
 use std::collections::HashMap;
 
@@ -26,17 +25,17 @@ const BENCHMARK_WARMUP_COUNT: usize = 500;
 const BENCHMARK_ITERATIONS: usize = 100000;
 
 /// Microbenchmark for measuring the Buffer -> Buffer memory copy BW within the
-/// GPU in a sequential manner.
+/// GPU
 ///
 /// The workgroup size will dictate the size of workgroups used for the
 /// computation.
-pub async fn buffer_sequential_benchmark(
+pub async fn buffer_to_buffer_benchmark(
     workgroup_size: u32,
-) -> Result<BufferSequentialResults, BenchmarkError> {
+) -> Result<BufferToBufferResults, BenchmarkError> {
     let gpu = GPUContext::new(None).await?;
     let buffers = Buffers::new_with_random_inputs(&gpu);
     let pipeline =
-        buffer_sequential_pipeline(&gpu, &buffers, workgroup_size).await?;
+        buffer_to_buffer_pipeline(&gpu, &buffers, workgroup_size).await?;
 
     let results = Benchmark {
         warmup_count: BENCHMARK_WARMUP_COUNT,
@@ -51,14 +50,14 @@ pub async fn buffer_sequential_benchmark(
     .run(pipeline)
     .await?;
 
-    Ok(BufferSequentialResults(results))
+    Ok(BufferToBufferResults(results))
 }
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
 
 /// Results from the matrix multiplication microbenchmark. See
-/// [buffer_sequential_benchmark].
+/// [buffer_to_buffer].
 ///
 /// Wraps a [BenchmarkResults] with some convenience methods.
 #[cfg_eval]
@@ -68,13 +67,13 @@ use wasm_bindgen::prelude::*;
     serde(transparent)
 )]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-pub struct BufferSequentialResults(
+pub struct BufferToBufferResults(
     #[cfg_attr(feature = "wasm", wasm_bindgen(getter_with_clone))]
     pub  BenchmarkResults,
 );
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-impl BufferSequentialResults {
+impl BufferToBufferResults {
     /// Get the total amount of time in seconds spent executing the
     /// microbenchmark
     pub fn total_time_s(&self) -> f64 { self.0.total_time(TimeUnit::Second) }
@@ -132,16 +131,16 @@ impl Buffers {
 }
 
 /// Pipeline needed for microbenchmark.
-async fn buffer_sequential_pipeline<'a>(
+async fn buffer_to_buffer_pipeline<'a>(
     gpu: &'a GPUContext,
     buffers: &'a Buffers,
     workgroup_size: u32,
 ) -> Result<BenchmarkComputePipeline<'a>, CreatePipelineError> {
     BenchmarkComputePipeline::new(PipelineParameters {
         shader: ShaderModuleDescriptor {
-            label: Some("sequential buffer copy shader"),
+            label: Some("buffer to buffer copy shader"),
             source: ShaderSource::Wgsl(
-                include_str!("buffer_sequential.wgsl").into(),
+                include_str!("buffer_to_buffer.wgsl").into(),
             ),
         },
         entry_point: "main",
@@ -189,7 +188,7 @@ mod tests {
 
         let workgroup_size = 64;
         let pipeline =
-            buffer_sequential_pipeline(&gpu, &buffers, workgroup_size)
+            buffer_to_buffer_pipeline(&gpu, &buffers, workgroup_size)
                 .await
                 .unwrap();
 

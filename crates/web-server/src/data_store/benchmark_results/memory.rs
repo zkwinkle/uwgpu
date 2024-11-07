@@ -16,10 +16,10 @@ pub enum DataStoreMemoryBenchmarkKind {
     BufferSequential,
     /// Buffer shuffled memory accesses
     BufferShuffled,
-    /// Copying from buffer -> buffer in a sequential manner
+    /// Copying from buffer -> buffer
     BufferToBuffer,
-    /// Copying from buffer -> texture in a sequential manner
+    /// Copying from buffer -> texture
     BufferToTexture,
-    /// Copying from texture -> texture in a sequential manner
+    /// Copying from texture -> texture
     TextureToTexture,
 }

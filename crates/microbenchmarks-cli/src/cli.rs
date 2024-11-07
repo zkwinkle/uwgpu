@@ -14,8 +14,8 @@ pub struct Cli {
 pub enum Microbenchmarks {
     /// Run the matmul microbenchmark
     MatMul(MicrobenchmarkParams<2>),
-    /// Run the sequential buffer copy microbenchmark
-    BufferCopySequential(MicrobenchmarkParams<1>),
+    /// Run the buffer copy microbenchmark
+    BufferToBuffer(MicrobenchmarkParams<1>),
 }
 
 /// Common parameters shared by microbenchmarks
@@ -57,7 +57,7 @@ impl Microbenchmarks {
     pub fn workgroups_empty(&self) -> bool {
         match self {
             Microbenchmarks::MatMul(params) => params.workgroup.is_empty(),
-            Microbenchmarks::BufferCopySequential(params) => {
+            Microbenchmarks::BufferToBuffer(params) => {
                 params.workgroup.is_empty()
             }
         }

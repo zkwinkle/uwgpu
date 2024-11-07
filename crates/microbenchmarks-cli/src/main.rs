@@ -2,7 +2,7 @@ use clap::Parser;
 use cli::{Cli, Microbenchmarks};
 use microbenchmarks::{
     matmul::matmul_benchmark,
-    memory::buffer_sequential::buffer_sequential_benchmark, BenchmarkError,
+    memcpy::buffer_to_buffer::buffer_to_buffer_benchmark, BenchmarkError,
 };
 
 mod cli;
@@ -38,9 +38,9 @@ async fn run_microbenchmark(
                 result.print_results(wg);
             }
         }
-        Microbenchmarks::BufferCopySequential(params) => {
+        Microbenchmarks::BufferToBuffer(params) => {
             for wg in params.workgroup {
-                let result = buffer_sequential_benchmark(wg[0]).await?;
+                let result = buffer_to_buffer_benchmark(wg[0]).await?;
                 result.print_results(wg);
             }
         }
