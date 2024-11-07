@@ -46,7 +46,7 @@ impl MicrobenchmarkKind {
         match self {
             Matmul => "wasm_matmul_benchmark",
             Reduction => "wasm_reduction_sum_benchmark",
-            Convolution => todo!(),
+            Convolution => "wasm_convolution_benchmark",
             Scan => todo!(),
             BufferSequential => todo!(),
             BufferToBuffer => "wasm_buffer_sequential_benchmark",
@@ -60,13 +60,12 @@ impl MicrobenchmarkKind {
         match self {
             // Accessing same-row should be faster than accessing different rows
             // which is why we use column-dominant workgroups
-            Matmul => {
+            Matmul | Convolution => {
                 "[[4, 8], [2, 16], [1, 32], [8, 8], [4, 16], [2, 32],
              [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
              [4, 64], [2, 128], [1, 256]]"
             }
             Reduction => "[8, 16, 32, 64, 128, 256]",
-            Convolution => todo!(),
             Scan => todo!(),
             BufferSequential => todo!(),
             BufferShuffled => todo!(),

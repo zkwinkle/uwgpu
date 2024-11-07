@@ -15,6 +15,10 @@ const TABS: &'static [NavLink] = &[
         link: Matmul.path(),
     },
     NavLink {
+        name: "Convolution",
+        link: Convolution.path(),
+    },
+    NavLink {
         name: "Reduction",
         link: Reduction.path(),
     },

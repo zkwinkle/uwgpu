@@ -3,6 +3,7 @@
 
 use wasm_bindgen::prelude::*;
 
+use crate::convolution::{convolution_benchmark, ConvolutionResults};
 use crate::matmul::{matmul_benchmark, MatmulResults};
 use crate::memory::buffer_sequential::{
     buffer_sequential_benchmark, BufferSequentialResults,
@@ -22,6 +23,15 @@ pub async fn wasm_matmul_benchmark(
     workgroup_size_y: u32,
 ) -> Result<MatmulResults, JsError> {
     Ok(matmul_benchmark((workgroup_size_x, workgroup_size_y)).await?)
+}
+
+/// WASM compatible version of [convolution_benchmark]
+#[wasm_bindgen]
+pub async fn wasm_convolution_benchmark(
+    workgroup_size_x: u32,
+    workgroup_size_y: u32,
+) -> Result<ConvolutionResults, JsError> {
+    Ok(convolution_benchmark((workgroup_size_x, workgroup_size_y)).await?)
 }
 
 /// WASM compatible version of [reduction_sum_benchmark]

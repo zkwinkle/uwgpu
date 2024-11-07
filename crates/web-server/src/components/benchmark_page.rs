@@ -108,7 +108,7 @@ impl MicrobenchmarkPage {
         match self.microbenchmark {
             Matmul => "This microbenchmark tests the performance of multiplying two 1024x1024 matrices of 32bit floats together.",
             Reduction => "This microbenchmark tests the performance of a single-pass reduction sum on a 1MiB buffer of random data.",
-            Convolution => todo!(),
+            Convolution => "This microbenchmark tests the performance of a naive convolution between a 1024x1024 matrix and a 3x3 kernel.",
             Scan => todo!(),
             BufferSequential => {
                 "This microbenchmark tests the performance of accessing buffer elements in a sequential manner."

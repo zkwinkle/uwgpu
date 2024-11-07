@@ -18,8 +18,8 @@ use crate::BenchmarkError;
 
 const BENCHMARK_MATRIX_DIMS: usize = 1024;
 const KERNEL_MATRIX_DIMS: usize = 3;
-const BENCHMARK_WARMUP_COUNT: usize = 20;
-const BENCHMARK_ITERATIONS: usize = 30;
+const BENCHMARK_WARMUP_COUNT: usize = 300;
+const BENCHMARK_ITERATIONS: usize = 3000;
 
 /// Microbenchmark for convolution.
 ///
@@ -67,9 +67,17 @@ pub struct ConvolutionResults(
 impl ConvolutionResults {
     /// Get the amount of FLOPS (floating point operations per second)
     pub fn flops(&self) -> f64 {
-        const NUM_FLOPS_PER_ITER: usize = BENCHMARK_MATRIX_DIMS
-            * BENCHMARK_MATRIX_DIMS
-            * (2 * BENCHMARK_MATRIX_DIMS - 1);
+        // 4 corners * ( 4 muls + 4 sums)
+        const FLOPS_CORNERS: usize = 4 * (4 + 4);
+        // 4 * elements in borders without corners * ( 6 muls + 6 sums)
+        const FLOPS_INNER_BORDERS: usize =
+            4 * (BENCHMARK_MATRIX_DIMS - 2) * (6 + 6);
+        // elements in inner matrix (no borders) * ( 9 muls + 9 sums)
+        const FLOPS_INNER_MATRIX: usize =
+            (BENCHMARK_MATRIX_DIMS - 1) * (BENCHMARK_MATRIX_DIMS - 1) * (9 + 9);
+
+        const NUM_FLOPS_PER_ITER: usize =
+            FLOPS_CORNERS + FLOPS_INNER_BORDERS + FLOPS_INNER_MATRIX;
 
         (NUM_FLOPS_PER_ITER as f64 * self.0.count as f64)
             / (self.0.total_time(TimeUnit::Second))
