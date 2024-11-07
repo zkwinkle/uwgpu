@@ -9,6 +9,7 @@ use uwgpu::{CreatePipelineError, GetGPUContextError, MapTimestampResultError};
 pub mod wasm;
 
 pub use uwgpu;
+pub mod convolution;
 pub mod matmul;
 pub mod memory;
 pub mod reduction_sum;
