@@ -6,8 +6,9 @@ use std::collections::HashMap;
 use thiserror::Error;
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindingResource,
-    CompilationInfo, CompilationMessage, ComputePipelineDescriptor,
-    ShaderModule, ShaderModuleDescriptor, ShaderSource,
+    CompilationInfo, CompilationMessage, ComputePass,
+    ComputePipelineDescriptor, ShaderModule, ShaderModuleDescriptor,
+    ShaderSource,
 };
 
 use crate::gpu::GPUContext;
@@ -19,7 +20,69 @@ pub struct BenchmarkComputePipeline<'a> {
     pub(crate) shader_module: ShaderModule,
     pub(crate) bind_group: BindGroup,
     pub(crate) pipeline: wgpu::ComputePipeline,
-    pub(crate) workgroups_dispatch: (u32, u32, u32),
+    pub(crate) workgroups_dispatch: Box<[(u32, u32, u32)]>,
+    pub(crate) dispatch_callback: Option<&'a dyn Fn(usize, &mut ComputePass)>,
+}
+
+/// This type can be used to create a [BenchmarkComputePipeline] by calling
+/// [BenchmarkComputePipeline::new()].
+#[derive(Clone)]
+pub struct PipelineParameters<'a, 'b> {
+    /// Compute shader to execute
+    pub shader: ShaderModuleDescriptor<'b>,
+
+    /// Entry point of the compute shader.
+    /// Must be the name of a shader function annotated with `@compute` and no
+    /// return value.
+    pub entry_point: &'b str,
+
+    /// This bind group must specify all the bindings used in the shader.
+    /// The key used in the HashMap is the `n` index value of the corresponding
+    /// `@binding(n)` attribute in the shader.
+    ///
+    /// This BindGroup will be assigned to `@group(0)` in the shader,
+    /// the shader should only use that group.
+    ///
+    /// Note: All the executions of the benchmark will reuse this same bind
+    /// group, so for example if the shader uses the same buffer for input
+    /// and output (by overriding it), it will keep overriding the same
+    /// buffer over and over, effectively using last iteration's output as its
+    /// next iteration's input.
+    pub bind_group_0: HashMap<u32, BindingResource<'b>>,
+
+    /// GPU context that is to be used for creating this pipeline.
+    pub gpu: &'a GPUContext,
+
+    /// The size of workgroups to dispatch.
+    ///
+    /// If [Some], the pipeline will look for and replace every instance of
+    /// `$workgroup$` placeholder with the size given here, it is expected this
+    /// will be used to programatically set the `@workgroup_size` of the
+    /// shader.
+    ///
+    /// The shader entrypoint would look like:
+    ///
+    /// ```wgsl
+    /// @compute @workgroup_size($workgroup$)fn computeSomething( /* ... */ )
+    /// ```
+    ///
+    /// Additionally, it will also replace the following placeholders.
+    /// - `$workgroup_x$`: workgroup_size.0
+    /// - `$workgroup_y$`: workgroup_size.1
+    /// - `$workgroup_z$`: workgroup_size.2
+    pub workgroup_size: Option<(u32, u32, u32)>,
+
+    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
+    /// z)` dimensions of the grid of workgroups.
+    ///
+    /// If more than one workgroup dispatch is given, each "benchmark
+    /// execution" will include calling the shader repeatedly with each of
+    /// the dispatches given.
+    pub workgroups_dispatch: &'b [(u32, u32, u32)],
+
+    /// If [Some], this callback will be called after each workgroup dispatch.
+    /// First argument is the index of the dispatch_workgroups call.
+    pub dispatch_callback: Option<&'a dyn Fn(usize, &mut ComputePass)>,
 }
 
 impl<'a> BenchmarkComputePipeline<'a> {
@@ -74,7 +137,8 @@ impl<'a> BenchmarkComputePipeline<'a> {
             shader_module,
             bind_group,
             pipeline,
-            workgroups_dispatch: params.workgroups_dispatch,
+            workgroups_dispatch: params.workgroups_dispatch.into(),
+            dispatch_callback: params.dispatch_callback,
         })
     }
 
@@ -82,59 +146,6 @@ impl<'a> BenchmarkComputePipeline<'a> {
     pub async fn get_shader_compilation_info(&self) -> CompilationInfo {
         self.shader_module.get_compilation_info().await
     }
-}
-
-/// This type can be used to create a [BenchmarkComputePipeline] by calling
-/// [BenchmarkComputePipeline::new()].
-#[derive(Clone)]
-pub struct PipelineParameters<'a, 'b> {
-    /// Compute shader to execute
-    pub shader: ShaderModuleDescriptor<'b>,
-
-    /// Entry point of the compute shader.
-    /// Must be the name of a shader function annotated with `@compute` and no
-    /// return value.
-    pub entry_point: &'b str,
-
-    /// This bind group must specify all the bindings used in the shader.
-    /// The key used in the HashMap is the `n` index value of the corresponding
-    /// `@binding(n)` attribute in the shader.
-    ///
-    /// This BindGroup will be assigned to `@group(0)` in the shader,
-    /// the shader should only use that group.
-    ///
-    /// Note: All the executions of the benchmark will reuse this same bind
-    /// group, so for example if the shader uses the same buffer for input
-    /// and output (by overriding it), it will keep overriding the same
-    /// buffer over and over, effectively using last iteration's output as its
-    /// next iteration's input.
-    pub bind_group_0: HashMap<u32, BindingResource<'b>>,
-
-    /// GPU context that is to be used for creating this pipeline.
-    pub gpu: &'a GPUContext,
-
-    /// The amount of workgroups to dispatch, the tuple represents the `(x, y,
-    /// z)` dimensions of the grid of workgroups.
-    pub workgroups_dispatch: (u32, u32, u32),
-
-    /// The size of workgroups to dispatch.
-    ///
-    /// If [Some], the pipeline will look for and replace every instance of
-    /// `$workgroup$` placeholder with the size given here, it is expected this
-    /// will be used to programatically set the `@workgroup_size` of the
-    /// shader.
-    ///
-    /// The shader entrypoint would look like:
-    ///
-    /// ```wgsl
-    /// @compute @workgroup_size($workgroup$)fn computeSomething( /* ... */ )
-    /// ```
-    ///
-    /// Additionally, it will also replace the following placeholders.
-    /// - `$workgroup_x$`: workgroup_size.0
-    /// - `$workgroup_y$`: workgroup_size.1
-    /// - `$workgroup_z$`: workgroup_size.2
-    pub workgroup_size: Option<(u32, u32, u32)>,
 }
 
 async fn check_shader_compilation_errors(

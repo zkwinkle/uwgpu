@@ -227,11 +227,15 @@ impl Benchmark<'_> {
         warmup_pass.set_bind_group(0, &pipeline.bind_group, &[]);
 
         for _ in 0..self.warmup_count {
-            warmup_pass.dispatch_workgroups(
-                pipeline.workgroups_dispatch.0,
-                pipeline.workgroups_dispatch.1,
-                pipeline.workgroups_dispatch.2,
-            )
+            for (i, dispatch) in pipeline.workgroups_dispatch.iter().enumerate()
+            {
+                warmup_pass
+                    .dispatch_workgroups(dispatch.0, dispatch.1, dispatch.2);
+
+                if let Some(callback) = pipeline.dispatch_callback {
+                    callback(i, &mut warmup_pass);
+                }
+            }
         }
 
         drop(warmup_pass); // has to be dropped before finishing commands
@@ -285,11 +289,17 @@ impl Benchmark<'_> {
             // println!("Adding pass i={} with {} runs", pass, amount);
 
             for _ in 0..amount {
-                bench_pass.dispatch_workgroups(
-                    pipeline.workgroups_dispatch.0,
-                    pipeline.workgroups_dispatch.1,
-                    pipeline.workgroups_dispatch.2,
-                )
+                for (i, dispatch) in
+                    pipeline.workgroups_dispatch.iter().enumerate()
+                {
+                    bench_pass.dispatch_workgroups(
+                        dispatch.0, dispatch.1, dispatch.2,
+                    );
+
+                    if let Some(callback) = pipeline.dispatch_callback {
+                        callback(i, &mut bench_pass);
+                    }
+                }
             }
 
             // Already gets dropped but leaving here as a reminder in case I

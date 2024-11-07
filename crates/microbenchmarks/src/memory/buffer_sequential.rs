@@ -146,15 +146,13 @@ async fn buffer_sequential_pipeline<'a>(
         ]),
         gpu: &gpu,
 
-        // WG size = 64
-        // 1MiB u32 = 262_144 elements
-        // 262_144 / 64 = 4096
-        workgroups_dispatch: (
+        workgroup_size: Some((workgroup_size, 1, 1)),
+        workgroups_dispatch: &[(
             1 + (BENCHMARK_BUFFER_SIZE / (workgroup_size as usize)) as u32,
             1,
             1,
-        ),
-        workgroup_size: Some((workgroup_size, 1, 1)),
+        )],
+        dispatch_callback: None,
     })
     .await
 }

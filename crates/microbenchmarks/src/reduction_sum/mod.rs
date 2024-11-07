@@ -195,12 +195,13 @@ async fn reduction_sum_pipeline<'a, const BUFFER_SIZE: usize>(
             (3, buffers.elements_left_buffer.as_entire_binding()),
         ]),
         gpu,
-        workgroups_dispatch: (
+        workgroup_size: Some((workgroup_size, 1, 1)),
+        workgroups_dispatch: &[(
             1 + (BUFFER_SIZE.div_ceil(workgroup_size as usize)) as u32,
             1,
             1,
-        ),
-        workgroup_size: Some((workgroup_size, 1, 1)),
+        )],
+        dispatch_callback: None,
     })
     .await
 }

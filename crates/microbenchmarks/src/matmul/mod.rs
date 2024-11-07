@@ -176,12 +176,13 @@ async fn matmul_pipeline<'a, const MATRIX_DIMS: usize>(
             (3, buffers.matrix_size_buffer.as_entire_binding()),
         ]),
         gpu,
-        workgroups_dispatch: (
+        workgroup_size: Some((workgroup_size.0, workgroup_size.1, 1)),
+        workgroups_dispatch: &[(
             1 + (MATRIX_DIMS / (workgroup_size.0 as usize)) as u32,
             1 + (MATRIX_DIMS / (workgroup_size.1 as usize)) as u32,
             1,
-        ),
-        workgroup_size: Some((workgroup_size.0, workgroup_size.1, 1)),
+        )],
+        dispatch_callback: None,
     })
     .await
 }
