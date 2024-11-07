@@ -1,21 +1,27 @@
 use std::sync::LazyLock;
 
 use maud::{html, Markup, PreEscaped};
+use rand::{seq::SliceRandom, thread_rng};
 
 use crate::api_types::MicrobenchmarkKind::{self, *};
 
 use super::extractors::Layout;
 
 /// Make sure this array contains all the supported microbenchmarks.
-const ALL_MICROBENCHMARKS: &[MicrobenchmarkKind] = &[Matmul, BufferToBuffer];
+const ALL_MICROBENCHMARKS: &[MicrobenchmarkKind] =
+    &[Matmul, Convolution, Reduction, Scan, BufferToBuffer];
 
 #[cfg_attr(feature = "debug", axum::debug_handler)]
 pub async fn home(layout: Layout) -> Markup {
     // Array of [title, run_microbenchmark_fn] pairs.
     // As a js string.
     static MICROBENCHMARK_DATA: LazyLock<String> = LazyLock::new(|| {
+        // randomize order to avoid biasing results towards the first
+        // microbenchmarks due to people refreshing or whatever
+        let mut microbenchmarks = ALL_MICROBENCHMARKS.to_vec();
+        microbenchmarks.shuffle(&mut thread_rng());
         // (title, run_microbenchmark callback)
-        let microbenchmarks: Vec<(&'static str, String)> = ALL_MICROBENCHMARKS
+        let microbenchmarks: Vec<(&'static str, String)> = microbenchmarks
             .iter()
             .map(|mb| {
                 (
