@@ -23,6 +23,10 @@ const TABS: &'static [NavLink] = &[
         link: Reduction.path(),
     },
     NavLink {
+        name: "Scan",
+        link: Scan.path(),
+    },
+    NavLink {
         name: "Buffer To Buffer",
         link: BufferToBuffer.path(),
     },

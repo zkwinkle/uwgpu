@@ -40,6 +40,10 @@ pub fn create_router(config: AppConfig) -> Router {
             get(|l: Layout| async { microbenchmark_page(Reduction)(l, url) }),
         )
         .route(
+            Scan.path(),
+            get(|l: Layout| async { microbenchmark_page(Scan)(l, url) }),
+        )
+        .route(
             BufferToBuffer.path(),
             get(|l: Layout| async {
                 microbenchmark_page(BufferToBuffer)(l, url)

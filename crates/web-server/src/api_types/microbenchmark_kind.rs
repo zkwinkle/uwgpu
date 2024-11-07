@@ -47,7 +47,7 @@ impl MicrobenchmarkKind {
             Matmul => "wasm_matmul_benchmark",
             Reduction => "wasm_reduction_sum_benchmark",
             Convolution => "wasm_convolution_benchmark",
-            Scan => todo!(),
+            Scan => "wasm_scan_benchmark",
             BufferSequential => todo!(),
             BufferToBuffer => "wasm_buffer_sequential_benchmark",
             BufferShuffled => todo!(),
@@ -65,8 +65,7 @@ impl MicrobenchmarkKind {
              [1, 64], [8, 16], [4, 32], [2, 64], [1, 128], [16, 16], [8, 32],
              [4, 64], [2, 128], [1, 256]]"
             }
-            Reduction => "[8, 16, 32, 64, 128, 256]",
-            Scan => todo!(),
+            Reduction | Scan => "[8, 16, 32, 64, 128, 256]",
             BufferSequential => todo!(),
             BufferShuffled => todo!(),
             BufferToBuffer => "[32, 64, 128, 256]",

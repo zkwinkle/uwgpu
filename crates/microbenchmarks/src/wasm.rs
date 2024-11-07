@@ -9,6 +9,7 @@ use crate::memory::buffer_sequential::{
     buffer_sequential_benchmark, BufferSequentialResults,
 };
 use crate::reduction_sum::{reduction_sum_benchmark, ReductionSumResults};
+use crate::scan::{scan_benchmark, ScanResults};
 
 #[wasm_bindgen(start)]
 /// Entrypoint to instantiate the WASM module.
@@ -40,6 +41,14 @@ pub async fn wasm_reduction_sum_benchmark(
     workgroup_size: u32,
 ) -> Result<ReductionSumResults, JsError> {
     Ok(reduction_sum_benchmark(workgroup_size).await?)
+}
+
+/// WASM compatible version of [scan_benchmark]
+#[wasm_bindgen]
+pub async fn wasm_scan_benchmark(
+    workgroup_size: u32,
+) -> Result<ScanResults, JsError> {
+    Ok(scan_benchmark(workgroup_size).await?)
 }
 
 #[wasm_bindgen]

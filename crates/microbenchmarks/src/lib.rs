@@ -13,6 +13,7 @@ pub mod convolution;
 pub mod matmul;
 pub mod memory;
 pub mod reduction_sum;
+pub mod scan;
 
 /// An error trying to execute a benchmark
 #[derive(Debug, Clone, Error)]
