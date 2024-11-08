@@ -54,7 +54,7 @@ impl PrintableResults<1> for ReductionSumResults {
 }
 
 impl PrintableResults<1> for ScanResults {
-    fn microbenchmark_label(&self) -> String { "Reduction Sum".to_string() }
+    fn microbenchmark_label(&self) -> String { "Scan".to_string() }
 
     fn print_info(&self) { results_with_flops(&self.0, self.flops()) }
 }
