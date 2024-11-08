@@ -49,6 +49,18 @@ pub fn create_router(config: AppConfig) -> Router {
                 microbenchmark_page(BufferToBuffer)(l, url)
             }),
         )
+        .route(
+            BufferToTexture.path(),
+            get(|l: Layout| async {
+                microbenchmark_page(BufferToTexture)(l, url)
+            }),
+        )
+        .route(
+            TextureToTexture.path(),
+            get(|l: Layout| async {
+                microbenchmark_page(TextureToTexture)(l, url)
+            }),
+        )
         .route("/results", post(post_results::post_results))
         .route("/hardwares", get(hardware_options::hardware_options))
         .route("/operating_systems", get(os_options::os_options))

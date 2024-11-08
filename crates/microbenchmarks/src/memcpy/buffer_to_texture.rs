@@ -19,8 +19,8 @@ use crate::BenchmarkError;
 const BENCHMARK_TEXTURE_DIMS: usize = 1024;
 const BENCHMARK_MEMORY_SIZE: usize =
     BENCHMARK_TEXTURE_DIMS * BENCHMARK_TEXTURE_DIMS;
-const BENCHMARK_WARMUP_COUNT: usize = 500;
-const BENCHMARK_ITERATIONS: usize = 100000;
+const BENCHMARK_WARMUP_COUNT: usize = 1000;
+const BENCHMARK_ITERATIONS: usize = 10000;
 
 /// Microbenchmark for measuring the Buffer -> Texture memory copy BW within the
 /// GPU

@@ -48,11 +48,11 @@ impl MicrobenchmarkKind {
             Reduction => "wasm_reduction_sum_benchmark",
             Convolution => "wasm_convolution_benchmark",
             Scan => "wasm_scan_benchmark",
-            BufferSequential => todo!(),
             BufferToBuffer => "wasm_buffer_to_buffer_benchmark",
+            BufferToTexture => "wasm_buffer_to_texture_benchmark",
+            TextureToTexture => "wasm_texture_to_texture_benchmark",
+            BufferSequential => todo!(),
             BufferShuffled => todo!(),
-            BufferToTexture => todo!(),
-            TextureToTexture => todo!(),
         }
     }
 
@@ -68,9 +68,10 @@ impl MicrobenchmarkKind {
             Reduction | Scan => "[8, 16, 32, 64, 128, 256]",
             BufferSequential => todo!(),
             BufferShuffled => todo!(),
-            BufferToBuffer => "[32, 64, 128, 256]",
-            BufferToTexture => todo!(),
-            TextureToTexture => todo!(),
+            BufferToBuffer => "[8, 16, 32, 64, 128, 256]",
+            BufferToTexture | TextureToTexture => {
+                "[[4, 4], [1, 32], [32, 1], [4, 8], [8, 4], [8, 8], [1, 64], [64, 1], [16, 8], [8, 16], [16, 16]]"
+            }
         }
     }
 
@@ -115,8 +116,8 @@ impl MicrobenchmarkKind {
             BufferSequential => "/buffer_sequential",
             BufferShuffled => "/buffer_shuffled",
             BufferToBuffer => "/buffer_to_buffer",
-            BufferToTexture => "buffer_to_texture",
-            TextureToTexture => "texture_to_texture",
+            BufferToTexture => "/buffer_to_texture",
+            TextureToTexture => "/texture_to_texture",
         }
     }
 

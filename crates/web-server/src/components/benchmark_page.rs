@@ -110,19 +110,19 @@ impl MicrobenchmarkPage {
             Reduction => "This microbenchmark tests the performance of a naive single-pass reduction sum on a 1MiB buffer of random data.",
             Convolution => "This microbenchmark tests the performance of a naive convolution between a 1024x1024 matrix and a 3x3 kernel.",
             Scan => "This microbenchmark tests the performance of a naive multi-pass scan using the Sklansky technique over a 1MB buffer of random data.",
-            BufferSequential => {
-                "This microbenchmark tests the performance of accessing buffer elements in a sequential manner."
-            }
             BufferToBuffer => {
                 "This microbenchmark tests the performance of copying memory between buffers in the GPU. It's a naive un-optimized implementation so it won't reflect the true bandwidth of your GPU."
             }
-            BufferShuffled => {
-                todo!()
-            }
             BufferToTexture => {
-                todo!()
+                "This microbenchmark tests the performance of copying memory from a buffer to a storage texture in the GPU. It's a naive un-optimized implementation so it won't reflect the true bandwidth of your GPU."
             }
             TextureToTexture => {
+                "This microbenchmark tests the performance of copying memory from a texture to a storage texture in the GPU. It's a naive un-optimized implementation so it won't reflect the true bandwidth of your GPU."
+            }
+            BufferSequential => {
+                "This microbenchmark tests the performance of accessing buffer elements in a sequential manner."
+            }
+            BufferShuffled => {
                 todo!()
             }
         }

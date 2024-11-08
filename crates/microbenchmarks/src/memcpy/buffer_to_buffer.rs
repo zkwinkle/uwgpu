@@ -21,7 +21,7 @@ use crate::BenchmarkError;
 ///
 /// 1MiB / 4bytes = 262_144
 const BENCHMARK_BUFFER_SIZE: usize = 262_144;
-const BENCHMARK_WARMUP_COUNT: usize = 500;
+const BENCHMARK_WARMUP_COUNT: usize = 10000;
 const BENCHMARK_ITERATIONS: usize = 100000;
 
 /// Microbenchmark for measuring the Buffer -> Buffer memory copy BW within the

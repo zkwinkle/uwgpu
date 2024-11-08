@@ -30,6 +30,14 @@ const TABS: &'static [NavLink] = &[
         name: "Buffer To Buffer",
         link: BufferToBuffer.path(),
     },
+    NavLink {
+        name: "Buffer To Texture",
+        link: BufferToTexture.path(),
+    },
+    NavLink {
+        name: "Texture To Texture",
+        link: TextureToTexture.path(),
+    },
 ];
 
 /// A navbar with certain navlinks

@@ -8,6 +8,12 @@ use crate::matmul::{matmul_benchmark, MatmulResults};
 use crate::memcpy::buffer_to_buffer::{
     buffer_to_buffer_benchmark, BufferToBufferResults,
 };
+use crate::memcpy::buffer_to_texture::{
+    buffer_to_texture_benchmark, BufferToTextureResults,
+};
+use crate::memcpy::texture_to_texture::{
+    texture_to_texture_benchmark, TextureToTextureResults,
+};
 use crate::reduction_sum::{reduction_sum_benchmark, ReductionSumResults};
 use crate::scan::{scan_benchmark, ScanResults};
 
@@ -52,11 +58,35 @@ pub async fn wasm_scan_benchmark(
 }
 
 #[wasm_bindgen]
-/// WASM compatible version of [buffer_to_buffer]
+/// WASM compatible version of [buffer_to_buffer_benchmark]
 pub async fn wasm_buffer_to_buffer_benchmark(
     workgroup_size: u32,
 ) -> Result<BufferToBufferResults, JsError> {
     Ok(buffer_to_buffer_benchmark(workgroup_size).await?)
+}
+
+#[wasm_bindgen]
+/// WASM compatible version of [buffer_to_texture_benchmark]
+pub async fn wasm_buffer_to_texture_benchmark(
+    workgroup_size_x: u32,
+    workgroup_size_y: u32,
+) -> Result<BufferToTextureResults, JsError> {
+    Ok(
+        buffer_to_texture_benchmark((workgroup_size_x, workgroup_size_y))
+            .await?,
+    )
+}
+
+#[wasm_bindgen]
+/// WASM compatible version of [texture_to_texture_benchmark]
+pub async fn wasm_texture_to_texture_benchmark(
+    workgroup_size_x: u32,
+    workgroup_size_y: u32,
+) -> Result<TextureToTextureResults, JsError> {
+    Ok(
+        texture_to_texture_benchmark((workgroup_size_x, workgroup_size_y))
+            .await?,
+    )
 }
 
 /// Shadow println! when compiling to WASM

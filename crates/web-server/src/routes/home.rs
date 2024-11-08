@@ -8,8 +8,15 @@ use crate::api_types::MicrobenchmarkKind::{self, *};
 use super::extractors::Layout;
 
 /// Make sure this array contains all the supported microbenchmarks.
-const ALL_MICROBENCHMARKS: &[MicrobenchmarkKind] =
-    &[Matmul, Convolution, Reduction, Scan, BufferToBuffer];
+const ALL_MICROBENCHMARKS: &[MicrobenchmarkKind] = &[
+    Matmul,
+    Convolution,
+    Reduction,
+    Scan,
+    BufferToBuffer,
+    BufferToTexture,
+    TextureToTexture,
+];
 
 #[cfg_attr(feature = "debug", axum::debug_handler)]
 pub async fn home(layout: Layout) -> Markup {

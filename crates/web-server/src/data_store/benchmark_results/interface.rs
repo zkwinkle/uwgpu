@@ -219,11 +219,11 @@ fn platform_subquery(filters: &BenchmarkResultsFilters) -> String {
         match platform {
             Platform::Chromium => conditions.insert(
                 PlatformTables::UserAgent,
-                vec![format!("family = 'Chrome'")],
+                vec!["family = 'Chrome'".to_string()],
             ),
             Platform::Firefox => conditions.insert(
                 PlatformTables::UserAgent,
-                vec![format!("family = 'Firefox'")],
+                vec!["family = 'Firefox'".to_string()],
             ),
             Platform::OtherBrowser => {
                 todo!("Other browsers not supported yet to filter by")
