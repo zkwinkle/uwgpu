@@ -1,15 +1,14 @@
-//! Microbenchmark for buffer to texture copy throughput
+//! Microbenchmark for texture to texture copy throughput
 
 use std::collections::HashMap;
 
 use rand::{thread_rng, Rng};
 use uwgpu::{
     wgpu::{
-        util::BufferInitDescriptor, BindingResource, BufferUsages, Extent3d,
-        ShaderModuleDescriptor, ShaderSource, Texture, TextureDescriptor,
-        TextureDimension, TextureFormat, TextureUsages, TextureViewDescriptor,
+        BindingResource, Extent3d, ShaderModuleDescriptor, ShaderSource,
+        Texture, TextureDescriptor, TextureDimension, TextureFormat,
+        TextureUsages, TextureViewDescriptor,
     },
-    wgpu_async::AsyncBuffer,
     Benchmark, BenchmarkComputePipeline, BenchmarkResults, CreatePipelineError,
     GPUContext, PipelineParameters, TimeUnit,
 };
@@ -22,16 +21,16 @@ const BENCHMARK_MEMORY_SIZE: usize =
 const BENCHMARK_WARMUP_COUNT: usize = 500;
 const BENCHMARK_ITERATIONS: usize = 100000;
 
-/// Microbenchmark for measuring the Buffer -> Texture memory copy BW within the
-/// GPU
-pub async fn buffer_to_texture_benchmark(
+/// Microbenchmark for measuring the Texture -> Texture memory copy BW within
+/// the GPU
+pub async fn texture_to_texture_benchmark(
     workgroup_size: (u32, u32),
-) -> Result<BufferToTextureResults, BenchmarkError> {
+) -> Result<TextureToTextureResults, BenchmarkError> {
     let gpu = GPUContext::new(None).await?;
-    let buffers =
+    let textures =
         Bindings::<BENCHMARK_TEXTURE_DIMS>::new_with_random_inputs(&gpu);
     let pipeline =
-        buffer_to_texture_pipeline(&gpu, &buffers, workgroup_size).await?;
+        texture_to_texture_pipeline(&gpu, &textures, workgroup_size).await?;
     let results = Benchmark {
         warmup_count: BENCHMARK_WARMUP_COUNT,
         count: BENCHMARK_ITERATIONS,
@@ -45,14 +44,14 @@ pub async fn buffer_to_texture_benchmark(
     .run(pipeline)
     .await?;
 
-    Ok(BufferToTextureResults(results))
+    Ok(TextureToTextureResults(results))
 }
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
 
-/// Results from the memcpy buffer->texture benchmark. See
-/// [buffer_to_texture_benchmark].
+/// Results from the memcpy texture->texture benchmark. See
+/// [texture_to_texture_benchmark].
 ///
 /// Wraps a [BenchmarkResults] with some convenience methods.
 #[cfg_eval]
@@ -62,13 +61,13 @@ use wasm_bindgen::prelude::*;
     serde(transparent)
 )]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-pub struct BufferToTextureResults(
+pub struct TextureToTextureResults(
     #[cfg_attr(feature = "wasm", wasm_bindgen(getter_with_clone))]
     pub  BenchmarkResults,
 );
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-impl BufferToTextureResults {
+impl TextureToTextureResults {
     /// Get the Bandwidth of memory copy in bytes per second
     pub fn bandwidth(&self) -> f64 {
         ((BENCHMARK_MEMORY_SIZE * std::mem::size_of::<u32>() * self.0.count)
@@ -79,7 +78,7 @@ impl BufferToTextureResults {
 
 /// GPU binding needed for microbenchmark
 struct Bindings<const TEXTURE_DIMS: usize> {
-    source_buffer: AsyncBuffer,
+    source_texture: Texture,
     destination_texture: Texture,
 }
 
@@ -87,23 +86,36 @@ impl<const TEXTURE_DIMS: usize> Bindings<TEXTURE_DIMS> {
     const MEM_SIZE: usize = TEXTURE_DIMS * TEXTURE_DIMS;
 
     fn new_with_random_inputs(gpu: &GPUContext) -> Self {
-        let mut source_buffer_data = vec![0u32; Self::MEM_SIZE];
+        let mut source_texture_data = vec![0u32; Self::MEM_SIZE];
 
         let mut rng = thread_rng();
 
-        rng.fill(source_buffer_data.as_mut_slice());
+        rng.fill(source_texture_data.as_mut_slice());
 
-        Self::new_from_source_data(source_buffer_data.as_slice(), gpu)
+        Self::new_from_source_data(source_texture_data.as_slice(), gpu)
     }
 
     fn new_from_source_data(source_data: &[u32], gpu: &GPUContext) -> Self {
         assert_eq!(source_data.len(), Self::MEM_SIZE);
 
-        let source_buffer = gpu.create_buffer_init(&BufferInitDescriptor {
-            label: Some("Source Buffer"),
-            contents: bytemuck::cast_slice(source_data),
-            usage: BufferUsages::STORAGE,
-        });
+        let source_texture = gpu.create_texture_with_data(
+            &TextureDescriptor {
+                label: Some("Source Texture"),
+                size: Extent3d {
+                    width: TEXTURE_DIMS as u32,
+                    height: TEXTURE_DIMS as u32,
+                    depth_or_array_layers: 1,
+                },
+                format: TextureFormat::Rgba8Uint,
+                usage: TextureUsages::TEXTURE_BINDING,
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: TextureDimension::D2,
+                view_formats: &[],
+            },
+            Default::default(),
+            bytemuck::cast_slice(source_data),
+        );
 
         let destination_texture = gpu.create_texture(&TextureDescriptor {
             label: Some("Destination Texture"),
@@ -123,32 +135,39 @@ impl<const TEXTURE_DIMS: usize> Bindings<TEXTURE_DIMS> {
         });
 
         Self {
-            source_buffer,
+            source_texture,
             destination_texture,
         }
     }
 }
 
 /// Pipeline needed for microbenchmark.
-async fn buffer_to_texture_pipeline<'a, const TEXTURE_DIMS: usize>(
+async fn texture_to_texture_pipeline<'a, const TEXTURE_DIMS: usize>(
     gpu: &'a GPUContext,
-    buffers: &'a Bindings<TEXTURE_DIMS>,
+    textures: &'a Bindings<TEXTURE_DIMS>,
     workgroup_size: (u32, u32),
 ) -> Result<BenchmarkComputePipeline<'a>, CreatePipelineError> {
     BenchmarkComputePipeline::new(PipelineParameters {
         shader: ShaderModuleDescriptor {
-            label: Some("buffer to texture copy shader"),
+            label: Some("texture to texture copy shader"),
             source: ShaderSource::Wgsl(
-                include_str!("buffer_to_texture.wgsl").into(),
+                include_str!("texture_to_texture.wgsl").into(),
             ),
         },
         entry_point: "main",
         bind_group_0: HashMap::from([
-            (0, buffers.source_buffer.as_entire_binding()),
+            (
+                0,
+                BindingResource::TextureView(
+                    &textures
+                        .source_texture
+                        .create_view(&TextureViewDescriptor::default()),
+                ),
+            ),
             (
                 1,
                 BindingResource::TextureView(
-                    &buffers
+                    &textures
                         .destination_texture
                         .create_view(&TextureViewDescriptor::default()),
                 ),
@@ -204,7 +223,7 @@ mod tests {
 
         let workgroup_size = (8, 8);
         let pipeline =
-            buffer_to_texture_pipeline(&gpu, &buffers, workgroup_size)
+            texture_to_texture_pipeline(&gpu, &buffers, workgroup_size)
                 .await
                 .unwrap();
 
