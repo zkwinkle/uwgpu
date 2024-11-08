@@ -14,8 +14,18 @@ pub struct Cli {
 pub enum Microbenchmarks {
     /// Run the matmul microbenchmark
     MatMul(MicrobenchmarkParams<2>),
-    /// Run the buffer copy microbenchmark
+    /// Run the convolution microbenchmark
+    Convolution(MicrobenchmarkParams<2>),
+    /// Run the scan microbenchmark
+    Scan(MicrobenchmarkParams<1>),
+    /// Run the reduction microbenchmark
+    Reduction(MicrobenchmarkParams<1>),
+    /// Run the buffer to buffer copy microbenchmark
     BufferToBuffer(MicrobenchmarkParams<1>),
+    /// Run the buffer to texture copy microbenchmark
+    BufferToTexture(MicrobenchmarkParams<2>),
+    /// Run the texture to texture copy microbenchmark
+    TextureToTexture(MicrobenchmarkParams<2>),
 }
 
 /// Common parameters shared by microbenchmarks
@@ -56,10 +66,15 @@ impl Microbenchmarks {
     /// Checks if the workgroups parameter is empty
     pub fn workgroups_empty(&self) -> bool {
         match self {
-            Microbenchmarks::MatMul(params) => params.workgroup.is_empty(),
-            Microbenchmarks::BufferToBuffer(params) => {
+            Microbenchmarks::MatMul(params)
+            | Microbenchmarks::Convolution(params)
+            | Microbenchmarks::BufferToTexture(params)
+            | Microbenchmarks::TextureToTexture(params) => {
                 params.workgroup.is_empty()
             }
+            Microbenchmarks::BufferToBuffer(params)
+            | Microbenchmarks::Scan(params)
+            | Microbenchmarks::Reduction(params) => params.workgroup.is_empty(),
         }
     }
 }

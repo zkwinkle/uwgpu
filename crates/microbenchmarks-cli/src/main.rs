@@ -1,8 +1,16 @@
 use clap::Parser;
 use cli::{Cli, Microbenchmarks};
 use microbenchmarks::{
+    convolution::convolution_benchmark,
     matmul::matmul_benchmark,
-    memcpy::buffer_to_buffer::buffer_to_buffer_benchmark, BenchmarkError,
+    memcpy::{
+        buffer_to_buffer::buffer_to_buffer_benchmark,
+        buffer_to_texture::buffer_to_texture_benchmark,
+        texture_to_texture::texture_to_texture_benchmark,
+    },
+    reduction_sum::reduction_sum_benchmark,
+    scan::scan_benchmark,
+    BenchmarkError,
 };
 
 mod cli;
@@ -38,9 +46,39 @@ async fn run_microbenchmark(
                 result.print_results(wg);
             }
         }
+        Microbenchmarks::Convolution(params) => {
+            for wg in params.workgroup {
+                let result = convolution_benchmark(wg.into()).await?;
+                result.print_results(wg);
+            }
+        }
+        Microbenchmarks::Scan(params) => {
+            for wg in params.workgroup {
+                let result = scan_benchmark(wg[0]).await?;
+                result.print_results(wg);
+            }
+        }
+        Microbenchmarks::Reduction(params) => {
+            for wg in params.workgroup {
+                let result = reduction_sum_benchmark(wg[0]).await?;
+                result.print_results(wg);
+            }
+        }
         Microbenchmarks::BufferToBuffer(params) => {
             for wg in params.workgroup {
                 let result = buffer_to_buffer_benchmark(wg[0]).await?;
+                result.print_results(wg);
+            }
+        }
+        Microbenchmarks::BufferToTexture(params) => {
+            for wg in params.workgroup {
+                let result = buffer_to_texture_benchmark(wg.into()).await?;
+                result.print_results(wg);
+            }
+        }
+        Microbenchmarks::TextureToTexture(params) => {
+            for wg in params.workgroup {
+                let result = texture_to_texture_benchmark(wg.into()).await?;
                 result.print_results(wg);
             }
         }
