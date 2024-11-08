@@ -1,4 +1,4 @@
-//! Microbenchmark for copying buffer to buffer copy throughput
+//! Microbenchmark for buffer to buffer copy throughput
 
 use std::collections::HashMap;
 
@@ -56,8 +56,8 @@ pub async fn buffer_to_buffer_benchmark(
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::*;
 
-/// Results from the matrix multiplication microbenchmark. See
-/// [buffer_to_buffer].
+/// Results from the memcpy buffer->buffer benchmark. See
+/// [buffer_to_buffer_benchmark].
 ///
 /// Wraps a [BenchmarkResults] with some convenience methods.
 #[cfg_eval]
