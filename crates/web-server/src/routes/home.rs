@@ -58,15 +58,15 @@ pub async fn home(
         header {
             h1 { "µwgpu" }
         }
-        p { "This page  lets you execute GPU microbenchmarks to measure your hardware's performance and also help us collect a dataset of GPU performance characteristics." }
-        p { "This is part of the "
+        p { "This page lets you run GPU microbenchmarks to measure your hardware's performance and help us build a GPU performance dataset. You can check out stats for each microbenchmark on its own page." }
+        p { "Part of the "
             a href="https://github.com/zkwinkle/uwgpu" {
                 "µwgpu project "
                 img class="inline-image"
                     src=(format!("{}/github-mark.svg", server_url))
                     alt="github repository" {}
             }
-            ". A project hoping to enable microbenchmarking of GPU performance characteristics and gathering of statistics across a wide variety of hardwares and platforms." }
+            ", which aims to enable GPU microbenchmarking and gather performance stats across a wide range of hardware and platforms." }
         // TODO: CSV download of dataset.
         //p { "To download the dataset for your analysis, "
         //    a href="/dataset.csv" {"click here (TODO)"}
