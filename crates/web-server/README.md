@@ -72,5 +72,5 @@ sqlx run --database-url 'postgres://postgres@localhost/uwgp-local'
 - [ ] Make it so historical data filters include other filters in their request
       (and re-request when they change), so for example users don't even have
       the option to select apple hardware with a Windows filter.
-- [ ] Sort results by workgroup sizes or something when showing the historic
+- [x] Sort results by workgroup sizes or something when showing the historic
       data table.

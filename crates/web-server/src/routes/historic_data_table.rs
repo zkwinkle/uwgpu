@@ -63,9 +63,21 @@ pub async fn historica_data_table(
         microbenchmark: qp.microbenchmark,
     };
 
-    let result_stats = data_store
+    let mut result_stats = data_store
         .get_benchmark_results_statistics(filters.clone())
         .await?;
+
+    result_stats.sort_by(|a, b| {
+        let wg_a = a.workgroup_size;
+        let wg_b = b.workgroup_size;
+
+        let sum_a = wg_a.0 * wg_a.1 * wg_a.2;
+        let sum_b = wg_b.0 * wg_b.1 * wg_b.2;
+
+        sum_a
+            .cmp(&sum_b)
+            .then_with(|| wg_a.cmp(&wg_b))
+    });
 
     if result_stats.is_empty() {
         Ok(html! {
