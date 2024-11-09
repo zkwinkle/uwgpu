@@ -47,11 +47,11 @@ h4 {
 }
 
 h1 {
-	margin: 1em 0 1em;
+	margin: 1.5em 0 1em;
 }
 
 h2 {
-	margin: 2em 0 1em;
+	margin: 1.25em 0 1em;
 }
 
 h3 {
@@ -66,6 +66,10 @@ h4 {
 p {
 	margin-top: 0;
 	margin-bottom: 0.5em;
+}
+
+img.inline-image {
+  height: 0.8em;
 }
 
 hr {

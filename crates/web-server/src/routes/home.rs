@@ -1,5 +1,6 @@
 use std::sync::LazyLock;
 
+use axum::Extension;
 use maud::{html, Markup, PreEscaped};
 use rand::{seq::SliceRandom, thread_rng};
 
@@ -19,7 +20,10 @@ const ALL_MICROBENCHMARKS: &[MicrobenchmarkKind] = &[
 ];
 
 #[cfg_attr(feature = "debug", axum::debug_handler)]
-pub async fn home(layout: Layout) -> Markup {
+pub async fn home(
+    layout: Layout,
+    Extension(server_url): Extension<&'static str>,
+) -> Markup {
     // Array of [title, run_microbenchmark_fn] pairs.
     // As a js string.
     static MICROBENCHMARK_DATA: LazyLock<String> = LazyLock::new(|| {
@@ -52,14 +56,27 @@ pub async fn home(layout: Layout) -> Markup {
 
     layout.render( html! {
         header {
-            h1 { "wgpu microbenchmarks" }
+            h1 { "µwgpu" }
         }
-        p { "This page lets you execute GPU microbenchmarks to measure your hardware's performance and also help us collect a dataset of GPU performance characteristics." }
+        p { "This page  lets you execute GPU microbenchmarks to measure your hardware's performance and also help us collect a dataset of GPU performance characteristics." }
+        p { "This is part of the "
+            a href="https://github.com/zkwinkle/uwgpu" {
+                "µwgpu project "
+                img class="inline-image"
+                    src=(format!("{}/github-mark.svg", server_url))
+                    alt="github repository" {}
+            }
+            ". A project hoping to enable microbenchmarking of GPU performance characteristics and gathering of statistics across a wide variety of hardwares and platforms." }
         // TODO: CSV download of dataset.
         //p { "To download the dataset for your analysis, "
         //    a href="/dataset.csv" {"click here (TODO)"}
         //    " to obtain it as a CSV file." }
-
+        h3 { "Browser compatibility" }
+        p { "At the moment only Chrome or other Chromium-based browsers are supported. If you're on Linux you'll need to "
+            a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#chromium-chrome-edge-etc"
+            { "enable a flag" }
+        "."}
+        p { "Efforts are being made to support Firefox Nightly." }
 
         h2 { "Execution" }
         p { "Click the \"Start\" button to execute the full microbenchmark suite. For more accurate results please close all other applications." }

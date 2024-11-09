@@ -139,7 +139,7 @@ pub enum GetGPUContextError {
     NoAdapter,
 
     /// Failed to request the device, originates from a [`RequestDeviceError`]
-    #[error("failed to request the device")]
+    #[error("failed to request the device {0}")]
     RequestDevice(#[from] RequestDeviceError),
 
     /// The adapter doesn't support timestamp queries.

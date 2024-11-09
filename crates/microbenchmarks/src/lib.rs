@@ -20,16 +20,16 @@ pub mod scan;
 pub enum BenchmarkError {
     /// An error trying to get a handle on the GPU context.
     /// See [GetGPUContextError].
-    #[error("error trying to get a handle on the GPU context")]
+    #[error("error trying to get a handle on the GPU context: {0}")]
     GPUContext(#[from] GetGPUContextError),
     /// An error trying to create the compute pipeline for the microbenchmark.
     /// See [CreatePipelineError].
-    #[error("error trying create the compute pipeline for the microbenchmark")]
+    #[error("error trying create the compute pipeline for the microbenchmark: {0}")]
     PipelineCreation(#[from] CreatePipelineError),
     /// An error trying to read the timestamp queries from the compute
     /// pipeline. See [MapTimestampResultError].
     #[error(
-        "error trying to read the timestamp queries from the compute pipeline"
+        "error trying to read the timestamp queries from the compute pipeline: {0}"
     )]
     MapTimestamp(#[from] MapTimestampResultError),
 }
