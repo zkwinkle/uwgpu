@@ -61,9 +61,9 @@
 
           src = fileSetForCrate ./crates/microbenchmarks;
           nativeBuildInputs = [
-            pkgs.wasm-pack
+            pkgs-wasm-bindgen.wasm-pack
             # binaryen for wasm-opt, used by wasm-pack
-            pkgs.binaryen
+            pkgs-wasm-bindgen.binaryen
             # used by wasm-pack
             pkgs-wasm-bindgen.wasm-bindgen-cli
           ];
