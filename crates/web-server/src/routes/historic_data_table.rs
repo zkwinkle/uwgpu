@@ -74,9 +74,7 @@ pub async fn historica_data_table(
         let sum_a = wg_a.0 * wg_a.1 * wg_a.2;
         let sum_b = wg_b.0 * wg_b.1 * wg_b.2;
 
-        sum_a
-            .cmp(&sum_b)
-            .then_with(|| wg_a.cmp(&wg_b))
+        sum_a.cmp(&sum_b).then_with(|| wg_a.cmp(&wg_b))
     });
 
     if result_stats.is_empty() {
