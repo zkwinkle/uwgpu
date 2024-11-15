@@ -107,19 +107,15 @@ pub async fn home(
                 // Shuffle so first ones don't have more executions than later
                 // ones.
                 shuffle(microbenchmarks);
-                console.log(1);
                 try {{
                     for (let microbenchmark of microbenchmarks) {{
                         let [title, run_microbenchmark_fn] = microbenchmark;
-                console.log(2);
 
                         let microbenchmark_header = document.createElement('h3');
                         microbenchmark_header.textContent = title;
                         results_div.appendChild(microbenchmark_header);
 
-                console.log(3);
                         await run_microbenchmark_fn();
-                console.log(4);
                     }}
                     alert("Execution finished");
                 }} finally {{

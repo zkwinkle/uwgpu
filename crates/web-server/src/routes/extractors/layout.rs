@@ -80,6 +80,7 @@ impl Layout {
                                                   disable_checkbox,
                                                   ) {{
                     let results_header_interval = null;
+                    let error_binding = null;
                     try {{
                         await init();
 
@@ -141,10 +142,14 @@ impl Layout {
                         error_message.textContent = error.toString();
                         results_div.appendChild(error_message);
 
-                        setTimeout(() => {{ throw error; }}, 100);
+                        error_binding = error;
                     }} finally {{
                         if (results_header_interval != null) {{
                             clearInterval(results_header_interval)
+                        }}
+
+                        if (error_binding != null) {{
+                            throw error;
                         }}
                     }}
                 }}
