@@ -149,7 +149,7 @@ impl Layout {
                         }}
 
                         if (error_binding != null) {{
-                            throw error;
+                            throw error_binding;
                         }}
                     }}
                 }}
