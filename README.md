@@ -46,7 +46,7 @@ cargo w
 
 To compile the microbenchmark's library as a WASM pack that the server can use:
 ```sh
-wasm-pack build crates/microbenchmarks -d ../web-server/public/pkg --target web --no-typescript --mode no-install --no-pack -- --features wasm
+wasm-pack build crates/microbenchmarks -d ../web-server/public/pkg --target web --no-typescript --no-pack -- --features wasm
 ```
 
 Compile and run CLI:
@@ -68,4 +68,3 @@ nix build '.#web-server' --extra-experimental-features "nix-command flakes" --sh
 ## TODO
 
 - [ ] Create a separate crate with API types that can be sent to the server as requests, and methods to build them (like the post results request). Can be compiled to WASM and used from JS code to ensure data integrity/consistency. Can also be used by the CLI.
-- [ ] Update wgpu to 23.0 when [wgpu-async](https://crates.io/crates/wgpu-async) catches up.

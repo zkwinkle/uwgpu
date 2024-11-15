@@ -48,11 +48,27 @@
         "type": "indirect"
       }
     },
+    "nixpkgs-bindgen-95": {
+      "locked": {
+        "lastModified": 1730643484,
+        "narHash": "sha256-FZN70acnL7V0gfmtLTdsi4J1o51bfaBYDTi3E7b7z3U=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "4ae2e647537bcdbb82265469442713d066675275",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "rev": "4ae2e647537bcdbb82265469442713d066675275",
+        "type": "indirect"
+      }
+    },
     "root": {
       "inputs": {
         "crane": "crane",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-bindgen-95": "nixpkgs-bindgen-95",
         "rust-overlay": "rust-overlay"
       }
     },

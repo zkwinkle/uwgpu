@@ -97,7 +97,7 @@ impl<'a> BenchmarkComputePipeline<'a> {
                 label: None,
                 layout: None,
                 module: &shader_module,
-                entry_point: params.entry_point,
+                entry_point: Some(params.entry_point),
                 compilation_options: Default::default(),
                 cache: None,
             },

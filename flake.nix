@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-24.05";
+    nixpkgs-bindgen-95.url = "nixpkgs/4ae2e647537bcdbb82265469442713d066675275";
 
     crane.url = "github:ipetkov/crane";
 
@@ -14,12 +15,16 @@
     };
   };
 
-  outputs = { nixpkgs, crane, flake-utils, rust-overlay, ... }:
+  outputs = { nixpkgs, nixpkgs-bindgen-95, crane, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ (import rust-overlay) ];
+        };
+
+        pkgs-wasm-bindgen = import nixpkgs-bindgen-95 {
+          inherit system;
         };
 
         inherit (pkgs) lib;
@@ -60,7 +65,7 @@
             # binaryen for wasm-opt, used by wasm-pack
             pkgs.binaryen
             # used by wasm-pack
-            pkgs.wasm-bindgen-cli
+            pkgs-wasm-bindgen.wasm-bindgen-cli
           ];
 
           WASM_PACK_CACHE = "$TMPDIR/.wasm-pack-cache";

@@ -13,8 +13,8 @@ wasm = ["serde", "dep:web-sys", "dep:wasm-bindgen", "dep:serde-wasm-bindgen"]
 env_logger = { workspace = true }
 log = { workspace = true }
 wgpu = { workspace = true }
+wgpu-async = { workspace = true }
 bytemuck = { workspace = true }
-wgpu-async = "22.1.0"
 thiserror = { workspace = true }
 
 # TODO: Figure out what to do about the error panic hook and other stuff
