@@ -25,7 +25,7 @@ pub enum BenchmarkError {
     /// An error trying to create the compute pipeline for the microbenchmark.
     /// See [CreatePipelineError].
     #[error(
-        "error trying create the compute pipeline for the microbenchmark: {0}"
+        "error trying to create the compute pipeline for the microbenchmark: {0}"
     )]
     PipelineCreation(#[from] CreatePipelineError),
     /// An error trying to read the timestamp queries from the compute
