@@ -75,11 +75,10 @@ pub async fn home(
         p { "I’m a Computer Engineering student preparing for my graduation project next semester and believe this tool has potential for interesting and useful research. However, it's really hard to find experts in this area, specially in my country." }
         p { "If you'd be interested in exploring an advisory role, or even just to chat, reach out to me at ignaevc [at] gmail [dot] com." }
         h3 { "Browser compatibility" }
-        p { "Currently supported on Chrome and Chromium-based browsers; Linux users may need to "
+        p { "Currently supported on Firefox Nightly and Chrome / Chromium-based browsers (Linux users may need to "
             a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#chromium-chrome-edge-etc"
             { "enable specific flags" }
-        "."}
-        p { "Firefox Nightly support is in progress." }
+        ")."}
 
         h2 { "Execution" }
         p { "Click the \"Start\" button to execute the full microbenchmark suite. For more accurate results please close all other applications. Don't refresh; it will stop execution." }
