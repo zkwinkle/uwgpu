@@ -63,9 +63,8 @@ sqlx run --database-url 'postgres://postgres@localhost/uwgp-local'
 
 - [x] Explain compatible browsers in home page.
 - [x] Add explanation about how microbenchmarks are very naively implemented and not optimized.
-- [ ] Add estimated time for full suite.
-- [ ] Add notification or msg at the top of execution log to let user know when microbenchmarks finished.
-- [ ] Figure out why errors in WASM don't get caught (trying to run tests on Firefox for example).
+- [x] Add estimated time for full suite.
+- [x] Add notification or msg at the top of execution log to let user know when microbenchmarks finished.
 - [ ] (optional) make benchmarks take count and warmup count as params
 - [ ] (optional) make web benchmarks take longer
 - [ ] CSV download.
