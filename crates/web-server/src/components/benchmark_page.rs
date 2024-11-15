@@ -43,6 +43,7 @@ impl Render for MicrobenchmarkPage {
                     results_div.innerHTML = "";
                     try {{
                         await {run_microbenchmark};
+                        alert("Execution finished");
                     }} finally {{
                         button.disabled = false;
                     }}

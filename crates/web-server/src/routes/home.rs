@@ -122,6 +122,7 @@ pub async fn home(
                         await run_microbenchmark_fn();
                 console.log(4);
                     }}
+                    alert("Execution finished");
                 }} finally {{
                     button.disabled = false;
                 }}
