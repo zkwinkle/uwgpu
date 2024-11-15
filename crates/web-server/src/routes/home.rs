@@ -82,8 +82,8 @@ pub async fn home(
         p { "Firefox Nightly support is in progress." }
 
         h2 { "Execution" }
-        p { "Click the \"Start\" button to execute the full microbenchmark suite. For more accurate results please close all other applications." }
-        p { "Don't refresh; it will stop execution." }
+        p { "Click the \"Start\" button to execute the full microbenchmark suite. For more accurate results please close all other applications. Don't refresh; it will stop execution." }
+        p { b { "Time estimate: " } "takes around 3 minutes on 12th gen intel integrated graphics." }
 
         button id="run_all_button" { "Start" }
 
