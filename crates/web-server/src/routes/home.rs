@@ -71,9 +71,9 @@ pub async fn home(
         //p { "To download the dataset for your analysis, "
         //    a href="/dataset.csv" {"click here (TODO)"}
         //    " to obtain it as a CSV file." }
-        h3 { "Seeking academic advisor!" }
-        p { "I’m a Computer Engineering student preparing for my graduation project next semester and believe this tool has potential for interesting and useful research. However, it's really hard to find experts in this area, specially in my country." }
-        p { "If you'd be interested in exploring an advisory role, or even just to chat, reach out to me at ignaevc [at] gmail [dot] com." }
+        // h3 { "Seeking academic advisor!" }
+        // p { "I’m a Computer Engineering student preparing for my graduation project next semester and believe this tool has potential for interesting and useful research. However, it's really hard to find experts in this area, specially in my country." }
+        // p { "If you'd be interested in exploring an advisory role, or even just to chat, reach out to me at ignaevc [at] gmail [dot] com." }
         h3 { "Browser compatibility" }
         p { "Currently supported on Firefox Nightly and Chrome / Chromium-based browsers (Linux users may need to "
             a href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status#chromium-chrome-edge-etc"
