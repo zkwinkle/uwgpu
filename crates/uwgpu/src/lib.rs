@@ -119,7 +119,7 @@ pub struct BenchmarkResults {
     /// Reference: https://www.w3.org/TR/webgpu/#timestamp
     pub count: usize,
 
-    /// Total time spent executing the benchmark.
+    /// Total time spent executing the benchmark. Stored in nanoseconds.
     pub total_time_spent: f64,
 
     /// Information about the adapter used in the benchmark.
