@@ -10,7 +10,7 @@ This repository includes the following crates:
 - [`uwgpu`](/crates/uwgpu): Core library for writing microbenchmarks.
 - [`microbenchmarks`](/crates/microbenchmarks): Suite of microbenchmarks implemented with `uwgpu`.
 - [`microbenchmarks-cli`](/crates/microbenchmarks-cli): CLI tool for native execution of the microbenchmarks.
-- [`web-server`](/crates/web-server): Server that serves the [µwgpu website](https://zkwinkle.is-a.dev/uwgpu) and collects execution results.
+- [`web-server`](/crates/web-server): Server that serves the [µwgpu website](https://uwgpu.zkwinkle.net) and collects execution results.
 
 
 **⚠️ NOTE:** This project is in highly experimental stages. None of the crates
